@@ -24,4 +24,4 @@ jobs:
       - name: Echo Host Setting
         run: cat ~/.ssh/config
       - name: Check out the source
-        run: ssh -t staging 'cd ~/one.ipwebsolutions.com/wp-content/plugins/scw-table-booking-pro && git pull'
+        run: ssh -oHostKeyAlgorithms=+ssh-rsa -t staging 'cd ~/one.ipwebsolutions.com/wp-content/plugins/scw-table-booking-pro && git pull'
