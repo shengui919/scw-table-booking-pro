@@ -380,7 +380,7 @@ function show_admin_bookings_page() {
 	include_once dirname(__FILE__) . '/includes/WP_List_Table.BookingsTable.class.php';
 	$bookings_table = new scwBookingsTable();
 	$bookings_table->prepare_items();
-	
+	include_once dirname(__FILE__) . '/includes/bookings.php';
 	?>
 
 	

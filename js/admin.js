@@ -2,7 +2,24 @@
 var upload_image_button=false;
 (function(jQuery) {
 "use strict";
-    
+jQuery( '#rtb-date-filter-link' ).click( function() {
+	jQuery( '#rtb-filters' ).toggleClass( 'date-filters-visible' );
+});
+jQuery(document).on('click', '.date-filters input[type="submit"]', function(event) {
+	event.preventDefault();
+	
+	let args = [];
+	let url = new URL(window.location.href);
+
+	jQuery('.date-filters input[type="hidden"]').each((i, x) => {
+		'' === jQuery(x).val() ? null : args.push([jQuery(x).prop('name'), jQuery(x).val()]);
+	});
+
+	args.push(['page', url.searchParams.get('page')]);
+	args = new URLSearchParams(args);
+
+	window.location = `${url.origin}${url.pathname}?${args.toString()}`;
+});
 	jQuery('.scwatbwsr_media_upload').on("click", function(){
         upload_image_button =true;
         var formfieldID = jQuery(this).prev('input');
