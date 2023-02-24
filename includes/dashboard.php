@@ -383,15 +383,16 @@
   --progress-color: var(--warning-color);
 }
 </style>
-<h2><?php echo esc_html__("Table Booking Dashboard", "scwatbwsr-translate") ?></h2>
+
 	<div class="wrap">
 		<div class="scwatbwsr_content">
 			<div><?=settings_errors()?></div>
         </div>
-		<div class="scwatbwsr_content">
+		<div class="scwatbwsr_content mb-3">
 		<?php adminMenuPage()?>
         </div>
-		<div class="scwatbwsr_content">
+		<div class="scwatbwsr_content pd-10">
+        <h2 class="mb-3"><?php echo esc_html__("Table Booking Dashboard", "scwatbwsr-translate") ?></h2>
 <main class="dashboard">
    <article class="dashboard-content">
         
