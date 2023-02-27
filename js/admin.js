@@ -2,16 +2,38 @@
 var upload_image_button=false;
 (function(jQuery) {
 "use strict";
+
 jQuery( '#rtb-date-filter-link' ).click( function() {
 	jQuery( '#rtb-filters' ).toggleClass( 'date-filters-visible' );
 });
+// Name filter helper
+jQuery(document)
+.on('click', '#rtb-filters .filter_name a' , function(ev) {
+	ev.preventDefault();
+	filterByName();
+})
+.on('keydown', '#rtb-filters .filter_name input' , function(ev) {
+	if(event.keyCode == 13) {
+		event.preventDefault();
+		filterByName();
+		return false;
+	}
+});
+
+function filterByName() {
+let text = jQuery('#rtb-filters .filter_name input').val();
+let href = jQuery('#rtb-filters .filter_name a').prop('href');
+href += '='+encodeURIComponent(text);
+href += '&date_range=all';
+window.location = href;
+}
 jQuery(document).on('click', '.date-filters input[type="submit"]', function(event) {
 	event.preventDefault();
 	
 	let args = [];
 	let url = new URL(window.location.href);
 
-	jQuery('.date-filters input[type="hidden"]').each((i, x) => {
+	jQuery('.date-filters input[type="type"]').each((i, x) => {
 		'' === jQuery(x).val() ? null : args.push([jQuery(x).prop('name'), jQuery(x).val()]);
 	});
 
@@ -19,6 +41,12 @@ jQuery(document).on('click', '.date-filters input[type="submit"]', function(even
 	args = new URLSearchParams(args);
 
 	window.location = `${url.origin}${url.pathname}?${args.toString()}`;
+});
+jQuery('.rtb-admin-bookings-filters-start #start-date,#end-date').datetimepicker({
+	format: jQuery(".scw_date_format").val()+' H:i',
+	closeOnDateSelect: false,
+	step: 5,
+	defaultTime: "00:00"
 });
 	jQuery('.scwatbwsr_media_upload').on("click", function(){
         upload_image_button =true;

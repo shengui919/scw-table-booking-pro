@@ -6,6 +6,7 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 }
 
 require_once dirname(__FILE__) . '/Query.class.php';
+require_once dirname(__FILE__) . '/settings-ipp.php';
 if ( !class_exists( 'scwBookingsTable' ) ) {
 /**
  * Bookings Table Class
@@ -125,18 +126,24 @@ class scwBookingsTable extends WP_List_Table {
 	public $booking_statuses = array();
 
 	/**
+	 * set the custom table
+	 */
+    private $table_data;
+
+	private $table_name;
+	/**
 	 * Initialize the table and perform any requested actions
 	 *
 	 * @since 0.0.1
 	 */
 	public function __construct() {
 
-		global $status, $page;
-
+		global $status, $page, $wpdb;
+        $this->table_name = $wpdb->prefix . 'scwatbwsr_orders';
 		// Set parent defaults
 		parent::__construct( array(
-			'singular'  => __( 'Booking', 'restaurant-reservations' ),
-			'plural'    => __( 'Bookings', 'restaurant-reservations' ),
+			'singular'  => __( 'Booking', 'scwatbwsr-translate' ),
+			'plural'    => __( 'Bookings', 'scwatbwsr-translate' ),
 			'ajax'      => false
 		) );
 
@@ -172,14 +179,46 @@ class scwBookingsTable extends WP_List_Table {
 
 	public function populate_booking_status()
 	{
-		global $rtb_controller;
-
-		foreach ( $rtb_controller->cpts->booking_statuses as $status => $data ) {
-			$this->booking_statuses[ $status ] = array(
-				'label' => $data['label'],
-				'count' => $data['label_count']['singular']
-			);
-		}
+		$this->booking_statuses[ 'closed' ] = array( 
+			'label' => __( 'Closed', 'scwatbwsr-translate' ),
+			'count' => _n_noop(
+				'Closed <span class="count">(%s)</span>', 
+				'Closed <span class="count">(%s)</span>', 
+				'scwatbwsr-translate' 
+			)[ 'singular' ]
+		);
+		$this->booking_statuses[ 'confirmed' ] = array( 
+			'label' => __( 'Confirmed', 'scwatbwsr-translate' ),
+			'count' => _n_noop(
+				'Confirmed <span class="count">(%s)</span>', 
+				'Confirmed <span class="count">(%s)</span>', 
+				'scwatbwsr-translate' 
+			)[ 'singular' ]
+		);
+		$this->booking_statuses[ 'pending' ] = array( 
+			'label' => __( 'Pen', 'scwatbwsr-translate' ),
+			'count' => _n_noop(
+				'Pending <span class="count">(%s)</span>', 
+				'Pending <span class="count">(%s)</span>', 
+				'scwatbwsr-translate' 
+			)[ 'singular' ]
+		);
+		$this->booking_statuses[ 'all' ] = array( 
+			'label' => __( 'All', 'scwatbwsr-translate' ),
+			'count' => _n_noop(
+				'All <span class="count">(%s)</span>', 
+				'All <span class="count">(%s)</span>', 
+				'scwatbwsr-translate' 
+			)[ 'singular' ]
+		);
+		$this->booking_statuses[ 'trash' ] = array( 
+			'label' => __( 'Trash', 'scwatbwsr-translate' ),
+			'count' => _n_noop(
+				'Trash <span class="count">(%s)</span>', 
+				'Trash <span class="count">(%s)</span>', 
+				'scwatbwsr-translate' 
+			)[ 'singular' ]
+		);
 	}
 
 	/**
@@ -243,9 +282,9 @@ class scwBookingsTable extends WP_List_Table {
 	 */
 	public function get_current_date_range() {
 
-		$range = empty( $this->filter_start_date ) ? _x( '*', 'No date limit in a date range, eg 2014-* would mean any date from 2014 or after', 'restaurant-reservations' ) : $this->filter_start_date;
-		$range .= empty( $this->filter_start_date ) || empty( $this->filter_end_date ) ? '' : _x( '&mdash;', 'Separator between two dates in a date range', 'restaurant-reservations' );
-		$range .= empty( $this->filter_end_date ) ? _x( '*', 'No date limit in a date range, eg 2014-* would mean any date from 2014 or after', 'restaurant-reservations' ) : $this->filter_end_date;
+		$range = empty( $this->filter_start_date ) ? _x( '*', 'No date limit in a date range, eg 2014-* would mean any date from 2014 or after', 'scwatbwsr-translate' ) : $this->filter_start_date;
+		$range .= empty( $this->filter_start_date ) || empty( $this->filter_end_date ) ? '' : _x( '&mdash;', 'Separator between two dates in a date range', 'scwatbwsr-translate' );
+		$range .= empty( $this->filter_end_date ) ? _x( '*', 'No date limit in a date range, eg 2014-* would mean any date from 2014 or after', 'scwatbwsr-translate' ) : $this->filter_end_date;
 
 		return $range;
 	}
@@ -319,7 +358,7 @@ class scwBookingsTable extends WP_List_Table {
 					) 
 				), 
 				$date_range === '' ? ' class="current"' : '', 
-				__( 'Upcoming', 'restaurant-reservations' ) ), 
+				__( 'Upcoming', 'scwatbwsr-translate' ) ), 
 
 			'today' => sprintf( 
 				'<a href="%s"%s>%s</a>', 
@@ -330,7 +369,7 @@ class scwBookingsTable extends WP_List_Table {
 					) 
 				), 
 				$date_range === 'today' ? ' class="current"' : '', 
-				__( 'Today', 'restaurant-reservations' ) ),
+				__( 'Today', 'scwatbwsr-translate' ) ),
 
 			'past' => sprintf( 
 				'<a href="%s"%s>%s</a>', 
@@ -341,7 +380,7 @@ class scwBookingsTable extends WP_List_Table {
 					)
 				), 
 				$date_range === 'past' ? ' class="current"' : '', 
-				__( 'Past', 'restaurant-reservations' ) ),
+				__( 'Past', 'scwatbwsr-translate' ) ),
 
 			'all' => sprintf( 
 				'<a href="%s"%s>%s</a>', 
@@ -352,7 +391,7 @@ class scwBookingsTable extends WP_List_Table {
 					) 
 				), 
 				$date_range == 'all' ? ' class="current"' : '', 
-				__( 'All', 'restaurant-reservations' ) 
+				__( 'All', 'scwatbwsr-translate' ) 
 			),
 		);
 
@@ -360,11 +399,11 @@ class scwBookingsTable extends WP_List_Table {
 			$views['date'] = '<span class="date-filter-range current">' . $this->get_current_date_range() . '</span>';
 			$views['date'] .= '<a id="rtb-date-filter-link" href="#"><span class="dashicons dashicons-calendar"></span> <span class="rtb-date-filter-label">Change date range</span></a>';
 		} else {
-			$views['date'] = '<a id="rtb-date-filter-link" href="#">' . esc_html__( 'Specific Date(s)/Time', 'restaurant-reservations' ) . '</a>';
+			$views['date'] = '<a id="rtb-date-filter-link" href="#">' . esc_html__( 'Specific Date(s)/Time', 'scwatbwsr-translate' ) . '</a>';
 		}
 
 		$views['filter_name'] = sprintf( 
-			'<input type="text" value="%s"><a href="%s"%s>%s</a>', 
+			'<input type="text" name="filter_name" id="filter_name" value="%s"><a href="%s"%s>%s</a>', 
 			$this->filter_name,
 			esc_url( 
 				add_query_arg( 
@@ -394,20 +433,18 @@ class scwBookingsTable extends WP_List_Table {
 
 			<div class="date-filters">
 				<div class="rtb-admin-bookings-filters-start">
-					<label for="start-date" class="screen-reader-text"><?php _e( 'Start Date:', 'restaurant-reservations' ); ?></label>
-					<input type="text" id="start-date" name="start_date" class="datepicker" value="<?php echo esc_attr( $this->filter_start_date ); ?>" placeholder="<?php _e( 'Start Date', 'restaurant-reservations' ); ?>" />
-					<input type="text" id="start-time" name="start_time" class="timepicker" value="<?php echo esc_attr( $this->filter_start_time ); ?>" placeholder="<?php _e( 'Start Time', 'restaurant-reservations' ); ?>" />
-				</div>	
+					<label for="start-date" class="screen-reader-text"><?php _e( 'Start Date:', 'scwatbwsr-translate' ); ?></label>
+					<input type="text" id="start-date" name="start_date" class="datepicker" value="<?php echo esc_attr( $this->filter_start_date ); ?>" placeholder="<?php _e( 'Start Date', 'scwatbwsr-translate' ); ?>" />
+					</div>	
 				<div class="rtb-admin-bookings-filters-end">
-					<label for="end-date" class="screen-reader-text"><?php _e( 'End Date:', 'restaurant-reservations' ); ?></label>
-					<input type="text" id="end-date" name="end_date" class="datepicker" value="<?php echo esc_attr( $this->filter_end_date ); ?>" placeholder="<?php _e( 'End Date', 'restaurant-reservations' ); ?>" />
-					<input type="text" id="end-time" name="end_time" class="timepicker" value="<?php echo esc_attr( $this->filter_end_time ); ?>" placeholder="<?php _e( 'End Time', 'restaurant-reservations' ); ?>" />
-				</div>
+					<label for="end-date" class="screen-reader-text"><?php _e( 'End Date:', 'scwatbwsr-translate' ); ?></label>
+					<input type="text" id="end-date" name="end_date" class="datepicker" value="<?php echo esc_attr( $this->filter_end_date ); ?>" placeholder="<?php _e( 'End Date', 'scwatbwsr-translate' ); ?>" />
+					</div>
 				
-				<input type="submit" class="button button-secondary" value="<?php _e( 'Apply', 'restaurant-reservations' ); ?>"/>
+				<input type="submit" class="button button-secondary" value="<?php _e( 'Apply', 'scwatbwsr-translate' ); ?>"/>
 				
 				<?php if( !empty( $this->filter_start_date ) || !empty( $this->filter_end_date ) || !empty( $this->filter_start_time ) || !empty( $this->filter_end_time ) ) : ?>
-					<a href="<?php echo esc_url( add_query_arg( array( 'action' => 'clear_date_filters' ) ) ); ?>" class="button button-secondary"><?php _e( 'Clear Filter', 'restaurant-reservations' ); ?></a>
+					<a href="<?php echo esc_url( add_query_arg( array( 'action' => 'clear_date_filters' ) ) ); ?>" class="button button-secondary"><?php _e( 'Clear Filter', 'scwatbwsr-translate' ); ?></a>
 				<?php endif; ?>
 
 				<?php if( !empty( $_GET['status'] ) ) : ?>
@@ -427,23 +464,8 @@ class scwBookingsTable extends WP_List_Table {
 	public function get_views() {
 
 		$current = isset( $_GET['status'] ) ? sanitize_text_field( $_GET['status'] ) : '';
-
-		$this->booking_statuses[ 'all' ] = array( 
-			'label' => __( 'All', 'restaurant-reservations' ),
-			'count' => _n_noop(
-				'All <span class="count">(%s)</span>', 
-				'All <span class="count">(%s)</span>', 
-				'restaurant-reservations' 
-			)[ 'singular' ]
-		);
-		$this->booking_statuses[ 'trash' ] = array( 
-			'label' => __( 'Trash', 'restaurant-reservations' ),
-			'count' => _n_noop(
-				'Trash <span class="count">(%s)</span>', 
-				'Trash <span class="count">(%s)</span>', 
-				'restaurant-reservations' 
-			)[ 'singular' ]
-		);
+        $this->populate_booking_status();
+		
 
 		ksort( $this->booking_statuses );
 
@@ -481,10 +503,11 @@ class scwBookingsTable extends WP_List_Table {
 	 * @since 0.0.1
 	 */
 	public function single_row( $item ) {
+	    $item = (OBJECT) $item;
 		static $row_alternate_class = 'alternate';
 		$row_alternate_class = ( $row_alternate_class == 'alternate' ? '' : 'alternate' );
 
-		$row_classes = array( esc_attr( $item->post_status ) );
+		$row_classes = array( esc_attr( $item->booking_status ) );
 
 		if ( !empty( $row_alternate_class ) ) {
 			$row_classes[] = $row_alternate_class;
@@ -513,8 +536,8 @@ class scwBookingsTable extends WP_List_Table {
 		$all_default_columns = $this->get_all_default_columns();
 		$all_columns = $this->get_all_columns();
 
-		global $rtb_controller;
-		$visible_columns = $rtb_controller->settings->get_setting( 'bookings-table-columns' );
+		
+		$visible_columns = [];
 		if ( empty( $visible_columns ) ) {
 			$columns = $all_default_columns;
 		} else {
@@ -541,24 +564,26 @@ class scwBookingsTable extends WP_List_Table {
 	 * @since 1.5
 	 */
 	public function get_all_default_columns() {
-		global $rtb_controller;
+		
 
 		$columns = array(
 			'cb'        => '<input type="checkbox" />', //Render a checkbox instead of text
-			'date'     	=> __( 'Date', 'restaurant-reservations' ),
-			'id'     	=> __( 'ID', 'restaurant-reservations' ),
-			'party'  	=> __( 'Party', 'restaurant-reservations' ),
-			'name'  	=> __( 'Name', 'restaurant-reservations' ),
-			'email'  	=> __( 'Email', 'restaurant-reservations' ),
-			'phone'  	=> __( 'Phone', 'restaurant-reservations' ),
-			'status'  	=> __( 'Status', 'restaurant-reservations' ),
+			'date'     	=> __( 'Date', 'scwatbwsr-translate' ),
+			'id'     	=> __( 'ID', 'scwatbwsr-translate' ),
+			'party'  	=> __( 'Party', 'scwatbwsr-translate' ),
+			'name'  	=> __( 'Name', 'scwatbwsr-translate' ),
+			'email'  	=> __( 'Email', 'scwatbwsr-translate' ),
+			'phone'  	=> __( 'Phone', 'scwatbwsr-translate' ),
+			'status'  	=> __( 'Status', 'scwatbwsr-translate' ),
 		);
 
-		if ( $rtb_controller->settings->get_setting( 'require-deposit' ) ) { $columns['deposit'] = __( 'Deposit', 'restaurant-reservations' ) ; }
-		if ( $rtb_controller->settings->get_setting( 'enable-tables' ) ) { $columns['table'] = __( 'Table', 'restaurant-reservations' ) ; }
+		if ( get_settings_scw( 'enabled_payment' ) ) { $columns['deposit'] = __( 'Price', 'scwatbwsr-translate' ) ; }
+		if ( get_settings_scw( 'desposit_type' ) =="Reservation") { $columns['table'] = __( 'Table', 'scwatbwsr-translate' ) ; } else  {
+			$columns['seat'] = __( 'Seats', 'scwatbwsr-translate' );
+		}
 
 		// This is so that deposit comes before details, is there a better way to do this?
-		$columns['details'] = __( 'Details', 'restaurant-reservations' );
+		$columns['details'] = __( 'Details', 'scwatbwsr-translate' );
 
 		return $columns;
 	}
@@ -573,7 +598,7 @@ class scwBookingsTable extends WP_List_Table {
 	 */
 	public function get_all_columns() {
 		$columns = $this->get_all_default_columns();
-		$columns['submitted-by'] = __( 'Submitted By', 'restaurant-reservations' );
+		$columns['submitted-by'] = __( 'Submitted By', 'scwatbwsr-translate' );
 		return apply_filters( 'rtb_bookings_all_table_columns', $columns );
 	}
 
@@ -596,28 +621,28 @@ class scwBookingsTable extends WP_List_Table {
 	 * @since 0.0.1
 	 */
 	public function column_default( $booking, $column_name ) {
-		global $rtb_controller;
+		
        
 		switch ( $column_name ) {
 			case 'date' :
-				$value = $booking->format_date( $booking->date );
-				$value .= '<div class="status"><span class="spinner"></span> ' . __( 'Loading', 'restaurant-reservations' ) . '</div>';
+				$value = date("F d, Y h:i  A" ,strtotime($booking->schedule ));
+				$value .= '<div class="status"><span class="spinner"></span> ' . __( 'Loading', 'scwatbwsr-translate' ) . '</div>';
 
-				if ( $booking->post_status !== 'trash' ) {
+				if ( $booking->booking_status !== 'trash' ) {
 					$value .= '<div class="actions">';
-					$value .= '<a href="#" data-id="' . esc_attr( $booking->ID ) . '" data-action="edit">' . __( 'Edit', 'restaurant-reservations' ) . '</a>';
-					$value .= ' | <a href="#" class="trash" data-id="' . esc_attr( $booking->ID ) . '" data-action="trash">' . __( 'Trash', 'restaurant-reservations' ) . '</a>';
+					$value .= '<a href="#" data-id="' . esc_attr( $booking->id ) . '" data-action="edit">' . __( 'Edit', 'scwatbwsr-translate' ) . '</a>';
+					$value .= ' | <a href="#" class="trash" data-id="' . esc_attr( $booking->id ) . '" data-action="trash">' . __( 'Trash', 'scwatbwsr-translate' ) . '</a>';
 					$value .= '</div>';
 				}
 
 				break;
 
 			case 'id' :
-				$value = $booking->ID;
+				$value = $booking->id;
 				break;
 
 			case 'party' :
-				$value = $booking->party;
+				$value = $booking->seats;
 				break;
 
 			case 'name' :
@@ -627,7 +652,7 @@ class scwBookingsTable extends WP_List_Table {
 			case 'email' :
 				$value = esc_html( $booking->email );
 				$value .= '<div class="actions">';
-				$value .= '<a href="#" data-id="' . esc_attr( $booking->ID ) . '" data-action="email" data-email="' . esc_attr( $booking->email ) . '" data-name="' . esc_attr( $booking->name ) . '">' . __( 'Send Email', 'restaurant-reservations' ) . '</a>';
+				$value .= '<a href="#" data-id="' . esc_attr( $booking->id ) . '" data-action="email" data-email="' . esc_attr( $booking->email ) . '" data-name="' . esc_attr( $booking->name ) . '">' . __( 'Send Email', 'scwatbwsr-translate' ) . '</a>';
 				$value .= '</div>';
 				break;
 
@@ -636,23 +661,23 @@ class scwBookingsTable extends WP_List_Table {
 				break;
 
 			case 'deposit' :
-				$currency_symbol = $rtb_controller->settings->get_setting( 'rtb-stripe-currency-symbol' );
-				$value = ( $currency_symbol ? $currency_symbol : '$' ) . esc_html( $booking->deposit );
+				$currency_symbol = '$';
+				$value = ( $currency_symbol ? $currency_symbol : '$' ) . esc_html( $booking->total );
 				break;
 
 			case 'table' :
-				$table = is_array( $booking->table ) ? $booking->table : array();
+				$table = is_array( $booking->seat ) ? $booking->seat : array();
 				$value = esc_html( implode( ',', $table ) );
 				break;
 
 			case 'status' :
-				global $rtb_controller;
-				if ( !empty( $rtb_controller->cpts->booking_statuses[$booking->post_status] ) ) {
-					$value = $rtb_controller->cpts->booking_statuses[$booking->post_status]['label'];
-				} elseif ( $booking->post_status == 'trash' ) {
-					$value = _x( 'Trash', 'Status label for bookings put in the trash', 'restaurant-reservations' );
+				
+				if ( !empty( $this->booking_statuses[$booking->booking_status] ) ) {
+					$value = $this->booking_statuses[$booking->booking_status]['label'];
+				} elseif ( $booking->booking_status == 'trash' ) {
+					$value = _x( 'Trash', 'Status label for bookings put in the trash', 'scwatbwsr-translate' );
 				} else {
-					$value = $booking->post_status;
+					$value = $booking->booking_status;
 				}
 				break;
 
@@ -660,14 +685,14 @@ class scwBookingsTable extends WP_List_Table {
 				$value = '';
 
 				$details = array();
-				if ( trim( $booking->message ) ) {
+				if ( trim( $booking->note ) ) {
 					$details[] = array(
-						'label' => __( 'Message', 'restaurant-reservations' ),
-						'value' => esc_html( $booking->message ),
+						'label' => __( 'Message', 'scwatbwsr-translate' ),
+						'value' => esc_html( $booking->note ),
 					);
 				}
 
-				if ( $booking->post_status == 'payment_failed' ) {
+				if ( $booking->_ipp_status == 'Pending' ) {
 					$details[] = array(
 						'label' => 'Payment Failure Reason',
 						'value' => isset( $booking->payment_failure_message ) ? $booking->payment_failure_message : 'Unknown payment failure reason. Check with payment processor.'
@@ -677,7 +702,7 @@ class scwBookingsTable extends WP_List_Table {
 				$details = apply_filters( 'rtb_bookings_table_column_details', $details, $booking );
 
 				if ( !empty( $details ) ) {
-					$value = '<a href="#" class="rtb-show-details" data-id="details-' . esc_attr( $booking->ID ) . '"><span class="dashicons dashicons-testimonial"></span></a>';
+					$value = '<a href="#" class="rtb-show-details" data-id="details-' . esc_attr( $booking->id ) . '"><span class="dashicons dashicons-testimonial"></span></a>';
 					$value .= '<div class="rtb-details-data"><ul class="details">';
 					foreach( $details as $detail ) {
 						$value .= '<li><div class="label">' . $detail['label'] . '</div><div class="value">' . $detail['value'] . '</div></li>';
@@ -687,23 +712,20 @@ class scwBookingsTable extends WP_List_Table {
 				break;
 
 			case 'submitted-by' :
-				global $rtb_controller;
-				$ip = !empty( $booking->ip ) ? $booking->ip : __( 'Unknown IP', 'restaurant-reservations' );
-				$date_submission = !empty( $booking->date_submission ) ? $booking->format_timestamp( $booking->date_submission ) : __( 'Unknown Date', 'restaurant-reservations' );
-				$value = sprintf( esc_html__( 'Request from %s on %s.', 'restaurant-reservations' ), $ip, $date_submission );
-				if ( $rtb_controller->settings->get_setting( 'require-consent' ) ) {
-					if ( !empty( $booking->consent_acquired ) ) {
-						$value .= '<div class="consent">' . sprintf( esc_html__( '✓ Consent acquired', 'restaurant-reservations' ) ) . '</div>';
-					} else {
-						$value .= '<div class="consent">' . sprintf( esc_html__( '✘ Consent not acquired', 'restaurant-reservations' ) ) . '</div>';
-					}
-				}
+				
+				$ip = !empty( $booking->ip ) ? $booking->ip : __( 'Unknown IP', 'scwatbwsr-translate' );
+				$date_submission = !empty( $booking->date_submission ) ? $booking->format_timestamp( $booking->date_submission ) : __( 'Unknown Date', 'scwatbwsr-translate' );
+				$value = sprintf( esc_html__( 'Request from %s on %s.', 'scwatbwsr-translate' ), $ip, $date_submission );
+				
+					
+						$value .= '<div class="consent">' . sprintf( esc_html__( '✘ Consent not acquired', 'scwatbwsr-translate' ) ) . '</div>';
+					
 				$value .= '<div class="actions">';
-				$value .= '<a href="#" data-action="ban" data-email="' . esc_attr( $booking->email ) . '" data-id="' . absint( $booking->ID ) . '" data-ip="' . $ip . '">';
-				$value .= __( 'Ban', 'restaurant-reservations' );
+				$value .= '<a href="#" data-action="ban" data-email="' . esc_attr( $booking->email ) . '" data-id="' . absint( $booking->id ) . '" data-ip="' . $ip . '">';
+				$value .= __( 'Ban', 'scwatbwsr-translate' );
 				$value .= '</a>';
-				$value .= ' | <a href="#" data-action="delete" data-email="' . esc_attr( $booking->email ) . '" data-id="' . absint( $booking->ID ) . '">';
-				$value .= __( 'Delete Customer', 'restaurant-reservations' );
+				$value .= ' | <a href="#" data-action="delete" data-email="' . esc_attr( $booking->email ) . '" data-id="' . absint( $booking->id ) . '">';
+				$value .= __( 'Delete Customer', 'scwatbwsr-translate' );
 				$value .= '</a>';
 				$value .= '</div>';
 				break;
@@ -725,7 +747,7 @@ class scwBookingsTable extends WP_List_Table {
 		return sprintf(
 			'<input type="checkbox" name="%1$s[]" value="%2$s" />',
 			'bookings',
-			$booking->ID
+			$booking->id
 		);
 	}
 
@@ -738,7 +760,7 @@ class scwBookingsTable extends WP_List_Table {
 	 * @since 1.5
 	 */
 	public function add_details_column_items( $details, $booking ) {
-		global $rtb_controller;
+		
 		$visible_columns = $this->get_columns();
 		$all_columns = $this->get_all_columns();
 
@@ -766,11 +788,11 @@ class scwBookingsTable extends WP_List_Table {
 	 */
 	public function get_bulk_actions() {
 		$actions = array(
-			'delete'                => __( 'Delete',                	'restaurant-reservations' ),
-			'set-status-confirmed'  => __( 'Set To Confirmed',      	'restaurant-reservations' ),
-			'set-status-pending'    => __( 'Set To Pending Review', 	'restaurant-reservations' ),
-			'set-status-closed'     => __( 'Set To Closed',         	'restaurant-reservations' ),
-			'send-email'      		=> __( 'Send Email',         		'restaurant-reservations' )
+			'delete'                => __( 'Delete',                	'scwatbwsr-translate' ),
+			'set-status-confirmed'  => __( 'Set To Confirmed',      	'scwatbwsr-translate' ),
+			'set-status-pending'    => __( 'Set To Pending Review', 	'scwatbwsr-translate' ),
+			'set-status-closed'     => __( 'Set To Closed',         	'scwatbwsr-translate' ),
+			'send-email'      		=> __( 'Send Email',         		'scwatbwsr-translate' )
 		);
 
 		return apply_filters( 'rtb_bookings_table_bulk_actions', $actions );
@@ -803,23 +825,23 @@ class scwBookingsTable extends WP_List_Table {
 			$ids = array( $ids );
 		}
 
-		global $rtb_controller;
+		
 		$results = array();
 		foreach ( $ids as $id ) {
 			if ( 'delete' === $action ) {
-				$results[$id] = $rtb_controller->cpts->delete_booking( intval( $id ) );
+				$results[$id] = delete_booking( intval( $id ) );
 			}
 
 			if ( 'set-status-confirmed' === $action ) {
-				$results[$id] = $rtb_controller->cpts->update_booking_status( intval( $id ), 'confirmed' );
+				$results[$id] = update_booking_status( intval( $id ), 'confirmed' );
 			}
 
 			if ( 'set-status-pending' === $action ) {
-				$results[$id] = $rtb_controller->cpts->update_booking_status( intval( $id ), 'pending' );
+				$results[$id] = update_booking_status( intval( $id ), 'pending' );
 			}
 
 			if ( 'set-status-closed' === $action ) {
-				$results[$id] = $rtb_controller->cpts->update_booking_status( intval( $id ), 'closed' );
+				$results[$id] = update_booking_status( intval( $id ), 'closed' );
 			}
 
 			$results = apply_filters( 'rtb_bookings_table_bulk_action', $results, $id, $action );
@@ -846,17 +868,16 @@ class scwBookingsTable extends WP_List_Table {
 			return;
 		}
 
-		global $rtb_controller;
-
+		
 		$results = array();
 
 		$id = !empty( $_REQUEST['booking'] ) ? intval( $_REQUEST['booking'] ) : false;
 
 		if ( $_REQUEST['rtb-quicklink'] == 'confirm' ) {
-			$results[$id] = $rtb_controller->cpts->update_booking_status( $id, 'confirmed' );
+			$results[$id] = update_booking_status( $id, 'confirmed' );
 			$this->last_action = 'set-status-confirmed';
 		} elseif ( $_REQUEST['rtb-quicklink'] == 'close' ) {
-			$results[$id] = $rtb_controller->cpts->update_booking_status( $id, 'closed' );
+			$results[$id] = update_booking_status( $id, 'closed' );
 			$this->last_action = 'set-status-closed';
 		}
 
@@ -888,16 +909,16 @@ class scwBookingsTable extends WP_List_Table {
 		<div id="rtb-admin-notice-bulk-<?php esc_attr( $this->last_action ); ?>" class="updated">
 
 			<?php if ( $this->last_action == 'delete' ) : ?>
-			<p><?php echo sprintf( _n( '%d booking deleted successfully.', '%d bookings deleted successfully.', $success, 'restaurant-reservations' ), $success ); ?></p>
+			<p><?php echo sprintf( _n( '%d booking deleted successfully.', '%d bookings deleted successfully.', $success, 'scwatbwsr-translate' ), $success ); ?></p>
 
 			<?php elseif ( $this->last_action == 'set-status-confirmed' ) : ?>
-			<p><?php echo sprintf( _n( '%d booking confirmed.', '%d bookings confirmed.', $success, 'restaurant-reservations' ), $success ); ?></p>
+			<p><?php echo sprintf( _n( '%d booking confirmed.', '%d bookings confirmed.', $success, 'scwatbwsr-translate' ), $success ); ?></p>
 
 			<?php elseif ( $this->last_action == 'set-status-pending' ) : ?>
-			<p><?php echo sprintf( _n( '%d booking set to pending.', '%d bookings set to pending.', $success, 'restaurant-reservations' ), $success ); ?></p>
+			<p><?php echo sprintf( _n( '%d booking set to pending.', '%d bookings set to pending.', $success, 'scwatbwsr-translate' ), $success ); ?></p>
 
 			<?php elseif ( $this->last_action == 'set-status-closed' ) : ?>
-			<p><?php echo sprintf( _n( '%d booking closed.', '%d bookings closed.', $success, 'restaurant-reservations' ), $success ); ?></p>
+			<p><?php echo sprintf( _n( '%d booking closed.', '%d bookings closed.', $success, 'scwatbwsr-translate' ), $success ); ?></p>
 
 			<?php endif; ?>
 		</div>
@@ -909,7 +930,7 @@ class scwBookingsTable extends WP_List_Table {
 		?>
 
 		<div id="rtb-admin-notice-bulk-<?php esc_attr( $this->last_action ); ?>" class="error">
-			<p><?php echo sprintf( _n( '%d booking had errors and could not be processed.', '%d bookings had errors and could not be processed.', $failure, 'restaurant-reservations' ), $failure ); ?></p>
+			<p><?php echo sprintf( _n( '%d booking had errors and could not be processed.', '%d bookings had errors and could not be processed.', $failure, 'scwatbwsr-translate' ), $failure ); ?></p>
 		</div>
 
 		<?php
@@ -926,10 +947,10 @@ class scwBookingsTable extends WP_List_Table {
 	 */
 	public function display_tablenav( $which ) {
 
-		global $rtb_controller;
+		
 
 		// Just call the parent method if locations aren't activated
-		if ( 'top' === $which && empty( $rtb_controller->locations->post_type ) ) {
+		if ( 'top' === $which ) {
 			$this->add_notification();
 			parent::display_tablenav( $which );
 			return;
@@ -941,9 +962,7 @@ class scwBookingsTable extends WP_List_Table {
 			return;
 		}
 
-		$locations = $rtb_controller->locations->get_location_options();
-		$all_locations = $rtb_controller->locations->get_location_options( false );
-		$inactive_locations = array_diff( $all_locations, $locations );
+		
 		?>
 
 		<div class="tablenav top rtb-top-actions-wrapper">
@@ -961,44 +980,13 @@ class scwBookingsTable extends WP_List_Table {
 			<?php endif; ?>
 			<ul class="rtb-locations">
 				<li<?php if ( empty( $this->filter_location ) ) : ?> class="current"<?php endif; ?>>
-					<a href="<?php echo esc_url( remove_query_arg( 'location', $this->query_string ) ); ?>"><?php esc_html_e( 'All Locations', 'restaurant-reservations' ); ?></a>
+					<a href="<?php echo esc_url( remove_query_arg( 'location', $this->query_string ) ); ?>"><?php esc_html_e( 'All Locations', 'scwatbwsr-translate' ); ?></a>
 				</li>
-				<?php
-					$i = 0;
-					foreach( $locations as $term_id => $name ) :
-						if ( $i > 15 ) {
-							break;
-						} else {
-							$i++;
-						}
-						?>
-
-						<li<?php if ( $this->filter_location == $term_id ) : ?> class="current"<?php endif; ?>>
-							<a href="<?php echo esc_url( add_query_arg( 'location', $term_id, $this->query_string ) ); ?>">
-								<?php esc_html_e( $name ); ?>
-							</a>
-						</li>
-				<?php endforeach; ?>
+				
 			</ul>
 			<div class="rtb-location-switch">
-				<select name="location">
-					<option><?php esc_attr_e( 'All Locations', 'restaurant-reservations' ); ?></option>
-					<?php foreach( $locations as $term_id => $name ) : ?>
-						<option value="<?php esc_attr_e( $term_id ); ?>"<?php if ( $this->filter_location == $term_id ) : ?> selected="selected"<?php endif; ?>>
-							<?php esc_attr_e( $name ); ?>
-						</option>
-					<?php endforeach; ?>
-					<?php if ( !empty( $inactive_locations ) ) : ?>
-						<optgroup label="<?php esc_attr_e( 'Inactive Locations' ); ?>">
-							<?php foreach( $inactive_locations as $term_id => $name ) : ?>
-								<option value="<?php esc_attr_e( $term_id ); ?>"<?php if ( $this->filter_location == $term_id ) : ?> selected="selected"<?php endif; ?>>
-									<?php esc_attr_e( $name ); ?>
-								</option>
-							<?php endforeach; ?>
-						</optgroup>
-					<?php endif; ?>
-				</select>
-				<input type="submit" class="button rtb-locations-button" value="<?php esc_attr_e( 'Switch', 'restaurant-reservations' ); ?>">
+				
+				<input type="submit" class="button rtb-locations-button" value="<?php esc_attr_e( 'Switch', 'scwatbwsr-translate' ); ?>">
 			</div>
 		</div>
 
@@ -1022,7 +1010,7 @@ class scwBookingsTable extends WP_List_Table {
 	 */
 	public function add_notification() {
 
-		global $rtb_controller;
+
 
 		$notifications = array();
 
@@ -1030,18 +1018,18 @@ class scwBookingsTable extends WP_List_Table {
 		if ( !empty( $_GET['status'] ) ) {
 			$status = sanitize_text_field( $_GET['status'] );
 			if ( $status == 'trash' ) {
-				$notifications['status'] = __( "You're viewing bookings that have been moved to the trash.", 'restaurant-reservations' );
-			} elseif ( !empty( $rtb_controller->cpts->booking_statuses[ $status ] ) ) {
-				$notifications['status'] = sprintf( _x( "You're viewing bookings that have been marked as %s.", 'Indicates which booking status is currently being filtered in the list of bookings.', 'restaurant-reservations' ), $rtb_controller->cpts->booking_statuses[ $_GET['status'] ]['label'] );
+				$notifications['status'] = __( "You're viewing bookings that have been moved to the trash.", 'scwatbwsr-translate' );
+			} elseif ( !empty( $booking_statuses[ $status ] ) ) {
+				$notifications['status'] = sprintf( _x( "You're viewing bookings that have been marked as %s.", 'Indicates which booking status is currently being filtered in the list of bookings.', 'scwatbwsr-translate' ), $this->booking_statuses[ $_GET['status'] ]['label'] );
 			}
 		}
 
 		if ( !empty( $this->filter_start_date ) || !empty( $this->filter_end_date ) ) {
-			$notifications['date'] = sprintf( _x( 'Only bookings from %s are being shown.', 'Notification of booking date range, eg - bookings from 2014-12-02-2014-12-05', 'restaurant-reservations' ), $this->get_current_date_range() );
+			$notifications['date'] = sprintf( _x( 'Only bookings from %s are being shown.', 'Notification of booking date range, eg - bookings from 2014-12-02-2014-12-05', 'scwatbwsr-translate' ), $this->get_current_date_range() );
 		} elseif ( !empty( $_GET['date_range'] ) && $_GET['date_range'] == 'today' ) {
-			$notifications['date'] = __( "Only today's bookings are being shown.", 'restaurant-reservations' );
+			$notifications['date'] = __( "Only today's bookings are being shown.", 'scwatbwsr-translate' );
 		} elseif ( empty( $_GET['date_range'] ) ) {
-			$notifications['date'] = __( 'Only upcoming bookings are being shown.', 'restaurant-reservations' );
+			$notifications['date'] = __( 'Only upcoming bookings are being shown.', 'scwatbwsr-translate' );
 		}
 
 		$notifications = apply_filters( 'rtb_admin_bookings_table_filter_notifications', $notifications );
@@ -1065,13 +1053,13 @@ class scwBookingsTable extends WP_List_Table {
 
 		global $wpdb;
 
-		$where = "WHERE p.post_type = '" . RTB_BOOKING_POST_TYPE . "'";
+		$where = "WHERE p.productId > 0";
 
 		if ( $this->filter_start_date !== null || $this->filter_end_date !== null ) {
 
 			if ( $this->filter_start_date !== null ) {
 				$start_date = new DateTime( $this->filter_start_date . ' ' . $this->filter_start_time );
-				$where .= " AND p.post_date >= '" . $start_date->format( 'Y-m-d H:i:s' ) . "'";
+				$where .= " AND p.schedule >= '" . $start_date->format( 'Y-m-d H:i:s' ) . "'";
 			}
 
 			if ( $this->filter_end_date !== null ) {
@@ -1079,23 +1067,23 @@ class scwBookingsTable extends WP_List_Table {
 					$this->filter_end_time = '23:59:58';
 				}
 				$end_date = new DateTime( $this->filter_end_date . ' ' . $this->filter_end_time );
-				$where .= " AND p.post_date <= '" . $end_date->format( 'Y-m-d H:i:s' ) . "'";
+				$where .= " AND p.schedule <= '" . $end_date->format( 'Y-m-d H:i:s' ) . "'";
 			}
 
 		} elseif ( !empty( $_GET['date_range'] ) ) {
 
 			if ( $_GET['date_range'] ==  'today' ) {
-				$where .= " AND p.post_date >= '" . date( 'Y-m-d', current_time( 'timestamp' ) ) . "' AND p.post_date <= '" . date( 'Y-m-d', current_time( 'timestamp' ) + 86400 ) . "'";
+				$where .= " AND p.schedule >= '" . date( 'Y-m-d', current_time( 'timestamp' ) ) . "' AND p.schedule <= '" . date( 'Y-m-d', current_time( 'timestamp' ) + 86400 ) . "'";
 			}
 
 		// Default date setting is to show upcoming bookings
 		} else {
-			$where .= " AND p.post_date >= '" . date( 'Y-m-d H:i:s', current_time( 'timestamp' ) - 3600 ) . "'";
+			$where .= " AND p.schedule >= '" . date( 'Y-m-d H:i:s', current_time( 'timestamp' ) - 3600 ) . "'";
 		}
 
 		// Filter by name
 		if( ! empty( $this->filter_name ) ) {
-			$where .= " AND p.post_title LIKE '%".esc_sql( $wpdb->esc_like( $this->filter_name ) )."%'";
+			$where .= " AND ( p.name LIKE '%".esc_sql( $wpdb->esc_like( $this->filter_name ) )."%' OR p.seats LIKE '%".esc_sql( $wpdb->esc_like( $this->filter_name ) )."%')";
 		}
 
 		$join = '';
@@ -1104,23 +1092,25 @@ class scwBookingsTable extends WP_List_Table {
 			$where .= " AND t.term_taxonomy_id=" . absint( $this->filter_location );
 		}
 
-		$query = "SELECT p.post_status,count( * ) AS num_posts
-			FROM $wpdb->posts p
+		$query = "SELECT p.booking_status,count( * ) AS num_posts
+			FROM $this->table_name p
 			$join
 			$where
-			GROUP BY p.post_status
+			GROUP BY p.booking_status
 		";
 
 		$count = $wpdb->get_results( $query, ARRAY_A );
-
+		
 		$this->booking_counts = array();
-		foreach ( get_post_stati() as $state ) {
+		
+		foreach ( $this->booking_statuses as $state=>$data ) {
 			$this->booking_counts[$state] = 0;
 		}
 
 		$this->booking_counts['all'] = 0;
+		
 		foreach ( (array) $count as $row ) {
-			$this->booking_counts[$row['post_status']] = $row['num_posts'];
+			$this->booking_counts[$row['booking_status']] = $row['num_posts'];
 			$this->booking_counts['all'] += $row['num_posts'];
 		}
 	}
@@ -1163,7 +1153,71 @@ class scwBookingsTable extends WP_List_Table {
 		$this->bookings = $query->get_bookings();
 		
 	}
+    /**
+	 * Setup the custom table
+	 */
+	// Get table data
+    private function get_table_data() {
+        global $wpdb;
 
+        $table = $this->table_name;
+        
+		$where = "WHERE p.productId > 0";
+
+		if ( $this->filter_start_date !== null || $this->filter_end_date !== null ) {
+
+			if ( $this->filter_start_date !== null ) {
+				$start_date = new DateTime( $this->filter_start_date . ' ' . $this->filter_start_time );
+				$where .= " AND p.schedule >= '" . $start_date->format( 'Y-m-d H:i:s' ) . "'";
+			}
+
+			if ( $this->filter_end_date !== null ) {
+				if( empty( $this->filter_end_time ) ) {
+					$this->filter_end_time = '23:59:58';
+				}
+				$end_date = new DateTime( $this->filter_end_date . ' ' . $this->filter_end_time );
+				$where .= " AND p.schedule <= '" . $end_date->format( 'Y-m-d H:i:s' ) . "'";
+			}
+
+		} elseif ( !empty( $_GET['date_range'] ) ) {
+
+			if ( $_GET['date_range'] ==  'today' ) {
+				$where .= " AND p.schedule >= '" . date( 'Y-m-d', current_time( 'timestamp' ) ) . "' AND p.schedule <= '" . date( 'Y-m-d', current_time( 'timestamp' ) + 86400 ) . "'";
+			}
+
+		// Default date setting is to show upcoming bookings
+		} else {
+			$where .= " AND p.schedule >= '" . date( 'Y-m-d H:i:s', current_time( 'timestamp' ) - 3600 ) . "'";
+		}
+
+		// Filter by name
+		// Filter by name
+		if( ! empty( $this->filter_name ) ) {
+			$where .= " AND ( p.name LIKE '%".esc_sql( $wpdb->esc_like( $this->filter_name ) )."%' OR p.seats LIKE '%".esc_sql( $wpdb->esc_like( $this->filter_name ) )."%')";
+		}
+        // Filter by status
+		if( ! empty( $_GET['status'] ) && array_key_exists($_GET['status'],$this->booking_counts) ) {
+			$where .= " AND p.booking_status = '".esc_sql( $wpdb->esc_like( $_GET['status']))."'";
+		}
+		$join = '';
+		if ( $this->filter_location ) {
+			$join .= " LEFT JOIN $wpdb->term_relationships t ON (t.object_id=p.ID)";
+			$where .= " AND t.term_taxonomy_id=" . absint( $this->filter_location );
+		}
+        $startRow=0;
+		if(isset($_GET['paged']) && $_GET['paged']>0)
+		$startRow = ($_GET['paged']-1) * $this->per_page;
+		$query = "SELECT *
+			FROM $this->table_name p
+			$join
+			$where limit $startRow , $this->per_page
+			
+		";
+        return $wpdb->get_results(
+            $query,
+            ARRAY_A
+        );
+    }
 	/**
 	 * Setup the final data for the table
 	 * @since 0.0.1
@@ -1175,8 +1229,8 @@ class scwBookingsTable extends WP_List_Table {
 		$sortable = $this->get_sortable_columns();
 
 		$this->_column_headers = array( $columns, $hidden, $sortable );
-
-		$this->items = $this->bookings;
+        $this->table_data = $this->get_table_data();
+		$this->items = $this->table_data;
 
 		$total_items   = empty( $_GET['status'] ) ? $this->booking_counts['all'] : $this->booking_counts[$_GET['status']];
 

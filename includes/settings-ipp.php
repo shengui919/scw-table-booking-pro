@@ -267,3 +267,19 @@ if(get_current_user_id())
 		$user = $_COOKIE['PHPSESSID'];
 	}
 */
+function get_settings_scw($key)
+{
+    $options = get_option( 'scwatbwsr_settings' );
+    if(array_key_exists($key,$options))
+    return $options[$key];
+    else
+    return "";
+}
+function delete_booking($id)
+{
+  
+}
+function update_booking_status($id,$status)
+{
+  
+}

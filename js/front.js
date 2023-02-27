@@ -2,11 +2,6 @@
 "use strict";
 	
 	
-	/*var phantram = 100/roomwidth*roomheight;
-	var bw = jQuery(".scwatbwsr_map_block").width();
-	console.log(bw);
-	var fh = bw/100*phantram;
-	jQuery(".scwatbwsr_map_block").css("height", fh+"px");*/
 	$( document ).ready(function() {
 		$(".body .is-layout-flow").css({'clear':'both'})
 		var url = jQuery(".scwatbwsr_url").val();
@@ -21,7 +16,114 @@
 		var roomheight = jQuery(".scw_roomheight").val();
 		var posttype = jQuery(".scw_posttype").val();
 		var zoomoption = jQuery(".scw_zoomoption").val();
-	
+		
+	function formBook()
+	{
+		 
+			var name = jQuery(".scwatbwsr_form_name_input").val();
+					var address = jQuery(".scwatbwsr_form_address_input").val();
+					var email = jQuery(".scwatbwsr_form_email_input").val();
+					var phone = jQuery(".scwatbwsr_form_phone_input").val();
+					var note = jQuery(".scwatbwsr_form_note_input").val();
+					var total = jQuery(".scwatbwsr_total_value").text().trim();
+					var seats = "";
+					var no_seat=0;
+					var data= {
+						name: name,
+						address: address,
+						email: email,
+						phone: phone,
+						note: note,
+						proId: proid,
+						total: total,
+						schedule: schedule,
+						task : "send_mail",
+						url:url,
+						customer_table:customer_table,
+						enabled_payment:enabled_payment
+					}
+					if(customer_table=="yes")
+					{
+						
+					
+					jQuery(".scwatbwsr_map_tables_table").each(function(){
+						var tbname = jQuery(this).children(".scwatbwsr_map_tables_table_label").text().trim();
+						jQuery(this).find(".scwatbwsr_map_tables_table_seat.active").each(function(){
+							if(seats)
+								seats += "@"+tbname+"."+jQuery(this).text().trim();
+							else
+								seats += tbname+"."+jQuery(this).text().trim();
+						});
+					});
+					data.seats= seats;
+				   }
+				   else 
+				   {
+					  no_seat = jQuery(".scwatbwsr_form_seat_input").val();
+					  data.no_seat = no_seat;
+				   }
+					var schedule = jQuery(".scwatbwsr_schedules_item.active").text().trim();
+					if(!schedule) schedule = jQuery("#scwatbwsr_schedules_picker").val();
+					
+					if(enabled_payment=="yes")
+					{
+						data.billing_first_name=$(".billing_first_name").val()
+						data.billing_last_name=$(".billing_last_name").val()
+						data.billing_address_1=$(".billing_address_1").val()
+						data.billing_address_2=$(".billing_address_2").val()
+						data.billing_city=$(".billing_city").val()
+						data.billing_state=$(".billing_state").val()
+						data.billing_postcode=$(".billing_postcode").val()
+						data.billing_country=$(".billing_country").val()
+						data.billing_email=$(".billing_email").val()
+						data.billing_phone=$(".billing_phone").val()
+					}
+					
+					if(seats!='' || no_seat>0){
+						jQuery.ajax({
+							url: url+"helper.php",
+							data:data,
+							type: 'POST',
+							beforeSend: function(data){
+								jQuery(".scwatbwsr_sendform").css("opacity", "0.5");
+							},
+							dataType: "json",
+							success: function(data){
+								jQuery(".scwatbwsr_sendform").css("opacity", "1");
+								if(data && data.success)
+								{
+									Swal.fire(
+										'Booking Status',
+										data.message,
+										'success'
+										)
+								}
+									
+								else
+									
+								{
+									if(data && data.result=='success')
+									{
+										window.location.href = data.redirect;
+									}
+								}
+							}
+						});
+					}
+				
+			
+	}
+		$("#scw-booking-form").submit(function(e){
+			e.preventDefault();
+			formBook();
+		})
+
+		$("#scw-booking-form").validate ({
+			submitHandler: function(form) {  
+				formBook();
+			}
+		});
+		
 	jQuery(".woocommerce-tabs").before(jQuery(".scwatbwsr_content").show());
 	jQuery(".scwatbwsr_content").after(jQuery("form.cart"));
 	
@@ -118,7 +220,7 @@
 	jQuery(".scwatbwsr_map_tables_table").each(function(){
 		var thistb = jQuery(this);
 		
-		thistb.find(".scwatbwsr_map_tables_table_seat").each(function(){
+		thistb.find(".scwatbwsr_map_tables_table_seat.perseat").each(function(){
 			var thiseat = jQuery(this);
 			thiseat.on("click", function(){
 				
@@ -131,7 +233,12 @@
 								thiseat.addClass("active");
 							sessSeat();
 						}else
-							alert("Please choose schedule first!");
+						Swal.fire(
+							'Error!',
+							"Please choose schedule first!",
+							'error'
+							);
+							
 					}else{
 						if(thiseat.hasClass("active"))
 							thiseat.removeClass("active");
@@ -146,7 +253,12 @@
 			if(jQuery("#scwatbwsr_schedules_picker").length > 0 || jQuery(".scwatbwsr_schedules_item").length > 0){
 				if(jQuery("#scwatbwsr_schedules_picker").val() || jQuery(".scwatbwsr_schedules_item.active").length > 0){
 					if(thistb.find(".seatbooked").length > 0){
-						alert("Can not book whole table!");
+						Swal.fire(
+							'Seat Status',
+							"Can not book whole table!",
+							'error'
+							);
+						
 					}else{
 						if(jQuery(this).hasClass("active")){
 							jQuery(this).removeClass("active");
@@ -158,10 +270,20 @@
 						sessSeat();
 					}
 				}else
-					alert("Please choose schedule first!");
+				Swal.fire(
+					'Error!',
+					"Please choose schedule first!",
+					'error'
+					);
+					
 			}else{
 				if(thistb.find(".seatbooked").length > 0){
-					alert("Can not book whole table!");
+					
+					Swal.fire(
+						'Error!',
+						"Can not book whole table!",
+						'error'
+						);
 				}else{
 					if(jQuery(this).hasClass("active")){
 						jQuery(this).removeClass("active");
@@ -211,7 +333,8 @@
 				}
 				
 				if(posttype == "post" || posttype == "page"){
-					jQuery(".scwatbwsr_total_value").text(data);
+					jQuery(".total_seats_count").text("Total Seats : "+jQuery(".scwatbwsr_map_tables_table_seat.active").length)
+					jQuery(".scwatbwsr_total_value").text("$"+data);
 				}
 			}
 		});
@@ -235,79 +358,5 @@
 		resetButton.addEventListener('click', panzoom.reset)
 	}
 	
-	// wordpress post
-	if(posttype == "post" || posttype == "page"){
-		jQuery(".scwatbwsr_form_submit").click(function(){
-			var name = jQuery(".scwatbwsr_form_name_input").val();
-			var address = jQuery(".scwatbwsr_form_address_input").val();
-			var email = jQuery(".scwatbwsr_form_email_input").val();
-			var phone = jQuery(".scwatbwsr_form_phone_input").val();
-			var note = jQuery(".scwatbwsr_form_note_input").val();
-			var total = jQuery(".scwatbwsr_total_value").text().trim();
-
-			
-			var seats = "";
-			jQuery(".scwatbwsr_map_tables_table").each(function(){
-				var tbname = jQuery(this).children(".scwatbwsr_map_tables_table_label").text().trim();
-				jQuery(this).find(".scwatbwsr_map_tables_table_seat.active").each(function(){
-					if(seats)
-						seats += "@"+tbname+"."+jQuery(this).text().trim();
-					else
-						seats += tbname+"."+jQuery(this).text().trim();
-				});
-			});
-			
-			var schedule = jQuery(".scwatbwsr_schedules_item.active").text().trim();
-			if(!schedule) schedule = jQuery("#scwatbwsr_schedules_picker").val();
-			
-			if(seats){
-				jQuery.ajax({
-					url: url+"helper.php",
-					data: {
-						name: name,
-						address: address,
-						email: email,
-						phone: phone,
-						note: note,
-						proId: proid,
-						total: total,
-						seats: seats,
-						schedule: schedule,
-						task : "send_mail",
-						url:url,
-						billing_first_name:$(".billing_first_name").val(),
-						billing_last_name:$(".billing_last_name").val(),
-						billing_address_1:$(".billing_address_1").val(),
-						billing_address_2:$(".billing_address_2").val(),
-						billing_city:$(".billing_city").val(),
-						billing_state:$(".billing_state").val(),
-						billing_postcode:$(".billing_postcode").val(),
-						billing_country:$(".billing_country").val(),
-						billing_email:$(".billing_email").val(),
-						billing_phone:$(".billing_phone").val()
-
-					},
-					type: 'POST',
-					beforeSend: function(data){
-						jQuery(".scwatbwsr_sendform").css("opacity", "0.5");
-					},
-					dataType: "json",
-					success: function(data){
-						jQuery(".scwatbwsr_sendform").css("opacity", "1");
-						if(data == "1")
-							alert("We got the order, will contact you soon!");
-						else
-							
-						{
-							if(data && data.result=='success')
-							{
-								window.location.href = data.redirect;
-							}
-						}
-					}
-				});
-			}
-		});
-	}
 });
 })(jQuery);

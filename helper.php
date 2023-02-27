@@ -495,6 +495,12 @@ if($task == "add_page")
 }elseif($task == "sess_seats"){
 	$proid = filter_var($_POST["proid"], FILTER_VALIDATE_INT);
 	$seats = filter_var($_POST["seats"], FILTER_SANITIZE_STRING);
+	if($seats=='')
+	{
+		echo 0;
+	}
+	else
+	{
 	$posttype = filter_var($_POST["posttype"], FILTER_SANITIZE_STRING);
 	
 	$_SESSION["seats".$proid] = $seats;
@@ -551,6 +557,7 @@ if($task == "add_page")
 		
 		echo $total;
 	}
+  }
 }elseif($task == "delete_order"){
 	$oid = filter_var($_POST["oid"], FILTER_VALIDATE_INT);
 	
@@ -558,11 +565,35 @@ if($task == "add_page")
 	$wpdb->query($wpdb->prepare("DELETE FROM $ordersTB where id=%d", $oid));
 }elseif($task == "make_as_booked"){
 	$roomId = filter_var($_POST["roomId"], FILTER_VALIDATE_INT);
+	$seat = filter_var($_POST["seat"], FILTER_VALIDATE_INT);
+    $bookedTb = $wpdb->prefix . 'scwatbwsr_bookedseats';
+	$tableTb = $wpdb->prefix . 'scwatbwsr_tables';
+	if(is_integer($seat))
+	{
+		$getdtSql = $wpdb->prepare("SELECT * from {$tableTb} where  id=%d", $seat);
+		$tableSeats = $wpdb->get_row($getdtSql);
+		$getdtSql = $wpdb->prepare("SELECT * from {$bookedTb} where roomid=%d and tb=%s", $roomId, $tableSeats->label);
+		$rs = $wpdb->get_results($getdtSql);
+		
+		if($rs){
+			$wpdb->query($wpdb->prepare("DELETE FROM $bookedTb where roomid=%d and tb=%s ", $roomId, $tableSeats->label));
+		}else{
+			$seats = explode(",",$tableSeats->seats);
+			foreach($seats as $k=>$seat)
+			{
+			$wpdb->query($wpdb->prepare("INSERT INTO $bookedTb (roomid, tb, seat)
+			VALUES (%d, %s, %s)", 
+			$roomId, $tableSeats->label, $seat));
+			}
+		}
+	}
+	else 
+	{
 	$seat = filter_var($_POST["seat"], FILTER_SANITIZE_STRING);
 	
 	$cseat = explode(".", $seat);
 	
-	$bookedTb = $wpdb->prefix . 'scwatbwsr_bookedseats';
+	
 	$getdtSql = $wpdb->prepare("SELECT * from {$bookedTb} where roomid=%d and tb=%s and seat=%s", $roomId, $cseat[0], $cseat[1]);
 	$rs = $wpdb->get_results($getdtSql);
 	
@@ -573,6 +604,7 @@ if($task == "add_page")
 		VALUES (%d, %s, %s)", 
 		$roomId, $cseat[0], $cseat[1]));
 	}
+  }
 }elseif($task == "send_mail"){
 	$name = $_POST["name"];
 	$address = $_POST["address"];
@@ -581,58 +613,83 @@ if($task == "add_page")
 	$note = $_POST["note"];
 	$proId = $_POST["proId"];
 	$total = $_POST["total"];
-	$seats = $_POST["seats"];
+	$seats = "";
+	$no_seat = 0;
 	$schedule = date("Y-m-d H:i:s",strtotime($_POST["schedule"]));
-	$billing_first_name=$_POST['billing_first_name'];
-	$billing_last_name=$_POST['billing_last_name'];
-	$billing_address_1=$_POST['billing_address_1'];
-	$billing_address_2=$_POST['billing_address_2'];
-	$billing_country=$_POST['billing_country'];
-	$billing_city=$_POST['billing_city'];
-	$billing_state=$_POST['billing_state'];
-	$billing_postcode=$_POST['billing_postcode'];
-	$billing_email=$_POST['billing_email'];
-	$billing_phone=$_POST['billing_phone'];
-	$_ipp_payment_url= $_POST['_ipp_payment_url'];
+	$billing_first_name=$_POST['billing_first_name']?$_POST['billing_first_name']:'';
+	$billing_last_name=$_POST['billing_last_name']?$_POST['billing_last_name']:'';
+	$billing_address_1=$_POST['billing_address_1']?$_POST['billing_address_1']:'';
+	$billing_address_2=$_POST['billing_address_2']?$_POST['billing_address_2']:'';
+	$billing_country=$_POST['billing_country']?$_POST['billing_country']:'';
+	$billing_city=$_POST['billing_city']?$_POST['billing_city']:'';
+	$billing_state=$_POST['billing_state']?$_POST['billing_state']:'';
+	$billing_postcode=$_POST['billing_postcode']?$_POST['billing_postcode']:'';
+	$billing_email=$_POST['billing_email']?$_POST['billing_email']:'';
+	$billing_phone=$_POST['billing_phone']?$_POST['billing_phone']:'';
+	$_ipp_payment_url= $_POST['_ipp_payment_url']?$_POST['_ipp_payment_url']:'';
 	$user = get_current_user_id();
 	if(!$user)
 	$user =$_COOKIE['PHPSESSID'];
 	
+	$table_name = $wpdb->prefix . 'scwatbwsr_orders';
+	$count_query = "select count(*) from $table_name";
+    $num = $wpdb->get_var($count_query);
+	$seatsnew = explode("@", $seats);
+	if($_POST['customer_table']!='' && $_POST['customer_table']='yes')
+	{
+		$seats = $_POST["seats"];
+	}
+	else 
+	{
+		$no_seat = $_POST['no_seat'];
+	}
+	$booking_status ="Confirmed";
+	if($_POST['enabled_payment']!='' && $_POST['enabled_payment']='yes')
+	{
+		$booking_status ="Pending";
+	}
+	$wpdb->query($wpdb->prepare("INSERT INTO $table_name (`productId`, `orderId`, `seats`, `schedule`, `name`, `address`, `email`, `phone`, `note`, `total`,`_ipp_status`,`_ipp_transaction_id`,
+	`billing_first_name`,`billing_last_name`,`billing_address_1`,`billing_address_2`,`billing_city`,`billing_country`,`billing_state`,`billing_postcode`,`billing_email`,`billing_phone`,`user`,`_ipp_payment_url`,`booking_status`)
+	VALUES (%d, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", 
+	$proId, date("Ymdhis").($num+1), implode(",", $seatsnew), $_SESSION["schedule".$proId], $name, $address, $email, $phone, $note, $total, "Pending",time().$num,
+    $billing_first_name,$billing_last_name,$billing_address_1,$billing_address_2,$billing_city,$billing_country,$billing_state,$billing_postcode,$billing_email,$billing_phone,$user,$_ipp_payment_url,$booking_status));
+    $lastid = $wpdb->insert_id;
+	$getdtSql = $wpdb->prepare("SELECT * from {$table_name} where id = %d", $lastid);
+	$order = $wpdb->get_row($getdtSql);
+
 	$adminEmail = get_option( 'admin_email' );
-	
 	$subject = 'Order Information';
 	$body = 'Order information<br>';
 	$body .= 'Schedule: '.$schedule.'<br>';
-	$body .= 'Seats: '.str_replace("@", " ", $seats).'<br>';
+	
 	$body .= 'Name: '.$name.'<br>';
 	$body .= 'Address: '.$address.'<br>';
 	$body .= 'Email: '.$email.'<br>';
 	$body .= 'Phone: '.$phone.'<br>';
 	$body .= 'Note: '.$note.'<br>';
-	$body .= 'Total: '.$total.'<br>';
+	
 	$headers = array('Content-Type: text/html; charset=UTF-8');
 	 
-	 wp_mail( array($email, $adminEmail), $subject, $body, $headers );
-	
-	$seatsnew = explode("@", $seats);
-	
-	$table_name = $wpdb->prefix . 'scwatbwsr_orders';
-	$count_query = "select count(*) from $table_name";
-    $num = $wpdb->get_var($count_query);
-	$wpdb->query($wpdb->prepare("INSERT INTO $table_name (`productId`, `orderId`, `seats`, `schedule`, `name`, `address`, `email`, `phone`, `note`, `total`,`_ipp_status`,`_ipp_transaction_id`,
-	`billing_first_name`,`billing_last_name`,`billing_address_1`,`billing_address_2`,`billing_city`,`billing_country`,`billing_state`,`billing_postcode`,`billing_email`,`billing_phone`,`user`,`_ipp_payment_url`)
-	VALUES (%d, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", 
-	$proId, "", implode(",", $seatsnew), $_SESSION["schedule".$proId], $name, $address, $email, $phone, $note, $total, "Pending",time().$num,
-    $billing_first_name,$billing_last_name,$billing_address_1,$billing_address_2,$billing_city,$billing_country,$billing_state,$billing_postcode,$billing_email,$billing_phone,$user,$_ipp_payment_url));
-    $lastid = $wpdb->insert_id;
-	$getdtSql = $wpdb->prepare("SELECT * from {$table_name} where id = %d", $lastid);
-	$order = $wpdb->get_row($getdtSql);
+	wp_mail( array($email, $adminEmail), $subject, $body, $headers );
 	
 	if($total >0 && $total!='')
 	{
 		include_once  'class-wc-gateway-ipp.php';
 		$wcGatewayIpp = new WC_Gateway_IPP($_POST['url']);
 		$gateway = $wcGatewayIpp->process_payment($lastid);
-		echo json_encode($gateway);
+		$body .= 'Seats: '.str_replace("@", " ", $seats).'<br>';
+		$body .= 'Total: '.$total.'<br>';
+
 	}
+	else
+	{
+		$gateway =array(
+			"message"=>"Booked your table successfully",
+			"success"=>true
+		);
+		$body .= 'Seats: '.$no_seat.'<br>';
+		$body .= 'Status: Completed<br>';
+
+	}
+	echo wp_send_json($gateway);
 }

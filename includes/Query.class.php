@@ -66,15 +66,14 @@ class scwQuery {
 	 */
 	public function __construct( $args = array(), $context = '' ) {
 
-		global $rtb_controller;
-
 		$defaults = array(
-			'post_type'			=> SCW_BOOKING_POST_TYPE,
-			'posts_per_page'	=> 10,
+			// 'post_type'			=> SCW_BOOKING_POST_TYPE,
+			// 'posts_per_page'	=> $args?$args->posts_per_page:20,
 			'date_range'		=> 'upcoming',
-			'post_status'		=> array_keys( $rtb_controller->cpts->booking_statuses ),
-			'order'				=> 'ASC',
-			'paged'				=> 1,
+			// 'post_status'		=> array_keys( $rtb_controller->cpts->booking_statuses ),
+			// 'order'				=> 'ASC',
+			// 'paged'				=> 1,
+			'posts_per_page'	=> $args?$args["posts_per_page"]:20
 		);
 
 		$this->args = wp_parse_args( $args, $defaults );
@@ -237,20 +236,20 @@ class scwQuery {
 		$args = apply_filters( 'rtb_query_args', $this->args, $this->context );
 
 		$query = new WP_Query( $args );
-   
+       
 		// Running this only for our query
 		remove_filter( 'posts_where', [$this, 'title_filter'], 10 );
 
 		if ( $query->have_posts() ) {
-			require_once( RTB_PLUGIN_DIR . '/includes/Booking.class.php' );
+			
 
 			while( $query->have_posts() ) {
 				$query->the_post();
 
-				$booking = new rtbBooking();
-				if ( $booking->load_post( $query->post ) ) {
-					$bookings[] = $booking;
-				}
+				
+				
+					$bookings[] = $query->post;
+				
 			}
 		}
 		

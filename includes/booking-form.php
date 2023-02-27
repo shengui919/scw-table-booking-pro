@@ -4,6 +4,7 @@ function scwatbwsr_content($content){
 	include_once dirname(__FILE__) . '/functions.php';
 	global $wpdb;
 	global $post;
+	$options = get_option( 'scwatbwsr_settings' );
 	$ipp_message='';
 	$proId = $post->ID;
 	
@@ -70,6 +71,7 @@ function scwatbwsr_content($content){
 		
 	?>
      <script type='text/javascript'>
+		
 		Swal.fire(
 		'Booking Status',
 		'<?=$ipp_message?>',
@@ -90,14 +92,15 @@ function scwatbwsr_content($content){
 		wp_enqueue_script('datetimepicker');
 		wp_register_style('datetimepicker', SCWATBWSR_URL .'datetimepicker/jquery.datetimepicker.css');
 		wp_enqueue_style('datetimepicker');
-		
+		wp_register_script('jqueryvalidation','https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js');
+		wp_enqueue_script('jqueryvalidation');
 		wp_register_script('panzoom', 'https://cdn.jsdelivr.net/npm/@panzoom/panzoom/dist/panzoom.min.js');
 		wp_enqueue_script('panzoom');
 		wp_register_script('sweetalert','https://cdn.jsdelivr.net/npm/sweetalert2@11');
 		wp_enqueue_script('sweetalert');
-		wp_register_script('scwatbwsr-script-frontend', SCWATBWSR_URL .'js/front.js');
+		wp_register_script('scwatbwsr-script-frontend', SCWATBWSR_URL .'js/front.js',array(),time(),true);
 		wp_enqueue_script('scwatbwsr-script-frontend');
-		wp_register_style('scwatbwsr-style-frontend', SCWATBWSR_URL .'css/front.css?v=1.2');
+		wp_register_style('scwatbwsr-style-frontend', SCWATBWSR_URL .'css/front.css',array(),time());
 		wp_enqueue_style('scwatbwsr-style-frontend');
 		if($ipp_message!='')
 		{
@@ -147,8 +150,13 @@ function scwatbwsr_content($content){
 		}
 		$bookedSeats = array_unique($bookedSeats);
 		?>
+		<script type='text/javascript'>
+		var customer_table ="<?=@$options["customer_table"]?>";
+		var enabled_payment ="<?=@$options["enabled_payment"]?>";
+		</script>
 		<div class="scw_front_content">
-		<div class="scwatbwsr_content <?php echo get_post_type($proId) ?>">
+			<div class="scwatbwsr_content <?php echo get_post_type($proId) ?>">
+			<form action="post" id="scw-booking-form">
 			<input type="hidden" value="<?php echo esc_attr(SCWATBWSR_URL) ?>" class="scwatbwsr_url">
 			<input type="hidden" value="<?php echo esc_attr($proId) ?>" class="product_id">
 			<input type="hidden" value="<?php echo esc_attr($roomid) ?>" class="profileid">
@@ -164,23 +172,30 @@ function scwatbwsr_content($content){
 			        <div class="bghover_scw">
 							<div class="scwatbwsr_form_item scw_form_name">
 								<label><?php echo esc_html__("Name", "scwatbwsr-translate") ?></label>
-								<input class="scwatbwsr_form_name_input scwatcommon_style" type="text" autocomplete="off">
+								<input name="fullname" class="scwatbwsr_form_name_input scwatcommon_style" required type="text" autocomplete="off">
 							</div>
 							<div class="scwatbwsr_form_item scw_form_address">
 								<label><?php echo esc_html__("Address", "scwatbwsr-translate") ?></label>
-								<input class="scwatbwsr_form_address_input scwatcommon_style" type="text" autocomplete="off">
+								<input name="address"  class="scwatbwsr_form_address_input scwatcommon_style" required type="text" autocomplete="off">
 							</div>
 							<div class="scwatbwsr_form_item scw_form_email">
 								<label><?php echo esc_html__("Email", "scwatbwsr-translate") ?></label>
-								<input class="scwatbwsr_form_email_input scwatcommon_style" type="text" autocomplete="off">
+								<input name="email"  class="scwatbwsr_form_email_input scwatcommon_style" required type="email" autocomplete="off">
 							</div>
 							<div class="scwatbwsr_form_item scw_form_phone">
 								<label><?php echo esc_html__("Phone", "scwatbwsr-translate") ?></label>
-								<input id="phone" class="scwatbwsr_form_phone_input scwatcommon_style" type="text" autocomplete="off">
+								<input name="phone"  id="phone" class="scwatbwsr_form_phone_input scwatcommon_style" required type="text" autocomplete="off">
 							</div>
+							<?php 
+			               if(@$options["customer_table"]!="yes"):?>
+						   <div class="scwatbwsr_form_item scw_form_phone">
+								<label><?php echo esc_html__("No of Seats", "scwatbwsr-translate") ?></label>
+								<input name="no_seats"  id="no_seats" class="scwatbwsr_form_seat_input scwatcommon_style" min="1" required type="number" autocomplete="off">
+							</div>
+						   <?php endif;?>
 							<div class="scwatbwsr_form_item scw_form_note">
 								<label><?php echo esc_html__("Note", "scwatbwsr-translate") ?></label>
-								<textarea class="scwatbwsr_form_note_input scwatcommon_style" rows="4"></textarea>
+								<textarea name="note" class="scwatbwsr_form_note_input scwatcommon_style" rows="4"></textarea>
 							</div>
 							<div class="scwatbwsr_form_item scw_form_calendar">
 								<label>
@@ -254,6 +269,8 @@ function scwatbwsr_content($content){
 					
 			</div>
 			
+			<?php 
+			if(@$options["customer_table"]=="yes"):?>
 			<div class="mainpage-seats">
 				<div class="scwatbwsr_map">
 					<div class="scwatbwsr_map_head"><?php echo esc_html__("Choose your Seats", "scwatbwsr-translate") ?></div>
@@ -333,6 +350,8 @@ function scwatbwsr_content($content){
 														foreach($seats as $seat){
 															$getSeatDt = $wpdb->prepare("SELECT * from {$seatsTb} where tbid=%d and seat=%s", $table->id, $seat);
 															$seatdt = $wpdb->get_results($getSeatDt);
+															$getPriceSql = $wpdb->prepare("SELECT * from {$pricesTb} where typeid=%d", $table->type);
+							                                $price = $wpdb->get_row($getPriceSql);
 															if(isset($seatdt[0]->tleft)) $sleft = $seatdt[0]->tleft;
 															else $sleft = 0;
 															
@@ -345,7 +364,7 @@ function scwatbwsr_content($content){
 																$newseatstyle .= 'background: '.$seatbookedcolor.';';
 															else
 																$newseatstyle .= 'background: '.$type[0]->seatbg .';';
-															?><span id="seat<?php echo esc_attr($table->label .$seat) ?>" style="<?php echo esc_attr($newseatstyle) ?>" class="scwatbwsr_map_tables_table_seat <?php if(in_array($table->label .".".$seat, $bookedSeats)) echo "seatbooked" ?>"><?php echo esc_attr($seat) ?></span><?php
+															?><span id="seat<?php echo esc_attr($table->label.$seat) ?>" data-id="<?php echo esc_attr($seat) ?>" style="<?php echo esc_attr($newseatstyle) ?>" class="scwatbwsr_map_tables_table_seat per<?=$price->type?> <?php if(in_array($table->label .".".$seat, $bookedSeats)) echo "seatbooked" ?>"><?php echo esc_attr($seat) ?></span><?php
 														}
 													}
 												?>
@@ -362,14 +381,13 @@ function scwatbwsr_content($content){
 					</div>
 				</div>			
 			</div>
-
+            <?php endif;?>
 			<div class="mainpage-seats">
 				<div class="scwatbwsr_form">
-					<!-- <div class="scwatbwsr_total">
-						<span><?php echo esc_html__("Total: $", "scwatbwsr-translate") ?></span>
-						<span class="scwatbwsr_total_value">0</span>
-					</div> -->
+					
 					<div class="scwatbwsr_sendform">
+					<?php 
+			if(@$options["enabled_payment"]=="on"):?>
 							<div class="scwatbwsr_types">
 				<div>
 					<label class="form-label form-label-top" id="" for="input"> My Tables  </label>
@@ -400,8 +418,9 @@ function scwatbwsr_content($content){
 					}
 				?>
 				<div class="scwatbwsr_types_item">
-					<span class="scwatbwsr_types_item_name"><b><?php echo esc_html__("Booked Table", "scwatbwsr-translate") ?></b></span>
-					<!-- <span class="scwatbwsr_types_item_bg" >bg</span> -->
+					<div class="scwatbwsr_types_item_name">
+					<p class="card-para-style"><b><?php echo esc_html__("Booked Tables", "scwatbwsr-translate") ?></b></p>
+					<div class="scwatbwsr_types_item_price card_pice_scw total_seats_count">Total Seats : 0</div>
 				</div>
 
 				<div class="scwatbwsr_total">
@@ -410,108 +429,89 @@ function scwatbwsr_content($content){
 				</div>
 			</div>
 			
-			
+			            <?php endif;?>
+						<?php 
+			if(@$options["enabled_payment"]=="on"):?>
 						<div class="scwatbwsr_form_item_payment scw_form_payment">
-						<div style="display:none">s
-							<label><?php echo esc_html__("Payment Method", "scwatbwsr-translate") ?> (<?php echo esc_html__("Credit Card", "scwatbwsr-translate") ?>)</label>
-							
-							<div class="payment_addr_field_scw">
-								
-									<input class="" type="text" autocomplete="off">
-									<label><?php echo esc_html__("Full Name", "scwatbwsr-translate") ?></label>
-								
-								
-							</div>
+						<label><?php echo esc_html__("Billing Address", "scwatbwsr-translate") ?></label>
 							<div class="payment_field_scw">
 								<div>
-									<input class="" type="text" autocomplete="off">
-									<label><?php echo esc_html__("Credit Card Number", "scwatbwsr-translate") ?></label>
+								<label><?php echo esc_html__("First Name", "scwatbwsr-translate") ?></label>
+									<input class="billing_first_name" required name="billing_first_name" type="text" >
+									
 								</div>
 								<div>
-									<input class="" type="text" autocomplete="off">
-									<label><?php echo esc_html__("Security Code", "scwatbwsr-translate") ?></label>
-								</div>
-							</div>
-							<div class="payment_field_scw">
-								<div>
-									<select name="month" id="month">
-										<option value=""></option>
-										<option value="month">Month</option>
-									</select>
-									<label><?php echo esc_html__("Expiration Month", "scwatbwsr-translate") ?></label>
-								</div>
-								<div>
-									<select name="date" id="date">
-										<option value=""></option>
-										<option value="date">Date</option>
-									</select>
-									<label><?php echo esc_html__("Expiration Year", "scwatbwsr-translate") ?></label>
-								</div>
-							</div>
-							</div>
-							<label><?php echo esc_html__("Billing Address", "scwatbwsr-translate") ?></label>
-							<div class="payment_field_scw">
-								<div>
-									<input class="billing_first_name" type="text" >
-									<label><?php echo esc_html__("First Name", "scwatbwsr-translate") ?></label>
-								</div>
-								<div>
-									<input class="billing_last_name" type="text" >
-									<label><?php echo esc_html__("Last Name", "scwatbwsr-translate") ?></label>
+								<label><?php echo esc_html__("Last Name", "scwatbwsr-translate") ?></label>
+									<input class="billing_last_name" required name="billing_last_name" type="text" >
+								
 								</div>
 							</div>
 							<div class="payment_addr_field_scw">
-								<input class="billing_address_1" type="text" >
+								
 								<label><?php echo esc_html__("Street Address", "scwatbwsr-translate") ?></label>
+								<input class="billing_address_1" required name="billing_address_1" type="text" >
 							</div>
 							<div class="payment_addr_field_scw">
-								<input class="billing_address_2" type="text" >
+								
 								<label><?php echo esc_html__("Street Address Line 2", "scwatbwsr-translate") ?></label>
+								<input class="billing_address_2" name="billing_address_2" type="text" >
 							</div>
 							<div class="payment_field_scw">
 								<div>
-									<input class="billing_city" type="text" >
+									
 									<label><?php echo esc_html__("City", "scwatbwsr-translate") ?></label>
+									<input class="billing_city" required name="billing_city" type="text" >
 								</div>
 								<div>
-									<input class="billing_state" type="text" >
+									
 										<label><?php echo esc_html__("State / Province", "scwatbwsr-translate") ?></label>
+										<input class="billing_state" required name="billing_state" type="text" >
 									</div>
 								</div>
 							<div class="payment_field_scw">
 								<div>
-									<input class="billing_postcode" type="text">
+									
 									<label><?php echo esc_html__("Postal / Zip Code", "scwatbwsr-translate") ?></label>
+									<input class="billing_postcode" required name="billing_postcode" type="text">
 								</div>
 								<div>
-									<select name="country" class="billing_country" id="country">
+								<label><?php echo esc_html__("Country", "scwatbwsr-translate") ?></label>
+									<select name="country" class="billing_country" required  id="country">
 										<option value="">Please Select</option>
 										<?php foreach($countries_list as $val=>$txt){?>
 										<option value="<?=$val?>"><?=$txt?></option>
 										<?php  }   ?>
 									</select>
-									<label><?php echo esc_html__("Country", "scwatbwsr-translate") ?></label>
+									
 								</div>
 							</div>
 							<div class="payment_field_scw">
 								
 								<div>
-								<input class="billing_email" type="text" autocomplete="off">
+								
 									<label><?php echo esc_html__("Emaill", "scwatbwsr-translate") ?></label>
+									<input class="billing_email" type="text"  required name="billing_email" autocomplete="off">
 									
 								</div>
 								<div>
-									<input class="billing_phone" type="text" autocomplete="off">
+									
 									<label><?php echo esc_html__("Phone Number", "scwatbwsr-translate") ?></label>
+									<input class="billing_phone" type="text"  required name="billing_phone" autocomplete="off">
 								</div>
 							</div>
 						</div>
-						<div class="scwatbwsr_form_item scwform_submit"><span class="scwatbwsr_form_submit"><?php echo esc_html__("Submit", "scwatbwsr-translate") ?></span></div>
+						<?php endif;?>
+						
+						
 					</div>
 				</div>
 			</div>
+		    
 		</div>
-		</div>
+		    <div class="scwatbwsr_form_item scwform_submi mt-3"><button type="submit"><?php echo esc_html__("Submit", "scwatbwsr-translate") ?></button></div>
+			</form>
+		    </div>
+	    </div>
 		<?php
 		$string = ob_get_contents();
 		ob_end_clean();

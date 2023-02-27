@@ -135,6 +135,7 @@ function scwatbwsr_install(){
 		`productId` varchar(255) DEFAULT NULL,
 		`schedule` varchar(255) DEFAULT NULL,
 		`seats` varchar(255) DEFAULT NULL,
+		`no_seats` varchar(255) DEFAULT NULL,
 		`name` varchar(255) DEFAULT NULL,
 		`address` varchar(255) DEFAULT NULL,
 		`email` varchar(255) DEFAULT NULL,
@@ -143,7 +144,7 @@ function scwatbwsr_install(){
 		`total` double(10,2) NOT NULL DEFAULT 0.00,
 		`_ipp_tax` double(10,2) NOT NULL DEFAULT 0.00,
 		`_ipp_commission` double(10,2) NOT NULL DEFAULT 0.00,
-		`booking_status` enum('Process','Pending','Completed','Cancelled') DEFAULT 'Process',
+		`booking_status` enum('trash', 'pending', 'confirmed', 'closed') DEFAULT 'pending',
 		`_ipp_status` enum('Process','Pending','Completed') DEFAULT 'Pending',
 		`_ipp_transaction_id` varchar(255) DEFAULT NULL,
 		`billing_first_name` varchar(255) NOT NULL,
@@ -233,7 +234,7 @@ function scwatbwsr_admin_menu(){
         'SCW Bookings Settings',
         'manage_options',
         'scwatbwsr-table-settings',
-        'scwatbwsr_options_page'
+        'scwatbwsr_parameters'
     );
     add_submenu_page(
 		'scwatbwsr-table-settings',
@@ -253,65 +254,71 @@ function scwatbwsr_admin_menu(){
 	);
 	
 }
+
+function scwatbwsr_options_page(){
+	do_settings_sections( 'pluginSCWTBWSRPage' );
+		
+}
+	
+add_action( 'admin_init', 'scwatbwsr_settings_init' );
+function scwatbwsr_settings_init() {
+	scwatbwsr_options_page();
+	register_setting( 'pluginSCWTBWSRPage', 'scwatbwsr_settings' );
+	add_settings_section(
+		'smartcms_pluginPage_section', '', '', 'pluginSCWTBWSRPage'
+	);
+	// add_settings_field( 
+	// 	'','',
+	// 	'scwatbwsr_parameters', 
+	// 	'pluginSCWTBWSRPage', 
+	// 	'smartcms_pluginPage_section' 
+	// );
+}
+
+function scwatbwsr_parameters(){
+	include_once dirname(__FILE__) . '/includes/admin-css-js.php';
+	include_once dirname(__FILE__) . '/includes/admin-scw-settings.php';
+}
+include_once dirname(__FILE__) . '/includes/booking-form.php';
+add_shortcode('scw_booking_form', 'scwatbwsr_content');
+
+function getActiveClass($roomId,$scwatbwsr_tab1)
+{
+
+   if(isset($_GET['tab']) && $_GET['tab']!='')
+    {
+		if($_GET['tab']==$scwatbwsr_tab1.$roomId)
+		echo "active";
+		
+	}
+	else
+	{
+		if($scwatbwsr_tab1=="scwatbwsr_tab1")
+		echo "active";
+	}
+}
+function show_admin_bookings_page() {
+    include_once dirname(__FILE__) . '/includes/admin-css-js.php';
+	include_once dirname(__FILE__) . '/includes/WP_List_Table.BookingsTable.class.php';
+	$bookings_table = new scwBookingsTable();
+	$bookings_table->prepare_items();
+	include_once dirname(__FILE__) . '/includes/admin-scw-bookings.php';
+	
+}
+
+	
 function scwatbwsr_dashboard_page()
 {
-	adminJsandCss();
-	include_once dirname(__FILE__) . '/includes/dashboard.php';
+	include_once dirname(__FILE__) . '/includes/admin-css-js.php';
+	include_once dirname(__FILE__) . '/includes/admin-scw-dashboard.php';
 	
 }
 function scwatbwsr_bookings_page()
 {
 	
-	adminJsandCss();
-	include_once dirname(__FILE__) . '/includes/bookings.php';
+	include_once dirname(__FILE__) . '/includes/admin-css-js.php';
+	include_once dirname(__FILE__) . '/includes/admin-scw-bookings.php';
 	
-}
-function adminJsandCss()
-{
-	$screen = get_current_screen();
-	$screenID = $screen->id;
-	global $rtb_controller;
-
-	$options = get_option( 'scwatbwsr_settings' );
-	global $wpdb;
-	$rtb_options = get_option( 'scw-settings' );
-	$bookingPageExit= $rtb_options['scw-booking-page'];
-	$adminPage=$_GET['page'];
-	wp_enqueue_script('jquery');
-	wp_enqueue_script('media-upload');
-	wp_enqueue_script('thickbox');
-	wp_enqueue_style('thickbox');
-	
-	wp_register_style('font-awesome', SCWATBWSR_URL .'css/font-awesome.css');
-	wp_enqueue_style('font-awesome');
-	
-	wp_register_script('datetimepicker', SCWATBWSR_URL .'datetimepicker/jquery.datetimepicker.full.min.js');
-	wp_enqueue_script('datetimepicker');
-	wp_register_style('datetimepicker', SCWATBWSR_URL .'datetimepicker/jquery.datetimepicker.css');
-	wp_enqueue_style('datetimepicker');
-	
-	wp_register_script('jquery-ui', 'https://code.jquery.com/ui/1.9.2/jquery-ui.js');
-	wp_enqueue_script('jquery-ui');
-	
-	wp_register_script('scwatbwsr-adminscript', SCWATBWSR_URL .'js/admin.js');
-	wp_enqueue_script('scwatbwsr-adminscript');
-	wp_register_style('scwatbwsr-admincss', SCWATBWSR_URL .'css/admin.css?v=1.1');
-	wp_enqueue_style('scwatbwsr-admincss');
-	
-	$roomsTb = $wpdb->prefix . 'scwatbwsr_rooms';
-	$getRoomsSql = $wpdb->prepare("SELECT * from {$roomsTb} where %d", 1);
-	$rooms = $wpdb->get_results($getRoomsSql);
-	
-	$typesTB = $wpdb->prefix . 'scwatbwsr_types';
-	$tableSchedules = $wpdb->prefix . 'scwatbwsr_schedules';
-	$tableDailySchedules = $wpdb->prefix . 'scwatbwsr_dailyschedules';
-	$tableDailyTimes = $wpdb->prefix . 'scwatbwsr_dailytimes';
-	$pricesTb = $wpdb->prefix . 'scwatbwsr_prices';
-	$tablesTb = $wpdb->prefix . 'scwatbwsr_tables';
-	$seatsTb = $wpdb->prefix . 'scwatbwsr_seats';
-	$ordersTb = $wpdb->prefix . 'scwatbwsr_orders';
-	$proTb = $wpdb->prefix . 'scwatbwsr_products';
-	$bookedTB = $wpdb->prefix . 'scwatbwsr_bookedseats';
 }
 function adminMenuPage()
 {
@@ -334,87 +341,4 @@ function adminMenuPage()
 		</div>
 	<?php
 }
-function scwatbwsr_options_page(){
-	do_settings_sections( 'pluginSCWTBWSRPage' );
-		
-}
-	
-add_action( 'admin_init', 'scwatbwsr_settings_init' );
-function scwatbwsr_settings_init() {
-	register_setting( 'pluginSCWTBWSRPage', 'scwatbwsr_settings' );
-	add_settings_section(
-		'smartcms_pluginPage_section', '', '', 'pluginSCWTBWSRPage'
-	);
-	add_settings_field( 
-		'','',
-		'scwatbwsr_parameters', 
-		'pluginSCWTBWSRPage', 
-		'smartcms_pluginPage_section' 
-	);
-}
-function getActiveClass($roomId,$scwatbwsr_tab1)
-{
-
-   if(isset($_GET['tab']) && $_GET['tab']!='')
-    {
-		if($_GET['tab']==$scwatbwsr_tab1.$roomId)
-		echo "active";
-		
-	}
-	else
-	{
-		if($scwatbwsr_tab1=="scwatbwsr_tab1")
-		echo "active";
-	}
-}
-function show_admin_bookings_page() {
-    adminJsandCss();
-	include_once dirname(__FILE__) . '/includes/WP_List_Table.BookingsTable.class.php';
-	$bookings_table = new scwBookingsTable();
-	$bookings_table->prepare_items();
-	include_once dirname(__FILE__) . '/includes/bookings.php';
-	?>
-
-	
-		
-	<div class="wrap">
-		<div class="scwatbwsr_content">
-			<div><?=settings_errors()?></div>
-        </div>
-		<div class="scwatbwsr_content mb-3">
-					<?php adminMenuPage()?>
-        </div>
-		<div class="scwatbwsr_content pd-10">
-		<h2 class="mb-3">
-			<?php _e( 'Bookings', 'scwatbwsr-translate' ); ?>
-			
-		</h2>
-		<?php do_action( 'rtb_bookings_table_top' ); ?>
-		<form id="rtb-bookings-table" method="POST" action="">
-			<input type="hidden" name="post_type" value="<?php echo RTB_BOOKING_POST_TYPE; ?>" />
-			<input type="hidden" name="page" value="rtb-bookings">
-
-			<div class="rtb-primary-controls clearfix">
-				<div class="rtb-views">
-					<?php $bookings_table->views(); ?>
-				</div>
-				<?php $bookings_table->advanced_filters(); ?>
-			</div>
-
-			<?php $bookings_table->display(); ?>
-		</form>
-		<?php do_action( 'rtb_bookings_table_btm' ); ?>
-        </div>
-    </div>
-
-	<?php
-}
-function scwatbwsr_parameters(){
-	include_once dirname(__FILE__) . '/includes/admin-scw-bookings.php';
-}
-include_once dirname(__FILE__) . '/includes/booking-form.php';
-add_shortcode('scw_booking_form', 'scwatbwsr_content');
-
-	
-
 
