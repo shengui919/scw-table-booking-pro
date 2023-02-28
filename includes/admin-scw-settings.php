@@ -16,8 +16,10 @@
 								$room=$rooms[0];
 									$getTypesSql = $wpdb->prepare("SELECT * from {$typesTB} where roomid=%d", $room->id);
 									$types = $wpdb->get_results($getTypesSql);
-									
-									$getScheSql = $wpdb->prepare("SELECT * from {$tableSchedules} where roomid=%d", $room->id);
+									$nowtime = date("Y-m-d H:i:s");
+									$wpdb->query($wpdb->prepare("UPDATE $tableSchedules SET status=%d  WHERE schedule <= %s",
+	0,$nowtime));
+									$getScheSql = $wpdb->prepare("SELECT * from {$tableSchedules} where roomid=%d and status=%d", $room->id,1);
 									$schedules = $wpdb->get_results($getScheSql);
 									
 									$getdailiesSql = $wpdb->prepare("SELECT * from {$tableDailySchedules} where roomid=%d", $room->id);
@@ -204,13 +206,27 @@
 												</section>
 												
 												<section id="scwatbwsr_content3<?php echo esc_attr($room->id) ?>" class="tab-content <?=getActiveClass($room->id,'scwatbwsr_tab3')?>">
-													<span class="scwatbwsr_schedules_spec">
-														<span class="scwatbwsr_schedules_spec_head"><?php echo esc_html__("Separate Schedules", "scwatbwsr-translate") ?></span>
-														<span class="scwatbwsr_schedules_spec_add">
-															<input class="scwatbwsr_schedules_spec_add_input" type="text">
-															<span class="scwatbwsr_schedules_spec_button mb-3"><i class="fa fa-plus" aria-hidden="true"></i> <?php echo esc_html__("ADD", "scwatbwsr-translate") ?></span>
-															<p><span class="scwatbwsr_schedules_spec_add_reload"><?php echo esc_html__("Refresh Data", "scwatbwsr-translate") ?> <i class="fa fa-refresh" aria-hidden="true"></i></span></p>
-														</span>
+													<div class="scwatbwsr_schedules_spec">
+														<h2 class="scwatbwsr_schedules_spec_head"><?php echo esc_html__("Separate Schedules", "scwatbwsr-translate") ?></h2>
+														<div class="scwatbwsr_schedules_spec_input_row">
+															<div class="scwatbwsr_schedules_spec_input">
+																<label>Start date and time</label>
+																<input class="scwatbwsr_schedules_spec_add_input" type="text">
+																<input type="hidden" class="start_time_hidden" />
+															</div>
+															<div class="scwatbwsr_schedules_spec_input">
+																<label>End time</label>
+																<input class="scwatbwsr_schedules_spec_end_time_input" type="text">
+															</div>
+															<div class="scwatbwsr_schedules_spec_add">
+																
+																<span class="scwatbwsr_schedules_spec_button mb-3"><i class="fa fa-plus" aria-hidden="true"></i> <?php echo esc_html__("ADD", "scwatbwsr-translate") ?></span>
+																
+															</div>
+														</div>
+														
+														<h2 class="scwatbwsr_schedules_spec_head"><?php echo esc_html__("List of  Schedules", "scwatbwsr-translate") ?></h2>
+														
 														<span class="scwatbwsr_schedules_spec_list">
 															<?php
 																if($schedules){
@@ -218,8 +234,10 @@
 																		?>
 																		<span class="scwatbwsr_schedules_spec_list_item">
 																			<input type="hidden" value="<?php echo esc_attr($schedule->id) ?>" class="scwatbwsr_schedules_spec_list_item_id">
-																			<input class="scwatbwsr_schedules_spec_list_item_schedule" value="<?php echo esc_attr($schedule->schedule) ?>" type="text">
-																			<span class="scwatbwsr_schedules_spec_list_item_save"><i class="fa fa-floppy-o" aria-hidden="true"></i> <?php echo esc_html__("Save", "scwatbwsr-translate") ?></span>
+																			<input type="hidden" class="start_time_hidden_list" value="<?php echo esc_attr($schedule->start_time) ?>" />
+																			<input class="scwatbwsr_schedules_spec_list_item_schedule scwatbwsr_schedules_spec_list_item_schedule_start" value="<?php echo esc_attr(date("F j, Y H:i",strtotime($schedule->schedule))) ?>" type="text">
+																			<input class="scwatbwsr_schedules_spec_list_item_schedule scwatbwsr_schedules_spec_list_item_schedule_end" value="<?php echo esc_attr($schedule->end_time) ?>" type="text">
+                                                                            <span class="scwatbwsr_schedules_spec_list_item_save"><i class="fa fa-floppy-o" aria-hidden="true"></i> <?php echo esc_html__("Save", "scwatbwsr-translate") ?></span>
 																			<span class="scwatbwsr_schedules_spec_list_item_delete"><i class="fa fa-trash-o" aria-hidden="true"></i> <?php echo esc_html__("Delete", "scwatbwsr-translate") ?></span>
 																		</span>
 																		<?php
@@ -227,63 +245,44 @@
 																}
 															?>
 														</span>
-													</span>
+														<div class="scwatbwsr_schedules_spec_reload">
+														<p><span class="scwatbwsr_schedules_spec_add_reload"><?php echo esc_html__("Refresh Data", "scwatbwsr-translate") ?> <i class="fa fa-refresh" aria-hidden="true"></i></span></p>
+														</div>
+													</div>
 													<span class="scwatbwsr_schedules_or"><?php echo esc_html__("OR", "scwatbwsr-translate") ?></span>
 													<span class="scwatbwsr_schedules_right">
 														<span class="scwatbwsr_schedules_right_head"><?php echo esc_html__("Daily Schedules", "scwatbwsr-translate") ?></span>
-														<span class="scwatbwsr_daily_schedules">
-															<span class="scwatbwsr_daily_schedules_week">
-																<input <?php if(in_array("monday", $dailies)) echo "checked='checked'" ?> value="monday" type="checkbox" class="scwatbwsr_daily_schedules_monday" id="scwatbwsr_daily_schedules_monday">
-																<label for="scwatbwsr_daily_schedules_monday"><?php echo esc_html__("Monday", "scwatbwsr-translate") ?></label>
-															</span>
-															<span class="scwatbwsr_daily_schedules_week">
-																<input <?php if(in_array("tuesday", $dailies)) echo "checked='checked'" ?> value="tuesday" type="checkbox" class="scwatbwsr_daily_schedules_tuesday" id="scwatbwsr_daily_schedules_tuesday">
-																<label for="scwatbwsr_daily_schedules_tuesday"><?php echo esc_html__("Tuesday", "scwatbwsr-translate") ?></label>
-															</span>
-															<span class="scwatbwsr_daily_schedules_week">
-																<input <?php if(in_array("wednesday", $dailies)) echo "checked='checked'" ?> value="wednesday" type="checkbox" class="scwatbwsr_daily_schedules_wednesday" id="scwatbwsr_daily_schedules_wednesday">
-																<label for="scwatbwsr_daily_schedules_wednesday"><?php echo esc_html__("Wednesday", "scwatbwsr-translate") ?></label>
-															</span>
-															<span class="scwatbwsr_daily_schedules_week">
-																<input <?php if(in_array("thursday", $dailies)) echo "checked='checked'" ?> value="thursday" type="checkbox" class="scwatbwsr_daily_schedules_thursday" id="scwatbwsr_daily_schedules_thursday">
-																<label for="scwatbwsr_daily_schedules_thursday"><?php echo esc_html__("Thursday", "scwatbwsr-translate") ?></label>
-															</span>
-															<span class="scwatbwsr_daily_schedules_week">
-																<input <?php if(in_array("friday", $dailies)) echo "checked='checked'" ?> value="friday" type="checkbox" class="scwatbwsr_daily_schedules_friday" id="scwatbwsr_daily_schedules_friday">
-																<label for="scwatbwsr_daily_schedules_friday"><?php echo esc_html__("Friday", "scwatbwsr-translate") ?></label>
-															</span>
-															<span class="scwatbwsr_daily_schedules_week">
-																<input <?php if(in_array("saturday", $dailies)) echo "checked='checked'" ?> value="saturday" type="checkbox" class="scwatbwsr_daily_schedules_saturday" id="scwatbwsr_daily_schedules_saturday">
-																<label for="scwatbwsr_daily_schedules_saturday"><?php echo esc_html__("Saturday", "scwatbwsr-translate") ?></label>
-															</span>
-															<span class="scwatbwsr_daily_schedules_week">
-																<input <?php if(in_array("sunday", $dailies)) echo "checked='checked'" ?> value="sunday" type="checkbox" class="scwatbwsr_daily_schedules_sunday" id="scwatbwsr_daily_schedules_sunday">
-																<label for="scwatbwsr_daily_schedules_sunday"><?php echo esc_html__("Sunday", "scwatbwsr-translate") ?></label>
-															</span>
-														</span>
-														<span class="scwatbwsr_daily_schedules_times">
-															<span class="scwatbwsr_daily_schedules_times_add">
-																<input class="scwatbwsr_daily_schedules_times_add_input" placeholder="daily time" type="text">
-																<span class="scwatbwsr_daily_schedules_times_add_button"><i class="fa fa-plus" aria-hidden="true"></i> <?php echo esc_html__("ADD", "scwatbwsr-translate") ?></span>
-																<span class="scwatbwsr_daily_schedules_times_refresh_button"><?php echo esc_html__("Refresh Data", "scwatbwsr-translate") ?> <i class="fa fa-refresh" aria-hidden="true"></i></span>
-															</span>
-															<span class="scwatbwsr_daily_schedules_times_list">
-																<?php
-																	if($times){
-																		foreach($times as $time){
-																			?>
-																			<span class="scwatbwsr_daily_schedules_times_list_item">
-																				<input class="scwatbwsr_daily_schedules_times_list_item_id" type="hidden" value="<?php echo esc_attr($time->id) ?>">
-																				<input class="scwatbwsr_daily_schedules_times_list_item_input" placeholder="daily time" value="<?php echo esc_attr($time->time) ?>" type="text">
-																				<span class="scwatbwsr_daily_schedules_times_list_item_button"><i class="fa fa-floppy-o" aria-hidden="true"></i> <?php echo esc_html__("Save", "scwatbwsr-translate") ?></span>
-																				<span class="scwatbwsr_daily_schedules_times_list_item_delete"><i class="fa fa-trash-o" aria-hidden="true"></i> <?php echo esc_html__("Delete", "scwatbwsr-translate") ?></span>
-																			</span>
-																			<?php
-																		}
-																	}
-																?>
-															</span>
-														</span>
+														
+															<?php 
+															$weekDays = array(
+																"monday","tuesday","wednesday","thursday","friday","saturday","sunday"
+															);
+															foreach($weekDays as $wk=>$week){?>
+															<div class="scwatbwsr_daily_schedules">
+																<div class="scwatbwsr_daily_schedules_week">
+																	<input <?php if(in_array($week, $dailies)) echo "checked='checked'" ?> value="<?=$week?>" type="checkbox" class="scwatbwsr_daily_schedules_<?=$week?>" id="scwatbwsr_daily_schedules_<?=$week?>">
+																	<label for="scwatbwsr_daily_schedules_<?=$week?>"><?php echo esc_html__(ucfirst($week), "scwatbwsr-translate") ?></label>
+																	
+																</div>
+															<?php 
+															$timeData= array_filter($times,function($t)use($week){
+																return ($t->week_day==$week);
+															});
+															$time = array_reverse($timeData);
+															$time = $time[0];
+															?>
+																<div class="scwatbwsr_daily_schedules_times_list_item">
+																                    <input class="scwatbwsr_daily_schedules_times_list_item_week" type="hidden" value="<?php echo esc_attr($time->week_day) ?>">
+																					<input class="scwatbwsr_daily_schedules_times_list_item_id" type="hidden" value="<?php echo esc_attr($time->id) ?>">
+																					<input class="scwatbwsr_daily_schedules_times_list_item_input input_start" id="scwatbwsr_daily_schedules_times_list_item_inpu_<?=$time->id?>t" placeholder="daily time" value="<?php echo esc_attr($time->start_time) ?>" type="text">
+																					<input class="scwatbwsr_daily_schedules_times_list_item_input input_end" id="scwatbwsr_daily_schedules_times_list_item_input_<?=$time->id?>" placeholder="daily time" value="<?php echo esc_attr($time->end_time) ?>" type="text">
+																					<span class="scwatbwsr_daily_schedules_times_list_item_button"><i class="fa fa-floppy-o" aria-hidden="true"></i> <?php echo esc_html__("Save", "scwatbwsr-translate") ?></span>
+																</div>
+														    </div>
+															<?php }?>
+															
+														   
+														
 													</span>
 												</section>
 												

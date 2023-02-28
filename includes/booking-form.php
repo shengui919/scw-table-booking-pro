@@ -114,8 +114,10 @@ function scwatbwsr_content($content){
 		
 		$getTypeSql = $wpdb->prepare("SELECT * from {$tableTypes} where roomid=%d", $roomid);
 		$types = $wpdb->get_results($getTypeSql);
-		
-		$getSchedulesSql = $wpdb->prepare("SELECT * from {$tableSchedules} where roomid=%d", $roomid);
+		$nowtime = date("Y-m-d H:i:s");
+	    $wpdb->query($wpdb->prepare("UPDATE $tableSchedules SET status=%d  WHERE schedule <= %s",
+	0,$nowtime));
+		$getSchedulesSql = $wpdb->prepare("SELECT * from {$tableSchedules} where roomid=%d and status=%d order by schedule asc", $roomid,1);
 		$checkSchedules = $wpdb->get_results($getSchedulesSql);
 		
 		if(isset($roomData[0]->tbbookedcolor))
@@ -167,6 +169,7 @@ function scwatbwsr_content($content){
 			<input type="hidden" value="<?php echo esc_attr(get_option('date_format')) ?>" class="scw_date_format">
 			<input type="hidden" value="<?php echo esc_attr(get_post_type($proId)) ?>" class="scw_posttype">
 			<input type="hidden" value="<?php echo esc_attr($roomData[0]->zoomoption) ?>" class="scw_zoomoption">
+			<input type="hidden" value="" id="time_hidden" />
 			
 			<div class="scwatbwsr_sendform">
 			        <div class="bghover_scw">
@@ -206,7 +209,7 @@ function scwatbwsr_content($content){
 										<div class="scwatbwsr_schedules scwatbwsr_schedules_special">
 										<?php foreach($checkSchedules as $sche)
 										{
-						                ?><span class="scwatbwsr_schedules_item"><?php echo esc_attr(date("Y-m-d H:i:s a",strtotime($sche->schedule)))?></span>
+						                ?><span class="scwatbwsr_schedules_item" data-mintime="<?=$sche->start_time?>" data-maxtime="<?=$sche->end_time?>"><?php echo esc_attr(date("l M d, Y",strtotime($sche->schedule)))?></span>
 										<?php } ?>
 									    </div>
 									<?php } else  { ?>
@@ -246,9 +249,15 @@ function scwatbwsr_content($content){
 					if($times){
 						foreach($times as $time){
 							if($arrTime)
-								$arrTime .= ",".$time->time;
+							{
+								$arrTime .= ",".$time->start_time;
+							}
 							else
-								$arrTime .= $time->time;
+							{
+								$arrTime .= $time->start_time;
+							}
+							echo '<input class="array_times_start_'.$time->week_day.'" type="hidden" value="'.esc_attr($time->start_time).'">';
+							echo '<input class="array_times_end_'.$time->week_day.'" type="hidden" value="'.esc_attr($time->end_time).'">';
 						}
 					}
 					
@@ -256,7 +265,7 @@ function scwatbwsr_content($content){
 						?>
 						<input class="array_dates" type="hidden" value='<?php echo json_encode($arrfDay, 1) ?>'>
 						<input class="array_times" type="hidden" value="<?php echo esc_attr($arrTime) ?>">
-						<input id="scwatbwsr_schedules_picker" class="scwatcommon_style" type="text">
+						<input id="scwatbwsr_schedules_picker" autocomplete="off" class="scwatcommon_style" type="text">
 						<?php
 					}
 				     ?>
@@ -264,7 +273,10 @@ function scwatbwsr_content($content){
 					                <?php } ?>
 								
 							</div>
-
+                            <div class="scwatbwsr_form_item scw_form_time" id="show_time">
+							<label><?php echo esc_html__("Time", "scwatbwsr-translate") ?></label>
+							<p id="show_time_text"></p>
+				            </div>
 						</div>
 					
 			</div>

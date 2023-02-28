@@ -115,19 +115,33 @@ if($task == "add_page")
 	$wpdb->query($wpdb->prepare("DELETE FROM $typesTb where id=%d", $thistypeid));
 }elseif($task == "add_schedule"){
 	$roomId = filter_var($_POST["roomId"], FILTER_VALIDATE_INT);
-	$schedule = filter_var($_POST["schedule"], FILTER_SANITIZE_STRING);
-	
+	$schedule = date("Y-m-d H:i",strtotime(filter_var($_POST["schedule"], FILTER_SANITIZE_STRING)));
+	$startTime = filter_var($_POST["startTime"], FILTER_SANITIZE_STRING);
+	$endTime = filter_var($_POST["endTime"], FILTER_SANITIZE_STRING);
 	$schedulesTb = $wpdb->prefix . 'scwatbwsr_schedules';
-	$wpdb->query($wpdb->prepare("INSERT INTO $schedulesTb (roomid, schedule)
-	VALUES (%d, %s)", 
-	$roomId, $schedule));
+	$getdtSql = $wpdb->prepare("select * from $schedulesTb where roomid=%d and date(schedule)=%s",$roomId,date("Y-m-d",strtotime($schedule)));
+	$rs = $wpdb->get_row($getdtSql);
+	
+	if($rs)
+	{
+		echo "This date already exists!";
+	}
+	else 
+	{
+	$wpdb->query($wpdb->prepare("INSERT INTO $schedulesTb (roomid, schedule,start_time,end_time)
+	VALUES (%d, %s, %s, %s)", 
+	$roomId, $schedule, $startTime, $endTime));
+	
+	}
 }elseif($task == "save_schedule"){
 	$scheid = filter_var($_POST["scheid"], FILTER_VALIDATE_INT);
-	$thisschedule = filter_var($_POST["thisschedule"], FILTER_SANITIZE_STRING);
+	$thisschedule = date("Y-m-d H:i",strtotime(filter_var($_POST["thisschedule"], FILTER_SANITIZE_STRING)));
+	$startTime = filter_var($_POST["startTime"], FILTER_SANITIZE_STRING);
+	$endTime = filter_var($_POST["endTime"], FILTER_SANITIZE_STRING);
 	
 	$schedulesTb = $wpdb->prefix . 'scwatbwsr_schedules';
-	$wpdb->query($wpdb->prepare("UPDATE $schedulesTb SET schedule=%s WHERE id=%d",
-	$thisschedule, $scheid));
+	$wpdb->query($wpdb->prepare("UPDATE $schedulesTb SET schedule=%s , start_time=%s, end_time=%s WHERE id=%d",
+	$thisschedule, $startTime, $endTime, $scheid));
 }elseif($task == "delete_schedule"){
 	$scheid = filter_var($_POST["scheid"], FILTER_VALIDATE_INT);
 	
@@ -168,10 +182,11 @@ if($task == "add_page")
 }elseif($task == "save_time"){
 	$thistimeid = filter_var($_POST["thistimeid"], FILTER_VALIDATE_INT);
 	$thistimetime = filter_var($_POST["thistimetime"], FILTER_SANITIZE_STRING);
+	$thisendtime = filter_var($_POST["endtime"], FILTER_SANITIZE_STRING);
 	
 	$tableName = $wpdb->prefix . 'scwatbwsr_dailytimes';
-	$wpdb->query($wpdb->prepare("UPDATE $tableName SET time=%s WHERE id=%d",
-	$thistimetime, $thistimeid));
+	$wpdb->query($wpdb->prepare("UPDATE $tableName SET start_time=%s,end_time=%s WHERE id=%d",
+	$thistimetime, $thisendtime, $thistimeid));
 }elseif($task == "delete_time"){
 	$thistimeid = filter_var($_POST["thistimeid"], FILTER_VALIDATE_INT);
 	

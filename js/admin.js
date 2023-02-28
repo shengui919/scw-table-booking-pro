@@ -1,5 +1,35 @@
 
 var upload_image_button=false;
+function fetchTime(dateTime,elthis)
+{
+	const d = new Date(dateTime);
+	var hoursTime ="0"+d.getHours();
+	var minuTime = "0"+d.getMinutes();
+    var time= hoursTime.slice(-2)+":"+minuTime.slice(-2);
+	elthis.find('.start_time_hidden').val(time)
+	var endTime = elthis.find('.scwatbwsr_schedules_spec_end_time_input').datetimepicker({
+		format: 'H:i',
+		datepicker:false,
+		step: parseInt(jQuery(".scwatbwsr_bktime_ip").val()?jQuery(".scwatbwsr_bktime_ip").val():"30"),
+		minTime:time
+	});
+}
+function fetchTimeList(dateTime,elthis,i)
+{
+	
+	const d = new Date(dateTime);
+	var hoursTime ="0"+d.getHours();
+	var minuTime = "0"+d.getMinutes();
+    var time= hoursTime.slice(-2)+":"+minuTime.slice(-2);
+	
+	jQuery('.scwatbwsr_schedules_spec_list_item:eq('+i+')').find('.start_time_hidden_list').val(time)
+	var endTime =jQuery('.scwatbwsr_schedules_spec_list_item:eq('+i+')').find('.scwatbwsr_schedules_spec_list_item_schedule_end').datetimepicker({
+		format: 'H:i',
+		datepicker:false,
+		step: parseInt(jQuery(".scwatbwsr_bktime_ip").val()?jQuery(".scwatbwsr_bktime_ip").val():"30"),
+		minTime:time
+	});
+}
 (function(jQuery) {
 "use strict";
 
@@ -318,21 +348,52 @@ jQuery('.rtb-admin-bookings-filters-start #start-date,#end-date').datetimepicker
 			});
 		});
 		
-		///////////
+		/////////// 
+		
+		
 		elthis.find('.scwatbwsr_schedules_spec_add_input').datetimepicker({
 			format: jQuery(".scw_date_format").val()+' H:i',
+			minDate:0,
 			closeOnDateSelect: false,
-			step: 5,
-			defaultTime: "00:00"
-		});
+			step: parseInt(jQuery(".scwatbwsr_bktime_ip").val()?jQuery(".scwatbwsr_bktime_ip").val():"30"),
+			onSelectDate:function(ct,$i)
+			{
+				
+				fetchTime(ct,elthis);
+				
+			},
+			onSelectTime:function(ct,$i)
+			{
+				fetchTime(ct,elthis);
+			}
+			});
+			//:parseInt(jQuery(".scwatbwsr_schedules_spec_add_input").val()?jQuery(".scwatbwsr_schedules_spec_add_input").val().slice(-5):"15:00"),
+            
 		elthis.find(".scwatbwsr_schedules_spec_button").on("click", function(){
 			var schedule = elthis.find(".scwatbwsr_schedules_spec_add_input").val();
-			if(schedule){
+			var endTime = elthis.find('.scwatbwsr_schedules_spec_end_time_input').val();
+			var startTime = elthis.find('.start_time_hidden').val();
+			if(startTime=='')
+			{
+				alert('Select start time')
+			}
+			else if(endTime=='')
+			{
+				alert('Select end time')
+			}
+			else if(endTime==startTime)
+			{
+				alert('Start and end time should be different!')
+			}
+			
+			else{
 				jQuery.ajax({
 					url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
 					data: {
 						roomId : roomId,
 						schedule : schedule,
+						endTime:endTime,
+                        startTime:startTime,
 						task : "add_schedule"
 					},
 					type: 'POST',
@@ -342,7 +403,10 @@ jQuery('.rtb-admin-bookings-filters-start #start-date,#end-date').datetimepicker
 					success: function(data){
 						jQuery(".scw_spin").remove();
 						if(!data)
+						{
 							alert("Added!");
+							jQuery(".scwatbwsr_schedules_spec_add_reload").trigger("click")
+						}
 						else
 							alert(data);
 					}
@@ -354,24 +418,58 @@ jQuery('.rtb-admin-bookings-filters-start #start-date,#end-date').datetimepicker
 		});
 		
 		////////
-		elthis.find(".scwatbwsr_schedules_spec_list_item").each(function(){
+		elthis.find(".scwatbwsr_schedules_spec_list_item").each(function(key,i){
 			var thische = jQuery(this);
+			thische.children('.scwatbwsr_schedules_spec_list_item_schedule_end').datetimepicker({
+				format:  'H:i',
+				datepicker: false,
+				step: parseInt(jQuery(".scwatbwsr_bktime_ip").val()?jQuery(".scwatbwsr_bktime_ip").val():"30"),
+				minTime: thische.children('.start_time_hidden_list').val(),
+			});
 			
-			thische.children('.scwatbwsr_schedules_spec_list_item_schedule').datetimepicker({
+			thische.children('.scwatbwsr_schedules_spec_list_item_schedule_start').datetimepicker({
 				format: jQuery(".scw_date_format").val()+' H:i',
 				closeOnDateSelect: false,
-				step: 5,
-				defaultTime: "00:00"
+				minDate:0,
+				step: parseInt(jQuery(".scwatbwsr_bktime_ip").val()?jQuery(".scwatbwsr_bktime_ip").val():"30"),
+				defaultTime: "00:00",
+			onSelectDate:function(ct,$i)
+			{
+				
+				fetchTimeList(ct,thische,key);
+				
+			},
+			onSelectTime:function(ct,$i)
+			{
+				fetchTimeList(ct,thische,key);
+			}
 			});
 			thische.children(".scwatbwsr_schedules_spec_list_item_save").on("click", function(){
 				var scheid = thische.children(".scwatbwsr_schedules_spec_list_item_id").val();
 				var thisschedule = thische.children(".scwatbwsr_schedules_spec_list_item_schedule").val();
-				
+				var startTime = thische.children('.start_time_hidden_list').val();
+				var endTime = thische.children('.scwatbwsr_schedules_spec_list_item_schedule_end').val();
+			if(startTime=='')
+			{
+				alert('Select start time')
+			}
+			else if(endTime=='')
+			{
+				alert('Select end time')
+			}
+			else if(endTime==startTime)
+			{
+				alert('Start and end time should be different!')
+			}
+			
+			else{
 				jQuery.ajax({
 					url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
 					data: {
 						scheid : scheid,
 						thisschedule : thisschedule,
+						startTime:startTime,
+						endTime:endTime,
 						task : "save_schedule"
 					},
 					type: 'POST',
@@ -381,11 +479,15 @@ jQuery('.rtb-admin-bookings-filters-start #start-date,#end-date').datetimepicker
 					success: function(data){
 						jQuery(".scw_spin").remove();
 						if(!data)
+						{
 							alert("Saved!");
+							jQuery(".scwatbwsr_schedules_spec_add_reload").trigger("click");
+						}
 						else
 							alert("Error!");
 					}
 				});
+			}
 			});
 			///
 			thische.children(".scwatbwsr_schedules_spec_list_item_delete").on("click", function(){
@@ -405,6 +507,7 @@ jQuery('.rtb-admin-bookings-filters-start #start-date,#end-date').datetimepicker
 						success: function(data){
 							jQuery(".scw_spin").remove();
 							if(!data)
+
 								thische.remove();
 							else
 								alert("Error!");
@@ -480,20 +583,29 @@ jQuery('.rtb-admin-bookings-filters-start #start-date,#end-date').datetimepicker
 		elthis.find(".scwatbwsr_daily_schedules_times_list_item").each(function(){
 			var thistime = jQuery(this);
 			
-			thistime.children(".scwatbwsr_daily_schedules_times_list_item_input").datetimepicker({
+			thistime.children(".scwatbwsr_daily_schedules_times_list_item_input.input_start").datetimepicker({
+				datepicker: false,
+				step: 5,
+				format: "H:i"
+			});
+			thistime.children(".scwatbwsr_daily_schedules_times_list_item_input.input_end").datetimepicker({
 				datepicker: false,
 				step: 5,
 				format: "H:i"
 			});
 			thistime.children(".scwatbwsr_daily_schedules_times_list_item_button").on("click", function(){
 				var thistimeid = thistime.children(".scwatbwsr_daily_schedules_times_list_item_id").val();
-				var thistimetime = thistime.children(".scwatbwsr_daily_schedules_times_list_item_input").val();
+				var thistimeweek = thistime.children(".scwatbwsr_daily_schedules_times_list_item_week").val();
+				var thistimetime = thistime.children(".scwatbwsr_daily_schedules_times_list_item_input.input_start").val();
+				var thistimeend = thistime.children(".scwatbwsr_daily_schedules_times_list_item_input.input_end").val();
 				
 				jQuery.ajax({
 					url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
 					data: {
 						thistimeid : thistimeid,
 						thistimetime : thistimetime,
+						endtime :thistimeend,
+						thistimeweek:thistimeweek,
 						task : "save_time"
 					},
 					type: 'POST',
@@ -608,7 +720,7 @@ jQuery('.rtb-admin-bookings-filters-start #start-date,#end-date').datetimepicker
 				alert("Please enter information!");
 			}
 		});
-		elthis.find(".scwatbwsr_tables_add_reload").on("click", function(){
+		elthis.find(".scwatbwsr_tables_add_reload,.scwatbwsr_schedules_spec_add_reload,.scwatbwsr_roomtype_add_reload,.scwatbwsr_daily_schedules_times_refresh_button").on("click", function(){
 			
 			   window.location.href="admin.php?page=scwatbwsr-table-settings&tab="+jQuery(".scwatbwsr_room_content_tabs_label.active").attr("for")
 		});

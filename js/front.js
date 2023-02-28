@@ -16,7 +16,21 @@
 		var roomheight = jQuery(".scw_roomheight").val();
 		var posttype = jQuery(".scw_posttype").val();
 		var zoomoption = jQuery(".scw_zoomoption").val();
-		
+	function myDateDay(speDay='') {
+			var a = new Date();
+			if(speDay && speDay!='')
+			a = new Date(speDay);
+			var weekdays = new Array(7);
+			weekdays[0] = "sunday";
+			weekdays[1] = "monday";
+			weekdays[2] = "tuesday";
+			weekdays[3] = "wednesday";
+			weekdays[4] = "thursday";
+			weekdays[5] = "friday";
+			weekdays[6] = "saturday";
+			var r = weekdays[a.getDay()];
+			return r;
+	}	
 	function formBook()
 	{
 		 
@@ -134,17 +148,29 @@
 		
 		if(jQuery(".array_times").val()){
 			var array_times = jQuery(".array_times").val().split(",");
+			var todayDateDayName = myDateDay();
 			jQuery('#scwatbwsr_schedules_picker').datetimepicker({
 				disabledWeekDays: array_dates,
-				allowTimes: array_times,
 				format: date_format+' H:i',
-				defaultTime: array_times[0],
+				minDate:0,
+				timepicker:false,
+				
 				closeOnDateSelect: false,
 				onSelectTime:function(ct, $i){
-					checkSchedule($i[0].value);
+					checkSchedule($i[0].value,$i);
+					$i.datetimepicker({closeOnDateSelect: false,timepicker:false});
+					$("#show_time_text,#time_hidden").text($i[0].value.slice("-5"))
+					$("#time_hidden").val($i[0].value.slice("-5"))
 				},
 				onSelectDate:function(ct,$i){
-					checkSchedule($i[0].value);
+					
+					
+					$i.datetimepicker({
+				timepicker:true,
+				step: jQuery(".scw_bookingtime").val(),
+				minTime:jQuery(".array_times_start_"+todayDateDayName).val(),
+				maxTime:jQuery(".array_times_end_"+todayDateDayName).val(),
+					});
 				}
 			});
 		}else{
@@ -168,12 +194,61 @@
 			thische.on("click", function(){
 				jQuery(".scwatbwsr_schedules_item").removeClass("active");
 				thische.addClass("active");
-				
+				Swal.fire({
+					title: '<strong>Select Time</strong>',
+					html:
+					  '<input type="text" class="scw_form_end_time" />' ,
+					showCloseButton: true,
+					showCancelButton: false,
+					focusConfirm: false,
+					showConfirmButton:false
+				  })
+				  $(".scw_form_end_time").datetimepicker({
+					datepicker:false,
+					step: jQuery(".scw_bookingtime").val(),
+					format:'H:i',
+					defaultTime: "00:00",
+					minTime:jQuery(".scwatbwsr_schedules_item.active").data("mintime"),
+					maxTime:jQuery(".scwatbwsr_schedules_item.active").data("maxtime"),
+					closeOnDateSelect: true,
+					onSelectTime:function(ct, $i){
+						checkSchedule(jQuery(".scwatbwsr_schedules_item.active").text()+" "+jQuery(".scw_form_end_time").val());
+						jQuery("#time_hidden").val(jQuery(".scw_form_end_time").val())
+						jQuery("#show_time_text").text(jQuery(".scw_form_end_time").val())
+					    swal.close()
+					},
+					onSelectDate:function(ct,$i){
+						checkSchedule(jQuery(".scwatbwsr_schedules_item.active").text()+" "+jQuery(".scw_form_end_time").val());
+					    swal.close()
+						jQuery("#time_hidden").val(jQuery(".scw_form_end_time").val())
+						jQuery("#show_time_text").text(jQuery(".scw_form_end_time").val())
+					}
+				});
 				checkSchedule(thische.text());
 			});
 		});
 	}
 	function checkSchedule(schedule){
+		
+		// var todayDateDayName = myDateDay(schedule);
+		
+		// 	jQuery('#scwatbwsr_schedules_picker').datetimepicker({
+		// 		disabledWeekDays: jQuery(".array_dates").val(),
+		// 		format: date_format+' H:i',
+		// 		minDate:0,
+		// 		timepicker:true,
+		// 		step: jQuery(".scw_bookingtime").val(),
+		// 		minTime:jQuery(".array_times_start_"+todayDateDayName).val(),
+		// 		maxTime:jQuery(".array_times_end_"+todayDateDayName).val(),
+		// 		closeOnDateSelect: false,
+		// 		onSelectTime:function(ct, $i){
+		// 			checkSchedule($i[0].value);
+		// 		},
+		// 		onSelectDate:function(ct,$i){
+		// 			checkSchedule($i[0].value);
+		// 		}
+		// 	});
+		$("#show_time").css("display","block")
 		jQuery.ajax({
 			type: "POST",
 			url: url+"helper.php",

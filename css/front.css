@@ -176,6 +176,10 @@ form.cart{
     display: flex;
     justify-content: center;
 }
+.scw_form_time
+{
+    display: none;
+}
 .scwatbwsr_map_tables_table_seat.active {
     border: 1px solid red;
 }

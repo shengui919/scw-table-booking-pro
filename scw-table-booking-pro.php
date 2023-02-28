@@ -76,7 +76,10 @@ function scwatbwsr_install(){
 	$schedulesSql = "CREATE TABLE $schedulesTB (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`roomid` int(11) DEFAULT NULL,
-		`schedule` varchar(255) DEFAULT NULL,
+		`schedule` datetime DEFAULT NULL,
+		`start_time` varchar(255) DEFAULT NULL,
+		`end_time` varchar(255) DEFAULT NULL,
+		`status` int(11) DEFAULT 1
 		PRIMARY KEY (`id`)
 	) $charset_collate;";
 	
@@ -90,7 +93,9 @@ function scwatbwsr_install(){
 	$dailytimesSql = "CREATE TABLE $dailytimesTB (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`roomid` int(11) DEFAULT NULL,
-		`time` varchar(255) DEFAULT NULL,
+		`start_time` varchar(255) DEFAULT NULL,
+		`end_time` varchar(255) DEFAULT NULL,
+		`week_day` varchar(255) DEFAULT NULL
 		PRIMARY KEY (`id`)
 	) $charset_collate;";
 	
@@ -133,7 +138,7 @@ function scwatbwsr_install(){
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`orderId` varchar(255) DEFAULT NULL,
 		`productId` varchar(255) DEFAULT NULL,
-		`schedule` varchar(255) DEFAULT NULL,
+		`schedule` datetime DEFAULT NULL,
 		`seats` varchar(255) DEFAULT NULL,
 		`no_seats` varchar(255) DEFAULT NULL,
 		`name` varchar(255) DEFAULT NULL,
@@ -225,6 +230,22 @@ function scwatbwsr_install(){
 		VALUES (%d, %d)",
 		$vl, $proid));
 	}
+	$roomId = $vl;
+	$weekDays = array(
+		"monday","tuesday","wednesday","thursday","friday","saturday","sunday"
+	);
+	$dailyTimeTb = $wpdb->prefix . 'scwatbwsr_dailytimes';
+	foreach($weekDays as $w=>$week){
+	$getdtSql = $wpdb->prepare("SELECT * from {$dailyTimeTb} where roomid=%s and week_day=%s", $roomId, $week);
+	$rs = $wpdb->get_results($getdtSql);
+	
+	if(!$rs){
+		
+		$wpdb->query($wpdb->prepare("INSERT INTO $dailyTimeTb (roomid, start_time, end_time, week_day)
+		VALUES (%d, %s, %s, %s)", 
+		$roomId, "09:00","15:00",$week));
+	}
+  }
 }
 
 add_action( 'admin_menu', 'scwatbwsr_admin_menu' );
