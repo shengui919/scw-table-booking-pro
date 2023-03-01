@@ -454,6 +454,34 @@
 		<div class="scwatbwsr_content mb-3">
 					<?php adminMenuPage()?>
         </div>
+		<?php if(@$_GET['type']=='view' && @$_GET['booking_id']!='')
+		{
+			$order  = orderGet($_GET['booking_id']);
+			$reload='
+			<div class="scwatbwsr_schedules_spec_reload">
+			<a  href="admin.php?page=scwatbwsr-table-bookings"><span class="scwatbwsr_schedules_spec_add_reload" style="width:150px">Refresh Bookings <i class="fa fa-refresh" aria-hidden="true"></i></span></a>
+			</div>';
+			if(!$order)
+			{
+				$output = "<div class='scwatbwsr_content pd-10'><div id='setting-error-settings_updated' class='notice notice-error mb-3'> \n";
+				$output .= "<p><strong>Booking is not found 404!</strong></p>";
+				$output .= "</div>\n";
+				$output .= "$reload</div> \n";
+				echo $output;
+			}
+			else
+			{
+		?>
+            <div class="scwatbwsr_content pd-10">
+              <?php echo "<h2 class='mb-3'>Order ID : $order->id</h2>";?>
+		    </div>
+		<?php
+			}
+		}
+		else 
+		{
+
+		?>
 		<div class="scwatbwsr_content pd-10">
 		<h2 class="mb-3">
 			<?php _e( 'Bookings', 'scwatbwsr-translate' ); ?>
@@ -475,4 +503,7 @@
 		</form>
 		<?php do_action( 'rtb_bookings_table_btm' ); ?>
         </div>
-    </div>
+        <?php 
+		}
+		?>
+	</div>

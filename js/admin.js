@@ -1,5 +1,13 @@
 
 var upload_image_button=false;
+function sendMail(booking_id)
+{
+
+}
+function editBooking(booking_id)
+{
+  window.location.href="admin.php?page=scwatbwsr-table-bookings&type=view&booking_id="+booking_id;
+}
 function fetchTime(dateTime,elthis)
 {
 	const d = new Date(dateTime);

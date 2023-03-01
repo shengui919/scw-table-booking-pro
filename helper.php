@@ -650,7 +650,7 @@ if($task == "add_page")
 	$count_query = "select count(*) from $table_name";
     $num = $wpdb->get_var($count_query);
 	$seatsnew = explode("@", $seats);
-	if($_POST['customer_table']!='' && $_POST['customer_table']='yes')
+	if($_POST['customer_table']!='' && $_POST['customer_table']=='yes')
 	{
 		$seats = $_POST["seats"];
 	}
@@ -659,15 +659,15 @@ if($task == "add_page")
 		$no_seat = $_POST['no_seat'];
 	}
 	$booking_status ="Confirmed";
-	if($_POST['enabled_payment']!='' && $_POST['enabled_payment']='yes')
+	if($_POST['enabled_payment']!='' && $_POST['enabled_payment']=='yes')
 	{
 		$booking_status ="Pending";
 	}
 	$wpdb->query($wpdb->prepare("INSERT INTO $table_name (`productId`, `orderId`, `seats`, `schedule`, `name`, `address`, `email`, `phone`, `note`, `total`,`_ipp_status`,`_ipp_transaction_id`,
-	`billing_first_name`,`billing_last_name`,`billing_address_1`,`billing_address_2`,`billing_city`,`billing_country`,`billing_state`,`billing_postcode`,`billing_email`,`billing_phone`,`user`,`_ipp_payment_url`,`booking_status`)
-	VALUES (%d, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", 
-	$proId, date("Ymdhis").($num+1), implode(",", $seatsnew), $_SESSION["schedule".$proId], $name, $address, $email, $phone, $note, $total, "Pending",time().$num,
-    $billing_first_name,$billing_last_name,$billing_address_1,$billing_address_2,$billing_city,$billing_country,$billing_state,$billing_postcode,$billing_email,$billing_phone,$user,$_ipp_payment_url,$booking_status));
+	`billing_first_name`,`billing_last_name`,`billing_address_1`,`billing_address_2`,`billing_city`,`billing_country`,`billing_state`,`billing_postcode`,`billing_email`,`billing_phone`,`user`,`_ipp_payment_url`,`booking_status`,`no_seats`)
+	VALUES (%d, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d)", 
+	$proId, date("Ymdhis").($num+1), implode(",", $seatsnew), $schedule, $name, $address, $email, $phone, $note, $total, "Pending",time().$num,
+    $billing_first_name,$billing_last_name,$billing_address_1,$billing_address_2,$billing_city,$billing_country,$billing_state,$billing_postcode,$billing_email,$billing_phone,$user,$_ipp_payment_url,$booking_status,$no_seat));
     $lastid = $wpdb->insert_id;
 	$getdtSql = $wpdb->prepare("SELECT * from {$table_name} where id = %d", $lastid);
 	$order = $wpdb->get_row($getdtSql);
@@ -685,7 +685,7 @@ if($task == "add_page")
 	
 	$headers = array('Content-Type: text/html; charset=UTF-8');
 	 
-	wp_mail( array($email, $adminEmail), $subject, $body, $headers );
+	
 	
 	if($total >0 && $total!='')
 	{
@@ -706,5 +706,6 @@ if($task == "add_page")
 		$body .= 'Status: Completed<br>';
 
 	}
+	wp_mail( array($email, $adminEmail), $subject, $body, $headers );
 	echo wp_send_json($gateway);
 }

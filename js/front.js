@@ -34,7 +34,7 @@
 	function formBook()
 	{
 		 
-			var name = jQuery(".scwatbwsr_form_name_input").val();
+			        var name = jQuery(".scwatbwsr_form_name_input").val();
 					var address = jQuery(".scwatbwsr_form_address_input").val();
 					var email = jQuery(".scwatbwsr_form_email_input").val();
 					var phone = jQuery(".scwatbwsr_form_phone_input").val();
@@ -42,6 +42,8 @@
 					var total = jQuery(".scwatbwsr_total_value").text().trim();
 					var seats = "";
 					var no_seat=0;
+					var schedule = jQuery(".scwatbwsr_schedules_item.active").text().trim();
+					if(!schedule) schedule = jQuery("#scwatbwsr_schedules_picker").val();
 					var data= {
 						name: name,
 						address: address,
@@ -76,8 +78,7 @@
 					  no_seat = jQuery(".scwatbwsr_form_seat_input").val();
 					  data.no_seat = no_seat;
 				   }
-					var schedule = jQuery(".scwatbwsr_schedules_item.active").text().trim();
-					if(!schedule) schedule = jQuery("#scwatbwsr_schedules_picker").val();
+					
 					
 					if(enabled_payment=="yes")
 					{

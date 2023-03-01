@@ -6,6 +6,13 @@ function orderUpdate($order_id,$updateArray)
     $ordersTb = $wpdb->prefix . 'scwatbwsr_orders';
     $wpdb->update( $ordersTb, $updateArray, array( 'id' => $order_id ) );
 }
+function orderGet($order_id)
+{ 
+    global $wpdb;
+    $ordersTb = $wpdb->prefix . 'scwatbwsr_orders';
+	$query = "SELECT * from $ordersTb where id=$order_id";
+    return $wpdb->get_row($query);
+}
 add_action( 'add_meta_boxes', 'scwatbwsr_add_tab_admin_product', 10, 2 );
 function scwatbwsr_add_tab_admin_product(){
 	global $wp_meta_boxes;

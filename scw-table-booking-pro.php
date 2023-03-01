@@ -320,6 +320,7 @@ function getActiveClass($roomId,$scwatbwsr_tab1)
 }
 function show_admin_bookings_page() {
     include_once dirname(__FILE__) . '/includes/admin-css-js.php';
+	include_once dirname(__FILE__) . '/includes/functions.php';
 	include_once dirname(__FILE__) . '/includes/WP_List_Table.BookingsTable.class.php';
 	$bookings_table = new scwBookingsTable();
 	$bookings_table->prepare_items();

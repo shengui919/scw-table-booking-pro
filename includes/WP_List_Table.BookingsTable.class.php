@@ -570,7 +570,8 @@ class scwBookingsTable extends WP_List_Table {
 			'cb'        => '<input type="checkbox" />', //Render a checkbox instead of text
 			'date'     	=> __( 'Date', 'scwatbwsr-translate' ),
 			'id'     	=> __( 'ID', 'scwatbwsr-translate' ),
-			'party'  	=> __( 'Party', 'scwatbwsr-translate' ),
+			'party'  	=> __( 'Seats', 'scwatbwsr-translate' ),
+			'table'  	=> __( 'Table', 'scwatbwsr-translate' ),
 			'name'  	=> __( 'Name', 'scwatbwsr-translate' ),
 			'email'  	=> __( 'Email', 'scwatbwsr-translate' ),
 			'phone'  	=> __( 'Phone', 'scwatbwsr-translate' ),
@@ -578,9 +579,8 @@ class scwBookingsTable extends WP_List_Table {
 		);
 
 		if ( get_settings_scw( 'enabled_payment' ) ) { $columns['deposit'] = __( 'Price', 'scwatbwsr-translate' ) ; }
-		if ( get_settings_scw( 'desposit_type' ) =="Reservation") { $columns['table'] = __( 'Table', 'scwatbwsr-translate' ) ; } else  {
-			$columns['seat'] = __( 'Seats', 'scwatbwsr-translate' );
-		}
+		if ( get_settings_scw( 'enabled_payment' )) { $columns['table'] = __( 'Table', 'scwatbwsr-translate' ) ; } 
+		
 
 		// This is so that deposit comes before details, is there a better way to do this?
 		$columns['details'] = __( 'Details', 'scwatbwsr-translate' );
@@ -630,8 +630,8 @@ class scwBookingsTable extends WP_List_Table {
 
 				if ( $booking->booking_status !== 'trash' ) {
 					$value .= '<div class="actions">';
-					$value .= '<a href="#" data-id="' . esc_attr( $booking->id ) . '" data-action="edit">' . __( 'Edit', 'scwatbwsr-translate' ) . '</a>';
-					$value .= ' | <a href="#" class="trash" data-id="' . esc_attr( $booking->id ) . '" data-action="trash">' . __( 'Trash', 'scwatbwsr-translate' ) . '</a>';
+					$value .= '<a href="javascript:editBooking('.esc_attr( $booking->id ).')" data-id="' . esc_attr( $booking->id ) . '" data-action="edit">' . __( 'Edit', 'scwatbwsr-translate' ) . '</a>';
+					$value .= ' | <a href="javascript:deleteBooking('.esc_attr( $booking->id ).')" class="trash" data-id="' . esc_attr( $booking->id ) . '" data-action="trash">' . __( 'Trash', 'scwatbwsr-translate' ) . '</a>';
 					$value .= '</div>';
 				}
 
@@ -642,7 +642,8 @@ class scwBookingsTable extends WP_List_Table {
 				break;
 
 			case 'party' :
-				$value = $booking->seats;
+				$value = ( $booking->no_seats >0 ) ? $booking->no_seats : explode(",",$booking->seats);
+				if(is_array($value)) $value = count($value);
 				break;
 
 			case 'name' :
@@ -652,7 +653,7 @@ class scwBookingsTable extends WP_List_Table {
 			case 'email' :
 				$value = esc_html( $booking->email );
 				$value .= '<div class="actions">';
-				$value .= '<a href="#" data-id="' . esc_attr( $booking->id ) . '" data-action="email" data-email="' . esc_attr( $booking->email ) . '" data-name="' . esc_attr( $booking->name ) . '">' . __( 'Send Email', 'scwatbwsr-translate' ) . '</a>';
+				$value .= '<a href="javascript:sendMail('.esc_attr( $booking->id ).')" data-id="' . esc_attr( $booking->id ) . '" data-action="email" data-email="' . esc_attr( $booking->email ) . '" data-name="' . esc_attr( $booking->name ) . '">' . __( 'Send Email', 'scwatbwsr-translate' ) . '</a>';
 				$value .= '</div>';
 				break;
 
@@ -666,8 +667,7 @@ class scwBookingsTable extends WP_List_Table {
 				break;
 
 			case 'table' :
-				$table = is_array( $booking->seat ) ? $booking->seat : array();
-				$value = esc_html( implode( ',', $table ) );
+				$value = $booking->seats;
 				break;
 
 			case 'status' :
