@@ -127,10 +127,7 @@
 				
 			
 	}
-		$("#scw-booking-form").submit(function(e){
-			e.preventDefault();
-			formBook();
-		})
+		
 
 		$("#scw-booking-form").validate ({
 			submitHandler: function(form) {  
