@@ -269,14 +269,27 @@
 																return ($t->week_day==$week);
 															});
 															$time = array_reverse($timeData);
-															$time = $time[0];
+															
+															if(!$time)
+															{
+																$time=(Object) array();
+																$time->id=0;
+																$time->start_time="09:00";
+																$time->week_day=$week;
+																$time->end_time="15:00";
+																$time->roomid=$room->id;
+															}
+															else 
+															{
+																$time = $time[0];
+															}
 															?>
 																<div class="scwatbwsr_daily_schedules_times_list_item">
-																                    <input class="scwatbwsr_daily_schedules_times_list_item_week" type="hidden" value="<?php echo esc_attr($time->week_day) ?>">
-																					<input class="scwatbwsr_daily_schedules_times_list_item_id" type="hidden" value="<?php echo esc_attr($time->id) ?>">
-																					<input class="scwatbwsr_daily_schedules_times_list_item_input input_start" id="scwatbwsr_daily_schedules_times_list_item_inpu_<?=$time->id?>t" placeholder="daily time" value="<?php echo esc_attr($time->start_time) ?>" type="text">
-																					<input class="scwatbwsr_daily_schedules_times_list_item_input input_end" id="scwatbwsr_daily_schedules_times_list_item_input_<?=$time->id?>" placeholder="daily time" value="<?php echo esc_attr($time->end_time) ?>" type="text">
-																					<span class="scwatbwsr_daily_schedules_times_list_item_button"><i class="fa fa-floppy-o" aria-hidden="true"></i> <?php echo esc_html__("Save", "scwatbwsr-translate") ?></span>
+																    <input class="scwatbwsr_daily_schedules_times_list_item_week" type="hidden" value="<?php echo esc_attr($time->week_day) ?>">
+																	<input class="scwatbwsr_daily_schedules_times_list_item_id" type="hidden" value="<?php echo esc_attr($time->id) ?>">
+																	<input class="scwatbwsr_daily_schedules_times_list_item_input input_start" id="scwatbwsr_daily_schedules_times_list_item_inpu_<?=$time->id?>t" placeholder="daily time" value="<?php echo esc_attr($time->start_time) ?>" type="text">
+																	<input class="scwatbwsr_daily_schedules_times_list_item_input input_end" id="scwatbwsr_daily_schedules_times_list_item_input_<?=$time->id?>" placeholder="daily time" value="<?php echo esc_attr($time->end_time) ?>" type="text">
+																	<span class="scwatbwsr_daily_schedules_times_list_item_button"><i class="fa fa-floppy-o" aria-hidden="true"></i> <?php echo esc_html__("Save", "scwatbwsr-translate") ?></span>
 																</div>
 														    </div>
 															<?php }?>
@@ -340,6 +353,7 @@
 														<span class="scwatbwsr_tables_add_button"><i class="fa fa-plus" aria-hidden="true"></i> <?php echo esc_html__("ADD", "scwatbwsr-translate") ?></span>
 														<span class="scwatbwsr_tables_add_reload"><?php echo esc_html__("Refresh Data", "scwatbwsr-translate") ?> <i class="fa fa-refresh" aria-hidden="true"></i></span>
 													</span>
+													<hr />
 													<span class="scwatbwsr_tables_list">
 														<span class="scwatbwsr_tables_list_head"><?php echo esc_html__("Tables", "scwatbwsr-translate") ?></span>
 														<?php
@@ -594,7 +608,7 @@
 																	<span class="scwatbwsr_bktables_seat_make">
 																				<label><?php echo esc_html__("Make as booked", "scwatbwsr-translate") ?></label>
 																				<input <?php if($bookedseat) echo "checked" ?> value="<?=$table->id?>" type="checkbox" class="scwatbwsr_bktables_seat_make_input">
-																			</span>
+																	</span>
 
 																	<?php echo"</td></tr>";}
 																	else 

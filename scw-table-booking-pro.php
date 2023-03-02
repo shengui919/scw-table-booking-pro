@@ -173,6 +173,8 @@ function scwatbwsr_install(){
 		`roomid` int(11) DEFAULT NULL,
 		`tb` varchar(255) DEFAULT NULL,
 		`seat` varchar(255) DEFAULT NULL,
+		`tb_id` INT NOT NULL,
+		`order_id` INT DEFAULT NULL,
 		PRIMARY KEY (`id`)
 	) $charset_collate;";
 	
@@ -322,6 +324,8 @@ function show_admin_bookings_page() {
     include_once dirname(__FILE__) . '/includes/admin-css-js.php';
 	include_once dirname(__FILE__) . '/includes/functions.php';
 	include_once dirname(__FILE__) . '/includes/WP_List_Table.BookingsTable.class.php';
+	wp_register_style('adminbookingcss', SCWATBWSR_URL .'css/bookings.css',array(),time());
+	wp_enqueue_style('adminbookingcss');
 	$bookings_table = new scwBookingsTable();
 	$bookings_table->prepare_items();
 	include_once dirname(__FILE__) . '/includes/admin-scw-bookings.php';

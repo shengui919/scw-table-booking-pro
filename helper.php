@@ -183,10 +183,20 @@ if($task == "add_page")
 	$thistimeid = filter_var($_POST["thistimeid"], FILTER_VALIDATE_INT);
 	$thistimetime = filter_var($_POST["thistimetime"], FILTER_SANITIZE_STRING);
 	$thisendtime = filter_var($_POST["endtime"], FILTER_SANITIZE_STRING);
-	
+	$week_day = filter_var($_POST["week_day"], FILTER_SANITIZE_STRING);
+	$roomid = filter_var($_POST["roomid"], FILTER_VALIDATE_INT);
 	$tableName = $wpdb->prefix . 'scwatbwsr_dailytimes';
+	if($thistimeid==0)
+	{
+		$wpdb->query($wpdb->prepare("INSERT INTO $tableName (start_time, end_time, week_day, roomid)
+		VALUES (%s,%s,%s,%d)", 
+		$thistimetime, $thisendtime, $week_day, $roomid));
+	}
+	else
+	{
 	$wpdb->query($wpdb->prepare("UPDATE $tableName SET start_time=%s,end_time=%s WHERE id=%d",
 	$thistimetime, $thisendtime, $thistimeid));
+	}
 }elseif($task == "delete_time"){
 	$thistimeid = filter_var($_POST["thistimeid"], FILTER_VALIDATE_INT);
 	
@@ -596,9 +606,9 @@ if($task == "add_page")
 			$seats = explode(",",$tableSeats->seats);
 			foreach($seats as $k=>$seat)
 			{
-			$wpdb->query($wpdb->prepare("INSERT INTO $bookedTb (roomid, tb, seat)
-			VALUES (%d, %s, %s)", 
-			$roomId, $tableSeats->label, $seat));
+			$wpdb->query($wpdb->prepare("INSERT INTO $bookedTb (roomid, tb, seat, tb_id)
+			VALUES (%d, %s, %s, %d)", 
+			$roomId, $tableSeats->label, $seat, $tableSeats->id));
 			}
 		}
 	}

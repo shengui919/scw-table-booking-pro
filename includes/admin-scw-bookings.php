@@ -1,451 +1,4 @@
-<style type="text/css">
-    /* Bookings Admin List Table */
-    .rtb-admin-bookings-filters-start,
-.rtb-admin-bookings-filters-end {
-  position: relative;
-  float: left;
-  width: 100%;
-  margin: 0 0 4px;
-}
-.rtb-admin-bookings-filters-start input,
-.rtb-admin-bookings-filters-end input {
-  position: relative;
-  float: left;
-  width: calc(50% - 4px);
-  margin: 0 2px 4px;
-  border: 1px solid #ddd;
-  background: #f5f5f5;
-  color: #555;
-  border-radius: 2px;
-}
-.rtb-admin-bookings-filters-start input::placeholder,
-.rtb-admin-bookings-filters-end input::placeholder {
-  color: #555;
-}
 
-
-.bookings_page_rtb-settings .wrap h1 {
-  width: 100%;
-}
-#rtb-bookings-table .rtb-primary-controls {
-	margin-top: 2em;
-}
-#rtb-bookings-table .rtb-primary-controls {
-    min-height: 50px;
-    height:auto;
-}
-#rtb-bookings-table .subsubsub {
-	float: none;
-	margin: 0.5em 0 1em;
-	text-align: left;
-}
-
-#rtb-bookings-table  .subsubsub .trash a {
-	color: #a00;
-}
-
-#rtb-bookings-table  .subsubsub .trash a:hover {
-	color: red;
-}
-
-#rtb-filters {
-	position: relative;
-}
-
-#rtb-filters .date-filters {
-	position: absolute;
-	top: -9999px;
-	left: -9999px;
-	display: inline-block;
-	padding: 12px;
-  background: #fff;
-  box-sizing: border-box;
-	-webkit-box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
-	box-shadow: 0 1px 1px 0 rgba(0,0,0,.1);
-}
-
-#rtb-filters.date-filters-visible .date-filters {
-	position: relative;
-	top: auto;
-  left: 0;
-  width: 300px;
-}
-
-#rtb-filters .date-filters .datepicker {
-	width: 20em;
-}
-
-#rtb-filters .date-filter-range {
-	padding: 0.25em;
-}
-
-#rtb-date-filter-link {
-	position: relative;
-}
-
-#rtb-date-filter-link .dashicons {
-	line-height: 1.5;
-}
-
-#rtb-filters .date-filter-range + #rtb-date-filter-link {
-	margin-left: 0.5em;
-}
-
-#rtb-date-filter-link .rtb-date-filter-label {
-	position: absolute;
-	top: -9999px;
-	left: -9999px;
-}
-
-#rtb-filters.date-filters-visible #rtb-date-filter-link {
-	color: #777;
-}
-
-#rtb-filters.date-filters-visible #rtb-date-filter-link:before {
-	content: '';
-	position: absolute;
-	top: 60%;
-	left: 50%;
-	margin-left: -1em;
-	width: 0;
-	height: 0;
-	border: 1em solid transparent;
-	border-bottom: 1em solid #fff;
-}
-
-#rtb-filters .current {
-	font-weight: 600;
-	color: #000;
-}
-
-#rtb-filters li.filter_name input {
-	width: 100%;
-	height: 30px;
-	max-width: 150px;
-	padding: 0 0.5em;
-	margin: 0 0 0 0.2em;
-	border-radius: 5px 0 0 5px;
-}
-
-#rtb-filters li.filter_name a {
-	height: 28px;
-	padding: 0 0.2em;
-	display: inline-block;
-	vertical-align: bottom;
-	border: 1px solid #8c8f94;
-	border-left: 0;
-	border-radius: 0 4px 4px 0;
-}
-
-#rtb-filters li.filter_name .dashicons {
-	vertical-align: middle;
-}
-
-#rtb-bookings-table .tablenav .actions .button {
-	margin-top: 1px;
-	margin-bottom: 1px;
-}
-
-#rtb-bookings-table .tablenav .actions .button .dashicons {
-	line-height: 28px;
-}
-
-#rtb-bookings-table .rtb-notice,
-#rtb-bookings-table .rtb-top-actions-wrapper,
-#rtb-bookings-table .rtb-table-header-controls {
-	margin: 1em 0;
-}
-
-#rtb-bookings-table .rtb-table-header-controls {
-	margin-bottom: 0;
-}
-
-#rtb-bookings-table .rtb-notice {
-	padding: 1em;
-	background: #2ea2cc;
-	color: #fff;
-    clear:both;
-}
-
-#rtb-bookings-table .rtb-table-header-controls {
-	position: relative;
-	top: 1px;
-	overflow: hidden;
-	margin-bottom: 0.5em;
-}
-
-#rtb-bookings-table select[name="action"],
-#rtb-bookings-table select[name="action2"],
-#rtb-bookings-table .rtb-location-switch select {
-	max-width: 120px;
-}
-
-#rtb-bookings-table .rtb-table-header-controls .bulkactions {
-	float: left;
-}
-
-#rtb-bookings-table .rtb-locations {
-	display: none;
-	margin: 0;
-	width: 9999px;
-}
-
-#rtb-bookings-table .rtb-locations li {
-	display: inline-block;
-	margin: 0;
-	line-height: 38px;
-	position: relative;
-}
-
-#rtb-bookings-table .rtb-locations a {
-	display: block;
-	padding: 0 1em;
-	font-weight: 700;
-	color: #777;
-	text-decoration: none;
-}
-
-#rtb-bookings-table .rtb-locations .current a {
-	background: #fff;
-	color: #333;
-	border: 1px solid #ddd;
-	border-bottom: 0;
-}
-
-#rtb-bookings-table .rtb-location-switch {
-	float: left;
-}
-
-#rtb-bookings-table .rtb-locations-button {
-	margin-bottom: 0;
-}
-
-#rtb-bookings-table tr.closed {
-	opacity: 0.6;
-	filter: opacity(alpha=60);
-}
-#rtb-bookings-table tr.closed:hover {
-	opacity: 1;
-	filter: opacity(alpha=100);
-}
-
-#rtb-bookings-table .striped tr {
-  background-color: #eaeaeac7;
-}
-
-#rtb-bookings-table .striped tr.alternate {
-  background-color: #f6f7f7;
-}
-
-#rtb-bookings-table tr.pending .check-column {
-  border-left: 4px solid #dd3d36;
-}
-
-#rtb-bookings-table .striped>tbody>tr.pending {
-  background-color: rgba(255,0,0,0.35);
-}
-#rtb-bookings-table .striped>tbody>tr.pending.alternate {
-  background-color: rgba(255,0,0,0.25);
-}
-
-#rtb-bookings-table tr:is(.pending, .payment_pending, .payment_failed) .check-column input[type=checkbox] {
-  margin-left: 4px;
-}
-
-#rtb-bookings-table tr:is(.payment_pending, .payment_failed) .check-column {
-  border-left: 4px solid #cca322;
-}
-
-#rtb-bookings-table .striped>tbody>tr:is(.payment_pending, .payment_failed) {
-  background-color: rgba(255,197,7,0.55);
-}
-#rtb-bookings-table .striped>tbody>tr:is(.payment_pending, .payment_failed).alternate {
-  background-color: rgba(255,197,7,0.35);
-}
-
-#rtb-bookings-table table.bookings > tbody > tr.payment_failed .column-status::before {
-  content: "\f14c";
-  font-family: dashicons;
-  padding: 0 5px 0 0;
-  vertical-align: top;
-}
-
-#rtb-bookings-table table.bookings > tbody > tr.payment-on-hold .column-status::before {
-  content: "\f18c";
-  font-family: dashicons;
-  padding: 0 5px;
-  vertical-align: top;
-  display: inline-block;
-}
-
-#rtb-bookings-table .striped>tbody>tr.confirmed {
-	background-color: rgba(46,162,204,0.35);
-}
-#rtb-bookings-table .striped>tbody>tr.confirmed.alternate {
-	background-color: rgba(46,162,204,0.25);
-}
-
-#rtb-bookings-table th#date {
-	width: auto;
-}
-
-#rtb-bookings-table th#party {
-	width: 3em;
-}
-
-#rtb-bookings-table th#details {
-	width: 4em;
-}
-
-#rtb-bookings-table td .actions {
-	line-height: 1.5em;
-	opacity: 0;
-	-webkit-transition: opacity 0.3s 0;
-	-moz-transition: opacity 0.3s 0;
-	transition: opacity 0.3s 0;
-}
-
-#rtb-bookings-table tr:hover td .actions {
-	opacity: 1;
-}
-
-#rtb-bookings-table .column-date .actions .trash,
-#rtb-bookings-table .actions [data-action="delete"] {
-	color: #a00;
-}
-
-#rtb-bookings-table .column-date .actions .trash:hover,
-#rtb-bookings-table .actions [data-action="delete"]:hover {
-	color: red;
-}
-
-#rtb-bookings-table .column-date .status {
-	width: 0;
-	height: 0;
-	overflow: hidden;
-	line-height: 28px;
-	opacity: 0;
-	-webkit-transition: opacity 0.6s 0;
-	-moz-transition: opacity 0.6s 0;
-	transition: opacity 0.6s 0;
-}
-
-#rtb-bookings-table .column-date .status .spinner {
-	visibility: visible;
-	display: inline-block;
-	float: left;
-	margin: 4px 4px 0 0;
-	vertical-align: middle;
-}
-
-#rtb-bookings-table .column-date.loading .actions {
-	display: none;
-}
-
-#rtb-bookings-table .column-date.loading .status {
-	width: auto;
-	height: auto;
-	overflow: visible;
-	opacity: 0.5;
-}
-
-#rtb-bookings-table tr ul {
-	margin: 0;
-}
-
-#rtb-bookings-table .consent {
-	margin-top: 0.5em;
-}
-
-.rtb-details-data {
-	display: none;
-}
-
-.rtb-details-data .details {
-	margin: 0;
-}
-
-.rtb-details-data .details > li {
-	margin-top: 2em;
-}
-
-.rtb-details-data .details > li:first-child {
-	margin-top: 0;
-}
-
-.rtb-details-data .details .label {
-	font-weight: 900;
-}
-
-#rtb-details-modal .rtb-details-data {
-	display: block;
-}
-
-@media screen and (min-width: 783px) {
-
-	#rtb-bookings-table .rtb-locations li {
-		line-height: 32px;
-	}
-}
-
-@media screen and (min-width: 930px) {
-
-	#rtb-bookings-table .rtb-primary-controls {
-		margin-top: 0;
-	}
-
-	#rtb-bookings-table .rtb-views {
-		float: right;
-		width: 50%;
-	}
-
-	#rtb-bookings-table .rtb-views .subsubsub {
-		text-align: right;
-	}
-
-	#rtb-filters {
-		float: left;
-		width: 50%;
-	}
-
-	#rtb-filters .date-filters {
-		margin-right: 2em;
-	}
-
-	#rtb-bookings-table .rtb-locations {
-		display: block;
-	}
-
-	#rtb-bookings-table .rtb-table-header-controls {
-		margin-bottom: 0;
-	}
-
-	#rtb-bookings-table .rtb-location-switch {
-		position: absolute;
-		top: 0;
-		right: 0;
-		background: #eee;
-		padding-left: 1em;
-	}
-}
-
-@media screen and (max-width: 782px) {
-
-	/* Prevent date column from being hidden in WP versions < 4.3 */
-	#rtb-bookings-table .fixed .column-date {
-		display: table-cell;
-	}
-
-	/* Always display details data in mobile views */
-	#rtb-bookings-table .column-details .rtb-details-data {
-		display: block;
-	}
-
-	#rtb-bookings-table .column-details .rtb-show-details {
-		display: none;
-	}
-}
-</style>
 <input type="hidden" value="<?php echo esc_attr(get_option('date_format')) ?>" class="scw_date_format">
 <div class="wrap">
 		<div class="scwatbwsr_content">
@@ -473,8 +26,262 @@
 			{
 		?>
             <div class="scwatbwsr_content pd-10">
-              <?php echo "<h2 class='mb-3'>Order ID : $order->id</h2>";?>
-		    </div>
+				<h2>Booking Information</h2>
+				<div class="content-area-left">
+					<div class="promotional-title">
+					<h2>Order Date</h2>
+					</div>
+					<div class="container__item">
+					<h2><?=date("l d Y, H:i",strtotime($order->schedule))?></h2>
+					</div>
+		        </div>
+				<div class="content-area-left">
+					<div class="promotional-title">
+					<h2>Phone</h2>
+					</div>
+					<div class="container__item">
+					<h2><?=$order->phone?></h2>
+					</div>
+		        </div>
+			</div>
+			
+		    <div class="scwatbwsr_content">
+			<div class="cart-content">
+         <div class="container">
+		 <!-- Start Table Cart -->
+            <table id="cart" class="table table-hover table-condensed">
+               <thead>
+                  <tr>
+                     <th style="width: 15%;font-size: 18px;">Name</th>
+                     <th style="width:30%;font-size: 18px;">No Seats</th>
+                     <th style="width:15%;font-size: 18px;">Email</th>
+                     <th class="text-center" style="width:30%;font-size: 18px;">Message</th>
+                     
+                  </tr>
+               </thead>
+               <tbody>
+                  <tr>
+                     <td data-th="Product">
+                        <div class="row">
+                           
+                           <div class="col-sm-12">
+                              <h4 class="nomargin"><?=$order->name?></h4>
+                           </div>
+                        </div>
+                     </td>
+                     <td data-th="Size">
+					 <div class="col-sm-12">
+                              <h4 class="nomargin"><?=$order->seats?></h4>
+                           </div>
+                     </td>
+                    
+                     <td data-th="Quantity">
+                        <div class="row">
+						<div class="col-sm-12">
+                              <h4 class="nomargin"><?=$order->email?></h4>
+                           </div>
+                        </div>
+                     </td>
+                     <td data-th="Subtotal" class="text-center" style="color:hsl(11, 71%, 50%);font-size: 18px;"><?=$order->note?></td>
+                     
+                  </tr>
+                 </tbody>
+            </table>
+            			<!-- End Table Cart -->
+		<div class="content-area-left">
+            <div class="promotional-title">
+               <h2>Change Status</h2>
+            </div>
+            <div class="container__item">
+               <form class="form promo-left">
+			               <select class="size-form">
+                              <option>Small</option>
+                              <option>Large</option>
+                              <option>Medium</option>
+                              <option>Family</option>
+                           </select>
+                  <button type="button" class="btn--primary btn--inside">Apply</button>
+               </form>
+              
+            </div>
+		</div>
+		<div class="content-area-left">
+            <div class="promotional-title">
+               <h2>Change Time</h2>
+            </div>
+			<div class="example-container">
+               <div>
+                  <input type="text" name="alt_example_4_alt" id="alt_example_4_alt" value="" style="cursor: pointer;">
+                  <br />
+				  <button type="button" class="btn--primary btn--inside">Apply</button>
+               </div>
+			   
+            </div>
+		</div>
+		<div class="content-area">
+			<!-- Start Booking -->
+            <div class="booking">
+               <h2>Select Table & Seats</h2>
+            </div>
+            <div class="row note">
+               <div class="col-md-2 col-sm-4 col-xs-4">
+                  <h2>Available Seat</h2>
+                  <div class="available">1</div>
+               </div>
+               <div class="col-md-2 col-sm-4 col-xs-4">
+                  <h2>Booked Seat</h2>
+                  <div class="booked">1</div>
+               </div>
+               <div class="col-md-2 col-sm-4 col-xs-4">
+                  <h2>Selected Seat</h2>
+                  <div class="selected-seat">1</div>
+               </div>
+            </div>
+		</div>
+		<div class="content-area">
+		    <div class="model">
+			   <?php 
+			   $roomsTB = $wpdb->prefix . 'scwatbwsr_rooms';
+			   $typesTB = $wpdb->prefix . 'scwatbwsr_types';
+			   $schedulesTB = $wpdb->prefix . 'scwatbwsr_schedules';
+			   $dailyschedulesTB = $wpdb->prefix . 'scwatbwsr_dailyschedules';
+			   $dailytimesTB = $wpdb->prefix . 'scwatbwsr_dailytimes';
+			   $pricesTB = $wpdb->prefix . 'scwatbwsr_prices';
+			   $tablesTB = $wpdb->prefix . 'scwatbwsr_tables';
+			   $seatsTB = $wpdb->prefix . 'scwatbwsr_seats';
+			   $productsTb = $wpdb->prefix . 'scwatbwsr_products';
+			   $ordersTB = $wpdb->prefix . 'scwatbwsr_orders';
+			   $bookedTB = $wpdb->prefix . 'scwatbwsr_bookedseats';
+			   $getTypesSql = $wpdb->prepare("SELECT * from {$typesTB} where roomid>%d", 0);
+			   $types = $wpdb->get_results($getTypesSql);
+			   foreach ($types as $type){
+				$getTablesSql = $wpdb->prepare("SELECT * from {$tablesTb} where type=%d", $type->id);
+				$arrayClass=range('A', 'Z');
+				$tables = $wpdb->get_results($getTablesSql);
+				$getPriceSql = $wpdb->prepare("SELECT * from {$pricesTB} where typeid=%d", $type->id);
+				$price = $wpdb->get_row($getPriceSql);
+				?>
+			   <div class="col-md-2 col-sm-6 col-xs-6 column1">
+				<?php 
+				 foreach($tables as $key=>$table){ 
+				 $seats = explode(",",$table->seats);
+				 $seatsC = count($seats);
+				 $arrNumb=range(1,$seatsC);
+				 $even = range(0, count($arrNumb), 2);
+				 $add = range(1, count($arrNumb), 2);
+				
+				?>
+                  <div class="table-<?=$arrayClass[$key]?> table-list">
+				  <div class="chart-status">
+						<h2><i class="fa-solid fa-plus-large"></i>Booked</h2>
+					 </div>
+                     <div class="chart-left">
+						<?php foreach($add as $i=>$a){
+							if($a>0){?>
+                        <div id="seat-<?=$a?>" data-seat="<?=$a?>" class="chart1 <?=$price->type?> selected-color"><?=$a?>
+						<i class="fa fa-check-circle"></i>
+                        </div>
+                        <?php } }?>
+                     </div>
+                     <div data-id="<?=$table->id?>" class="name-table <?=$price->type?>">
+                        <h2><i class="fa fa-check-circle"></i><?=$table->label?></h2>
+                     </div>
+                     <div class="chart-right">
+					    <?php foreach($even as $i=>$a){
+							if($a>0){?>
+                        <div id="seat-<?=$a?>" data-seat="<?=$a?>" class="chart1 <?=$price->type?> selected-color"><?=$a?>
+                        <i class="fa fa-check-circle"></i>    
+					</div>
+                       <?php } } ?>
+                     </div>
+                    
+					</div>
+				  <?php  } ?>
+                 </div>
+                <hr style="clear:both" />
+				 <?php } ?> 
+				 
+				    <div class="cart-total mt-3">
+						<div class="total-order">
+							<p class="cart-total-title">Confirm Tables and Seats</p>
+							<p class="cart-sub"><strong>Total Required Seats </strong><span>$<?=$order->no_seats?></span></p>
+							<p class="cart-ship"><strong>Selected Table</strong><span><?=$order->_ipp_tax?></span></p>
+							<p class="cart-order"><strong>Selected Seats</strong><span>$<?=$order->total?></span></p>
+						</div>  
+                    </div>
+					<div class="cart-total mt-3">
+						<div class="total-order">
+							<p class="cart-total-title">Confirm Tables and Seats</p>
+							<p class="cart-sub"><strong>Total Required Seats </strong><span>$<?=$order->no_seats?></span></p>
+							<p class="cart-ship"><strong>Selected Table</strong><span><?=$order->_ipp_tax?></span></p>
+							<p class="cart-order"><strong>Selected Seats</strong><span>$<?=$order->total?></span></p>
+						</div>  
+                    </div>
+			</div>
+		</div>
+			<!-- End Booking -->
+		   
+		<!-- Start cart total -->
+		<?php if($order->tran_id>0 || $order->total==0) {?>
+		<div class="content-area clear pd-10">
+		    <div class="booking mb-3">
+               <h2>Payment Information</h2>
+            </div>
+            <div class="cart-total mt-3">
+               <div class="total-order">
+                  <p class="cart-total-title">Price</p>
+                  <p class="cart-sub"><strong>Cart Sub Total </strong><span>$<?=number_format($order->total-$order->_ipp_tax,2)?></span></p>
+                  <p class="cart-ship"><strong>Tax </strong><span><?=$order->_ipp_tax?></span></p>
+                  <p class="cart-order"><strong>Order Total </strong><span>$<?=$order->total?></span></p>
+               </div>  
+            </div>
+			<div class="cart-total mt-3">
+               <div class="total-order">
+                  <p class="cart-total-title">Payment Status</p>
+                  <p class="cart-sub"><strong>Status </strong><span><?=$order->_ipp_status?></span></p>
+                  <p class="cart-ship"><strong>Change Status </strong></p>
+                  <p class="cart-order">
+				            <select class="size-form">
+                              <option>Small</option>
+                              <option>Large</option>
+                              <option>Medium</option>
+                              <option>Family</option>
+                           </select>
+				  </p>
+				  
+			       <button type="button" class="btn--primary btn--inside promo-right  mb-3">Update Payment</button>
+		         
+               </div>  
+            </div>
+			<div class="cart-total mt-3" >
+               <div class="total-order">
+                  <p class="cart-total-title">Ippayware Info</p>
+                  <p class="cart-sub"><strong>Transaction ID </strong><span><?=$order->_ipp_transaction_id?></span></p>
+                  <p class="cart-ship"><strong>Order Number </strong><span><?=$order->orderId?></span></p>
+                  <p class="cart-order"><strong>Ippayware ID </strong><span><?=$order->tran_id?></span></p>
+               </div>  
+            </div>
+			<div class="cart-total mt-3" style="width:50%;">
+               <div class="total-order">
+                  <p class="cart-total-title">Billing Address</p>
+                  <p class="cart-sub"><strong>Name</strong><span><?=$order->billing_first_name." ".$order->billing_last_name?></span></p>
+                  <p class="cart-ship"><strong>Address </strong><span><?=$order->billing_address_1." ".$order->billing_address_2?></span></p>
+                  <p class="cart-order"><strong>City </strong><span><?=$order->billing_city?></span></p>
+				  <p class="cart-order"><strong>Zip Code</strong><span><?=$order->billing_postcode?></span></p>
+				  <p class="cart-order"><strong>City </strong><span><?=$order->billing_state?></span></p>
+				  <p class="cart-order"><strong>Country </strong><span><?=$order->billing_country?></span></p>
+				  <p class="cart-order"><strong>Phone </strong><span><?=$order->billing_phone?></span></p>
+				  <p class="cart-order"><strong>Email </strong><span><?=$order->billing_email?></span></p>
+               </div>  
+            </div>
+			
+		</div>
+		
+		<?php  } ?>
+		<!-- End cart Total -->
+         </div>
+      </div>
+			</div>
 		<?php
 			}
 		}

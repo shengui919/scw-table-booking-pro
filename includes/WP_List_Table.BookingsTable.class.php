@@ -631,7 +631,6 @@ class scwBookingsTable extends WP_List_Table {
 				if ( $booking->booking_status !== 'trash' ) {
 					$value .= '<div class="actions">';
 					$value .= '<a href="javascript:editBooking('.esc_attr( $booking->id ).')" data-id="' . esc_attr( $booking->id ) . '" data-action="edit">' . __( 'Edit', 'scwatbwsr-translate' ) . '</a>';
-					$value .= ' | <a href="javascript:deleteBooking('.esc_attr( $booking->id ).')" class="trash" data-id="' . esc_attr( $booking->id ) . '" data-action="trash">' . __( 'Trash', 'scwatbwsr-translate' ) . '</a>';
 					$value .= '</div>';
 				}
 
@@ -702,7 +701,7 @@ class scwBookingsTable extends WP_List_Table {
 				$details = apply_filters( 'rtb_bookings_table_column_details', $details, $booking );
 
 				if ( !empty( $details ) ) {
-					$value = '<a href="#" class="rtb-show-details" data-id="details-' . esc_attr( $booking->id ) . '"><span class="dashicons dashicons-testimonial"></span></a>';
+					$value = '<a href="javascript:editBooking('.esc_attr( $booking->id ).')" class="rtb-show-details" data-id="details-' . esc_attr( $booking->id ) . '"><span class="dashicons dashicons-testimonial"></span></a>';
 					$value .= '<div class="rtb-details-data"><ul class="details">';
 					foreach( $details as $detail ) {
 						$value .= '<li><div class="label">' . $detail['label'] . '</div><div class="value">' . $detail['value'] . '</div></li>';

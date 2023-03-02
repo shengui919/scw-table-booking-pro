@@ -928,9 +928,10 @@
 }
 .scwatbwsr_tables_add {
     float: left;
-    width: 25%;
-    border-right: 1px solid #ccc;
+    width: 100%;
+    border-bottom: 1px solid #ccc;
     box-sizing: border-box;
+    padding-bottom:20px;
 }
 .scwatbwsr_tables_add_head {
     float: left;
@@ -984,8 +985,9 @@
 }
 .scwatbwsr_tables_list {
     float: left;
-    width: 74%;
+    width: 100%;
     margin-left: 1%;
+    padding-top:20px;
 }
 .scwatbwsr_tables_list_head {
     float: left;

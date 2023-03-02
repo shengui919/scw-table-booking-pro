@@ -41,6 +41,25 @@ function fetchTimeList(dateTime,elthis,i)
 (function(jQuery) {
 "use strict";
 
+jQuery( '.name-table.table' ).click( function() {
+	var element = jQuery(this);
+	element.toggleClass('active');
+	var seatEle =element.parent(".table-list").find(".chart1");
+	seatEle.each(function( index ) {
+       jQuery(this).toggleClass("active")
+	})
+});
+jQuery( '.chart1.seat' ).click( function() {
+	var element = jQuery(this);
+	element.toggleClass('active')
+});
+jQuery( '.name-table.seat' ).click( function() {
+	alert("You can't select full table")
+});
+jQuery( '.chart1.table' ).click( function() {
+	alert("You can't select single seat")
+});
+
 jQuery( '#rtb-date-filter-link' ).click( function() {
 	jQuery( '#rtb-filters' ).toggleClass( 'date-filters-visible' );
 });
@@ -86,6 +105,13 @@ jQuery('.rtb-admin-bookings-filters-start #start-date,#end-date').datetimepicker
 	step: 5,
 	defaultTime: "00:00"
 });
+jQuery('#alt_example_4_alt').datetimepicker({
+	format: jQuery(".scw_date_format").val()+' H:i',
+	closeOnDateSelect: false,
+	step: 5,
+	defaultTime: "00:00"
+});
+
 	jQuery('.scwatbwsr_media_upload').on("click", function(){
         upload_image_button =true;
         var formfieldID = jQuery(this).prev('input');
@@ -606,7 +632,7 @@ jQuery('.rtb-admin-bookings-filters-start #start-date,#end-date').datetimepicker
 				var thistimeweek = thistime.children(".scwatbwsr_daily_schedules_times_list_item_week").val();
 				var thistimetime = thistime.children(".scwatbwsr_daily_schedules_times_list_item_input.input_start").val();
 				var thistimeend = thistime.children(".scwatbwsr_daily_schedules_times_list_item_input.input_end").val();
-				
+				var week_day = thistime.children(".scwatbwsr_daily_schedules_times_list_item_week").val();
 				jQuery.ajax({
 					url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
 					data: {
@@ -614,7 +640,9 @@ jQuery('.rtb-admin-bookings-filters-start #start-date,#end-date').datetimepicker
 						thistimetime : thistimetime,
 						endtime :thistimeend,
 						thistimeweek:thistimeweek,
-						task : "save_time"
+						roomid:jQuery(".scwatbwsr_room_id").val(),
+						task : "save_time",
+						week_day: week_day
 					},
 					type: 'POST',
 					beforeSend: function(data){
