@@ -1,5 +1,20 @@
 
 var upload_image_button=false;
+function totalCounts()
+{
+	var tableCount =jQuery(".name-table.active").length;
+	var seatCount =jQuery(".chart1.active").length;
+	jQuery("#total-table").text(tableCount);
+	jQuery("#total-seats").text(seatCount);
+	var tableName=[];
+	for(var i=0;i<tableCount;i++)
+	{
+		tableName.push(jQuery(".name-table.active:eq('"+i+"')").data("name"));
+	}
+	console.log(tableName)
+	jQuery("#total-table-list").text(tableName.toString())
+	
+}
 function sendMail(booking_id)
 {
 
@@ -48,10 +63,12 @@ jQuery( '.name-table.table' ).click( function() {
 	seatEle.each(function( index ) {
        jQuery(this).toggleClass("active")
 	})
+	totalCounts()
 });
 jQuery( '.chart1.seat' ).click( function() {
 	var element = jQuery(this);
 	element.toggleClass('active')
+	totalCounts()
 });
 jQuery( '.name-table.seat' ).click( function() {
 	alert("You can't select full table")

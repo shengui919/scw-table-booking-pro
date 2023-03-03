@@ -137,6 +137,19 @@
                   <div class="selected-seat">1</div>
                </div>
             </div>
+			<div class="row note">
+			<div class="cart-total-row mt-3">
+						<div class="total-order">
+							<p class="cart-total-title">Confirm Tables and Seats</p>
+							<p class="cart-sub"><strong>Total Required Seats </strong><span id="req_seat"><?=$order->no_seats?></span></p>
+							<p class="cart-ship"><strong>Selected Table</strong><span id="total-table"><?=$order->_ipp_tax?></span></p>
+							<p class="cart-ship"><span id="total-table-list"><?=$order->_ipp_tax?></span></p>
+							<p class="cart-order"><strong>Selected Seats</strong><span id="total-seats">$<?=$order->total?></span></p>
+						</div> 
+						<button type="button" class="submit-button-table btn--primary btn--inside">Update Table</button> 
+                    </div>
+					
+			</div>
 		</div>
 		<div class="content-area">
 		    <div class="model">
@@ -161,6 +174,7 @@
 				$getPriceSql = $wpdb->prepare("SELECT * from {$pricesTB} where typeid=%d", $type->id);
 				$price = $wpdb->get_row($getPriceSql);
 				?>
+				<button type="button" class="submit-button-bottom btn--primary btn--inside">Update Table</button> 
 			   <div class="col-md-2 col-sm-6 col-xs-6 column1">
 				<?php 
 				 foreach($tables as $key=>$table){ 
@@ -183,7 +197,7 @@
                         </div>
                         <?php } }?>
                      </div>
-                     <div data-id="<?=$table->id?>" class="name-table <?=$price->type?>">
+                     <div data-id="<?=$table->id?>" data-name="<?=$table->label?>" class="name-table <?=$price->type?>">
                         <h2><i class="fa fa-check-circle"></i><?=$table->label?></h2>
                      </div>
                      <div class="chart-right">
@@ -198,26 +212,12 @@
 					</div>
 				  <?php  } ?>
                  </div>
-                <hr style="clear:both" />
+                
 				 <?php } ?> 
 				 
-				    <div class="cart-total mt-3">
-						<div class="total-order">
-							<p class="cart-total-title">Confirm Tables and Seats</p>
-							<p class="cart-sub"><strong>Total Required Seats </strong><span>$<?=$order->no_seats?></span></p>
-							<p class="cart-ship"><strong>Selected Table</strong><span><?=$order->_ipp_tax?></span></p>
-							<p class="cart-order"><strong>Selected Seats</strong><span>$<?=$order->total?></span></p>
-						</div>  
-                    </div>
-					<div class="cart-total mt-3">
-						<div class="total-order">
-							<p class="cart-total-title">Confirm Tables and Seats</p>
-							<p class="cart-sub"><strong>Total Required Seats </strong><span>$<?=$order->no_seats?></span></p>
-							<p class="cart-ship"><strong>Selected Table</strong><span><?=$order->_ipp_tax?></span></p>
-							<p class="cart-order"><strong>Selected Seats</strong><span>$<?=$order->total?></span></p>
-						</div>  
-                    </div>
+				   
 			</div>
+			
 		</div>
 			<!-- End Booking -->
 		   
