@@ -476,10 +476,11 @@
       color: hsl(0,0%,100%);
       font-size: 20px;
       line-height: 30px;
-      padding: 15px
+      padding: 15px;
       clear: both;
       float: right;
       margin-top: 5px;
+      cursor: pointer;
   }
   
   .btn--primary:hover {
@@ -488,7 +489,11 @@
       color: hsl(40,92%,53%);
       border: 1px solid hsl(40,92%,53%)
   }
-  
+  .textarea_email
+  {
+    resize: none;
+    height:100px;
+  }
   .promo-left {
       float: left;
       width:100%

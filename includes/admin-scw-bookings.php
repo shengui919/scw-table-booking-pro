@@ -27,12 +27,13 @@
 		?>
             <div class="scwatbwsr_content pd-10">
 				<h2>Booking Information</h2>
+				<input type="hidden" id="booking_view_booking_id" value="<?=$order->id?>" />
 				<div class="content-area-left">
 					<div class="promotional-title">
 					<h2>Order Date</h2>
 					</div>
 					<div class="container__item">
-					<h2><?=date("l d Y, H:i",strtotime($order->schedule))?></h2>
+					<h2 id="booking_data_schedule"><?=date("l d Y, H:i",strtotime($order->schedule))?></h2>
 					</div>
 		        </div>
 				<div class="content-area-left">
@@ -94,12 +95,12 @@
             </div>
             <div class="container__item">
                <form class="form promo-left">
-			               <select class="size-form">
+			               <select id="booking_view_change_status_select" class="size-form">
 							<?php foreach($booking_status as $st=>$status){ ?>
-                              <option value="<?=$st?>"><?=$status['label']?></option>
+                              <option value="<?=$st?>" <?php if($st==$order->booking_status) echo "selected='selected'";?>><?=$status['label']?></option>
                             <?php } ?>
                            </select>
-                  <button type="button" class="btn--primary btn--inside">Apply</button>
+                  <button type="button" class="btn--primary btn--inside" id="booking_view_change_status_button">Apply</button>
                </form>
               
             </div>
@@ -112,7 +113,7 @@
                <div>
                   <input type="text" name="alt_example_4_alt" id="alt_example_4_alt" value="" style="cursor: pointer;">
                   <br />
-				  <button type="button" class="btn--primary btn--inside">Apply</button>
+				  <button type="button" class="btn--primary btn--inside" id="booking_view_change_schedule">Apply</button>
                </div>
 			   
             </div>
@@ -240,15 +241,16 @@
                   <p class="cart-sub"><strong>Status </strong><span><?=$order->_ipp_status?></span></p>
                   <p class="cart-ship"><strong>Change Status </strong></p>
                   <p class="cart-order">
-				            <select class="size-form">
-                              <option>Small</option>
-                              <option>Large</option>
-                              <option>Medium</option>
-                              <option>Family</option>
+				            <select class="size-form" id="booking_view_payment_status_select">
+							<?php 
+							$payment_status=['Process','Pending','Completed'];
+							foreach($payment_status as $st=>$status){ ?>
+                              <option value="<?=$status?>" <?php if($status==$order->_ipp_status) echo "selected='selected'";?>><?=$status?></option>
+                            <?php } ?>
                            </select>
 				  </p>
 				  
-			       <button type="button" class="btn--primary btn--inside promo-right  mb-3">Update Payment</button>
+			       <button type="button" class="btn--primary btn--inside promo-right  mb-3" id="booking_view_payment_status_change">Update Payment</button>
 		         
                </div>  
             </div>

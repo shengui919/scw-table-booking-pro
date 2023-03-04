@@ -589,3 +589,53 @@ function scwatbwsr_add_tab_admin_post_display(){
 	}
 }
 
+function bookingEmail($booking,$subject='')
+{
+	$htmlContent = '<table>'.
+	'<tr><td>Name</td><td>'.$booking['name'].'</td>'.
+	'<tr><td>Date</td><td>'.$booking['schedule'].'</td>'.
+	'<tr><td>Email</td><td>'.$booking['email'].'</td>'.
+	'<tr><td>Phone</td><td>'.$booking['phone'].'</td>'.
+	'<tr><td>Seats</td><td>'.$booking['seats'].'</td>'.
+	'<tr><td>No Seats</td><td>'.$booking['no_seats'].'</td>'.
+	'<tr><td>Notes</td><td>'.$booking['note'].'</td>';
+	if($booking['total']>0)
+	{
+		if($booking['tran_id']!='' || $booking['trand_id']=='offline')
+		{
+			$htmlContent .= '<tr><td>Payment</td><td>Offline</td>';
+		}
+		else 
+		{
+			$htmlContent .= '<tr><td>Payment</td><td>Online</td>';
+			$htmlContent .='<tr><td>Transaction ID</td><td>'.$booking['_ipp_transaction_id'].'</td>';
+			$htmlContent .= '<tr><td>Payment Status</td><td>'.$booking['_ipp_status'].'</td>';
+			$htmlContent .= '<tr><td>Tax</td><td>'.$booking['_ipp_tax'].'</td>';
+		}
+		$htmlContent .= '<tr><td>Price</td><td>'.$booking['total'].'</td>';
+	}
+	else 
+	{
+		$htmlContent .= '<tr><td>Payment</td><td>Free Booking</td>';
+	}
+	$htmlContent .= '<tr><td>Booking Status</td><td>'.$booking['booking_status'].'</td>'.
+	'<tr><td>Order ID</td><td>'.$booking['orderId'].'</td>'.
+	'</table>';
+    if($subject=='')
+	$subject = 'Remainder Booking Information';
+
+	$body .= '<h2>Booking Date<h2> '.date("l M d, Y",strtotime($booking['schedule']));
+
+	$body .="<p>Restaurant Message : ".$booking['textarea_email']." </p>";
+
+	$body = '<h1>Booking information<h1>';
+
+	
+	$body .=$htmlContent;
+
+	$headers = array('Content-Type: text/html; charset=UTF-8');
+
+	$adminEmail = get_option( 'admin_email' );
+
+	wp_mail( array($booking['email'], $adminEmail), $subject, $body, $headers );
+}

@@ -630,7 +630,57 @@ if($task == "add_page")
 		$roomId, $cseat[0], $cseat[1]));
 	}
   }
-}elseif($task == "send_mail"){
+}elseif($task == "custom_send_mail"){
+	$booking = $_POST;
+	 
+    bookingEmail($booking);
+}
+else if($task == "booking_change_status")
+{
+	$booking_id = filter_var($_POST["booking_id"], FILTER_VALIDATE_INT);
+
+	$booking_status  = filter_var($_POST["booking_status"], FILTER_SANITIZE_STRING);
+
+
+	$booking = (array) orderGet($booking_id);
+
+	orderUpdate($booking_id,["booking_status"=>$booking_status]);
+
+	$booking['textarea_email'] = " Previous status is $booking[status] Restaurant manager change to new status <strong>$booking_status</strong>";
+
+	bookingEmail($booking ,"Booking status is updated!");
+}
+else if($task == "booking_change_schedule")
+{
+	$booking_id = filter_var($_POST["booking_id"], FILTER_VALIDATE_INT);
+
+	$schedule  = filter_var($_POST["schedule"], FILTER_SANITIZE_STRING);
+
+
+	$booking = (array) orderGet($booking_id);
+
+	orderUpdate($booking_id,["schedule"=>date("Y-m-d h:i",strtotime($schedule))]);
+
+	$booking['textarea_email'] = " Previous Booking Date is date('F j, Y, H:i',strtotime($booking[schedule])) Restaurant manager change to new Date <strong>date('F j, Y, H:i',strtotime($schedule))</strong>";
+
+	bookingEmail($booking ,"Booking Date  is updated!");
+}
+else if($task == "booking_change_payment")
+{
+	$booking_id = filter_var($_POST["booking_id"], FILTER_VALIDATE_INT);
+
+	$payment_status  = filter_var($_POST["payment_status"], FILTER_SANITIZE_STRING);
+
+
+	$booking = (array) orderGet($booking_id);
+
+	orderUpdate($booking_id,["_ipp_status"=>$payment_status]);
+
+	$booking['textarea_email']= " Previous payment status is $booking[status] Restaurant manager change to new payment status <strong>$payment_status</strong>";
+
+	bookingEmail($booking ,"Booking payment status is updated!");
+}
+elseif($task == "send_mail"){
 	$name = $_POST["name"];
 	$address = $_POST["address"];
 	$email = $_POST["email"];
@@ -683,8 +733,8 @@ if($task == "add_page")
 	$order = $wpdb->get_row($getdtSql);
 
 	$adminEmail = get_option( 'admin_email' );
-	$subject = 'Order Information';
-	$body = 'Order information<br>';
+	$subject = 'Booking Information';
+	$body = 'Booking information<br>';
 	$body .= 'Schedule: '.$schedule.'<br>';
 	
 	$body .= 'Name: '.$name.'<br>';
@@ -767,23 +817,25 @@ else if($task == "revenue_filter")
 	$where .= " AND p.schedule <= '" . $enddDate . "'";
 	
 	$result["total_revenue"] = $wpdb->get_results("select sum(total) as total ,MONTH(schedule) as month from $table_name p $where group by month",ARRAY_A);
-	$result["booked_table"] = $wpdb->get_results("select sum(total) as total ,MONTH(schedule) as month from $table_name p $where",ARRAY_A);
-	$result["cancelled_table"] = $wpdb->get_results("select sum(total) as total ,MONTH(schedule) as month from $table_name p $where AND booking_status='trash'",ARRAY_A);
-	$result["confirmed_table"] = $wpdb->get_results("select sum(total) as total ,MONTH(schedule) as month from $table_name p $where AND (booking_status='confirmed' OR booking_status='closed')",ARRAY_A);
+	$result["booked_table"] = $wpdb->get_results("select count(id) as total ,MONTH(schedule) as month from $table_name p $where",ARRAY_A);
+	$result["cancelled_table"] = $wpdb->get_results("select count(id) as total ,MONTH(schedule) as month from $table_name p $where AND booking_status='trash'",ARRAY_A);
+	$result["confirmed_table"] = $wpdb->get_results("select count(id) as total ,MONTH(schedule) as month from $table_name p $where AND (booking_status='confirmed' OR booking_status='closed')",ARRAY_A);
 	$result["total_expenses"] = $wpdb->get_results("select sum(total) as total ,MONTH(schedule) as month from $table_name p $where",ARRAY_A);
 	$result["online_revenue"] = $wpdb->get_results("select sum(total) as total ,MONTH(schedule) as month from $table_name p $where AND p.tran_id!='offline' AND p._ipp_status='Completed'",ARRAY_A);
 	
-	$result['check'] = $result["booked_table"];
-	$result['total_revenue'] = array_key_filter_count($result['total_revenue']);
-	$result["booked_table"] =array_key_filter_count($result['booked_table']);
-	$result["cancelled_table"] = array_key_filter_count($result['cancelled_table']);
-	$result["confirmed_table"] =array_key_filter_count($result['confirmed_table']);
-	$result["total_expenses"] = array_key_filter_count($result['total_expenses']);
-	$result["online_revenue"] = array_key_filter_count($result['online_revenue']);
-	echo wp_send_json($result);
+	
+	$result["booked_table"] = array("label"=>"Booked","borderWidth"=>1,"data"=>array_key_filter_count($result['booked_table']));
+	$result['total_revenue'] = array("label"=>"Revenue","borderWidth"=>1,"data"=>array_key_filter_count($result['total_revenue']));
+	$result["cancelled_table"] = array("label"=>"Cancelled","borderWidth"=>1,"data"=>array_key_filter_count($result['cancelled_table']));
+	$result["confirmed_table"] =array("label"=>"Confirmed","borderWidth"=>1,"data"=>array_key_filter_count($result['confirmed_table']));
+	$result["total_expenses"] = array("label"=>"Expenses","borderWidth"=>1,"data"=>array_key_filter_count($result['total_expenses']));
+	$result["online_revenue"] = array("label"=>"Online Revenue","borderWidth"=>1,"data"=>array_key_filter_count($result['online_revenue']));
+	
+	echo wp_send_json(array_values($result));
 }
 function array_key_filter_count($result)
 {
+	$output = [];
 	$month_arr = [
 		'1',
 		'2',
@@ -798,19 +850,23 @@ function array_key_filter_count($result)
 		'11',
 		'12'
 	  ];
-	$total_revenue = array_column($result, 'month');
 	
 	foreach($month_arr as $key=>$val)
 	{
-		if(!in_array($val,$total_revenue))
+		$datas = array_filter($result,function($r) use ($val) {
+			return ($r['month']==$val);
+		});
+		$total_revenue = array_values($datas);
+		if(count($total_revenue) == 0)
 		{
-			$result[$key]= array("total"=>0,"month"=>$key);
+			$output[$key]= array("total"=>count($total_revenue),"month"=>$key);
 		}
 		else 
 		{
-			$result[$key] = array("total"=>$result[$key]["total"]?$result[$key]["total"]:0,"month"=>$key);
+			$output[$key] = array("total"=>$datas[0]["total"]?$datas[0]["total"]:0,"month"=>$key);
 		}
 	}
-	$result=array_column($result,"total");
-	return $result;
+	$output=array_column($output,"total");
+	return $output;
 }
+

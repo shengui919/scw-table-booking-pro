@@ -669,6 +669,7 @@ class scwBookingsTable extends WP_List_Table {
 			case 'email' :
 				$value = esc_html( $booking->email );
 				$value .= '<div class="actions">';
+				$value.='<input type="hidden" id="hid_'.$booking->id.'" value="'.htmlspecialchars(json_encode($booking), ENT_QUOTES, 'UTF-8').'" />';
 				$value .= '<a href="javascript:sendMail('.esc_attr( $booking->id ).')" data-id="' . esc_attr( $booking->id ) . '" data-action="email" data-email="' . esc_attr( $booking->email ) . '" data-name="' . esc_attr( $booking->name ) . '">' . __( 'Send Email', 'scwatbwsr-translate' ) . '</a>';
 				$value .= '</div>';
 				break;
@@ -1246,6 +1247,7 @@ class scwBookingsTable extends WP_List_Table {
 
 		$this->_column_headers = array( $columns, $hidden, $sortable );
         $this->table_data = $this->get_table_data();
+		
 		$this->items = $this->table_data;
 
 		$total_items   = empty( $_GET['status'] ) ? $this->booking_counts['all'] : $this->booking_counts[$_GET['status']];

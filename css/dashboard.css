@@ -191,6 +191,10 @@
   .junk-list__item.active .junk-icon svg {
     fill: white;
   }
+  .weeks-option__item_year.active
+  {
+    color : #1362FC !important
+  }
   .btn--primary--booking {
     background: hsl(40,92%,53%) none repeat scroll 0 0;
     border: 1px solid hsl(40,92%,53%);

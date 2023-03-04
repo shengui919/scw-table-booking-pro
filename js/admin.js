@@ -52,13 +52,53 @@ function openCustomDate(htmlType=1)
 		timepicker:false
 	});
 }
+function sendEmailBooking(booking_id)
+{
+	var booking = JSON.parse(jQuery("#hid_"+booking_id).val());
+	var textarea_email=jQuery(".textarea_email").val();
+	if(textarea_email.length<5)
+	{
+		alert("Email message minmum 5 letters")
+	}
+	else 
+	{
+		booking.textarea_email=textarea_email,
+		booking.task = "custom_send_email"
+	    jQuery.ajax({
+			url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
+			data: booking,
+			type: 'POST',
+			dataType:'JSON',
+			beforeSend: function(data){
+				swal.close();
+				
+			},
+			success: function(data){
+				
+				swal.close();
+				Swal.fire(
+					'Email Sent!',
+					'Email sent successfully!',
+					'success'
+				  )
+				  
+				
+			},
+			error:function(data)
+			{
+				
+				alert('Try again!')
+			}
+		});	
+	}
+}
 function reportsFilterYear(year)
 {
 	var startDate='';
 	var endDate='';
 	var filterText='';
 	jQuery(".weeks-option__item_year").removeClass("active")
-	jQuery(".weeks-option__item.year_"+year).addClass("active")
+	jQuery(".weeks-option__item_year.year_"+year).addClass("active")
 	startDate=year+"-01-01";
 	endDate=year+"-12-31";
 	if(startDate!='') startDate=startDate+" 00:00:00";
@@ -82,7 +122,7 @@ function reportsFilterYear(year)
 		},
 		success: function(data){
 			
-			drawChart(data.total_revenue,data.total_expenses)
+			drawChart(data)
 			
 		},
 		error:function(data)
@@ -205,7 +245,72 @@ function totalCounts()
 }
 function sendMail(booking_id)
 {
+   var booking = JSON.parse(jQuery("#hid_"+booking_id).val());
 
+   if(booking && booking.id)
+   {
+     if(new Date(booking.schedule) < new Date() )
+	 {
+		Swal.fire(
+			'Error!',
+			'Booking is closed!',
+			'error'
+		  )
+	 }
+	 else 
+	 {
+		var htmlContent = '<table>'+
+		'<tr><td>Name</td><td>'+booking.name+'</td>'+
+		'<tr><td>Date</td><td>'+booking.schedule+'</td>'+
+		'<tr><td>Email</td><td>'+booking.email+'</td>'+
+		'<tr><td>Phone</td><td>'+booking.phone+'</td>'+
+		'<tr><td>Seats</td><td>'+booking.seats+'</td>'+
+		'<tr><td>No Seats</td><td>'+booking.no_seats+'</td>'+
+		'<tr><td>Notes</td><td>'+booking.note+'</td>';
+		if(booking.total>0)
+		{
+			if(booking.tran_id!='' || booking.trand_id=='offline')
+			{
+				htmlContent += '<tr><td>Payment</td><td>Offline</td>';
+			}
+			else 
+			{
+				htmlContent += '<tr><td>Payment</td><td>Online</td>';
+				htmlContent +='<tr><td>Transaction ID</td><td>'+booking._ipp_transaction_id+'</td>';
+				htmlContent += '<tr><td>Payment Status</td><td>'+booking._ipp_status+'</td>';
+				htmlContent += '<tr><td>Tax</td><td>'+booking._ipp_tax+'</td>';
+			}
+			htmlContent += '<tr><td>Price</td><td>'+booking.total+'</td>';
+		}
+		else 
+		{
+			htmlContent += '<tr><td>Payment</td><td>Free Booking</td>';
+		}
+		htmlContent += '<tr><td>Booking Status</td><td>'+booking.booking_status+'</td>'+
+		'<tr><td>Order ID</td><td>'+booking.orderId+'</td>'+
+		
+		'<tr><td>Message</td><td><textarea class="textarea_email"></textarea></td>'+
+		'<tr><td colspan="2"><button type="button" onClick="sendEmailBooking('+booking_id+')" class="btn--primary">Send</button></td>'+
+		'</table>';
+		var bDate = new Date(booking.schedule)
+		Swal.fire({
+			title: bDate.toLocaleString('default', { month: 'long' })+', '+bDate.toLocaleDateString("en-Latn-US", { weekday: 'long' })+' '+bDate.getDate(),
+			html:htmlContent,
+			showCloseButton: true,
+			showCancelButton: false,
+			focusConfirm: false,
+			showConfirmButton:false
+		  });
+	 }
+   }
+   else 
+   {
+	Swal.fire(
+		'Error!',
+		'Booking is invalid!',
+		'error'
+	  )
+   }
 }
 function editBooking(booking_id)
 {
@@ -244,6 +349,127 @@ function fetchTimeList(dateTime,elthis,i)
 (function(jQuery) {
 "use strict";
 
+
+jQuery("#booking_view_change_status_button").click(function(){
+	var schedule = jQuery("#booking_data_schedule").text().trim();
+	if(new Date(schedule) < new Date() )
+	 {
+		Swal.fire(
+			'Error!',
+			'Booking is closed!',
+			'error'
+		  )
+	 }
+	 else 
+	 {
+		Swal.fire('Loading.....')
+	
+	jQuery.ajax({
+		url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
+		data: {
+			booking_id:jQuery("#booking_view_booking_id").val(),
+			booking_status:jQuery("#booking_view_change_status_button_select").val(),
+			task : "booking_change_status"
+		},
+		type: 'POST',
+		dataType:'JSON',
+		beforeSend: function(data){
+			
+			
+		},
+		success: function(data){
+			swal.close();
+			alert("Succsully updated")
+		},
+		error:function(data)
+		{
+			swal.close();
+			alert("Try again!")
+		}
+	});
+	 }
+}) 
+
+
+jQuery("#booking_view_change_schedule").click(function(){
+	var schedule = jQuery("#booking_data_schedule").text().trim();
+	if(new Date(schedule) < new Date() )
+	 {
+		Swal.fire(
+			'Error!',
+			'Booking is closed!',
+			'error'
+		  )
+	 }
+	 else 
+	 {
+		Swal.fire('Loading.....')
+	
+	jQuery.ajax({
+		url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
+		data: {
+			booking_id:jQuery("#booking_view_booking_id").val(),
+			schedule:jQuery("#alt_example_4_alt").val(),
+			task : "booking_change_schedule"
+		},
+		type: 'POST',
+		dataType:'JSON',
+		beforeSend: function(data){
+			
+			
+		},
+		success: function(data){
+			swal.close();
+			alert("Succsully updated")
+		},
+		error:function(data)
+		{
+			swal.close();
+			alert("Try again!")
+		}
+	});
+	 }
+})
+
+jQuery("#booking_view_payment_status_change").click(function(){
+	var schedule = jQuery("#booking_data_schedule").text().trim();
+	if(new Date(schedule) < new Date() )
+	 {
+		Swal.fire(
+			'Error!',
+			'Booking is closed!',
+			'error'
+		  )
+	 }
+	 else 
+	 {
+		Swal.fire('Loading.....')
+	
+	jQuery.ajax({
+		url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
+		data: {
+			booking_id:jQuery("#booking_view_booking_id").val(),
+			payment_status:jQuery("#booking_view_payment_status_select").val(),
+			task : "booking_change_payment"
+		},
+		type: 'POST',
+		dataType:'JSON',
+		beforeSend: function(data){
+			
+			
+		},
+		success: function(data){
+			swal.close();
+			alert("Succsully updated")
+		},
+		error:function(data)
+		{
+			swal.close();
+			alert("Try again!")
+		}
+	});
+	 }
+})
 jQuery( '.name-table.table' ).click( function() {
 	var element = jQuery(this);
 	element.toggleClass('active');
@@ -1240,11 +1466,15 @@ function getCookie(cname) {
     }
     return "";
 }
-function drawChart(salesL,cancelL)
+var ctx = document.getElementById('myChart').getContext("2d");
+var myChart ;
+function drawChart(data)
 {
-	const ctx = document.getElementById('myChart');
+	
 if(ctx)
 {
+	if(myChart)
+	myChart.destroy();
 	const MONTHS = [
 		'January',
 		'February',
@@ -1268,23 +1498,17 @@ if(ctx)
 		'#166a8f',
 		'#00a950',
 		'#58595b',
-		'#8549ba'
+		'#8549ba',
+		'#4dc9f6',
+		'#f67019',
+		'#f53794',
 	  ];
   const labels = MONTHS;
-  new Chart(ctx, {
+  myChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: labels,
-      datasets: [{
-        label: 'Sales',
-        data: salesL,
-        borderWidth: 1
-      },
-	  {
-        label: 'Cancelled Booking',
-        data: cancelL,
-        borderWidth: 2
-      }]
+      datasets: data
     },
     options: {
       scales: {
@@ -1298,5 +1522,5 @@ if(ctx)
 }
 
 jQuery(document).ready(function(){
-	reportsFilterYear('2023')
+	reportsFilterYear(jQuery(".weeks-option__item_year:first").text().trim())
 })
