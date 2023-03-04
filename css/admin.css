@@ -1904,3 +1904,8 @@ table.fixed {
 }
 /* tab vertical */
 
+#wpfooter
+{
+    position: inherit;
+}
+

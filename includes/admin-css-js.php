@@ -20,10 +20,14 @@
 	wp_enqueue_script('datetimepicker');
 	wp_register_style('datetimepicker', SCWATBWSR_URL .'datetimepicker/jquery.datetimepicker.css');
 	wp_enqueue_style('datetimepicker');
-	
+	wp_register_script('jquery-chart', 'https://cdn.jsdelivr.net/npm/chart.js');
+	wp_enqueue_script('jquery-chart');
 	wp_register_script('jquery-ui', 'https://code.jquery.com/ui/1.9.2/jquery-ui.js');
 	wp_enqueue_script('jquery-ui');
-	
+	wp_register_script('sweetalert','https://cdn.jsdelivr.net/npm/sweetalert2@11');
+	wp_enqueue_script('sweetalert');
+	wp_register_script('momentjs','https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.min.js');
+	wp_enqueue_script('momentjs');
 	wp_register_script('scwatbwsr-adminscript', SCWATBWSR_URL .'js/admin.js',array(),time(),true);
 	wp_enqueue_script('scwatbwsr-adminscript');
 	wp_register_style('scwatbwsr-admincss', SCWATBWSR_URL .'css/admin.css',array(),time());

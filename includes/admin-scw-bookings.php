@@ -95,10 +95,9 @@
             <div class="container__item">
                <form class="form promo-left">
 			               <select class="size-form">
-                              <option>Small</option>
-                              <option>Large</option>
-                              <option>Medium</option>
-                              <option>Family</option>
+							<?php foreach($booking_status as $st=>$status){ ?>
+                              <option value="<?=$st?>"><?=$status['label']?></option>
+                            <?php } ?>
                            </select>
                   <button type="button" class="btn--primary btn--inside">Apply</button>
                </form>

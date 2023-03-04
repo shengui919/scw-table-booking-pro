@@ -1,5 +1,193 @@
 
 var upload_image_button=false;
+function rangeyears (startYear) {
+    var currentYear = new Date().getFullYear(), years = [];
+    startYear = startYear || 2010;  
+    while ( startYear <= currentYear ) {
+        years.push(startYear++);
+    }   
+    return years;
+}
+function openCustomDate(htmlType=1)
+{
+	var htmlContent = '<div class="date-filters-swal">'+
+	'<div class="rtb-admin-bookings-filters-start">'+
+	'<label for="start-date" class="screen-reader-text">Start Date:</label>'+
+	'<input type="text" id="start-date-swal" name="start_date_swal" class="datepickerswal" value="" placeholder="Start Date">'+
+	'</div>'+	
+	'<div class="rtb-admin-bookings-filters-end">'+
+	'<label for="end-date" class="screen-reader-text">End Date:</label>'+
+	'<input type="text" id="end-date-swal" name="end_date_swal" class="datepickerswal" value="" placeholder="End Date">'+
+	'</div>'+
+	'<input type="submit" onClick="reportsFilter(1)" class="button button-secondary" value="Apply">'+
+	'</div>';
+    if(htmlType=='2')
+	{
+		var dropdownHtml='';
+		var listYears = rangeyears();
+		listYears.forEach(function(year,ind)
+		{
+			dropdownHtml+='<option value="'+year+'">'+year+'</option>';
+		});
+		htmlContent = '<div class="date-filters-swal">'+
+		'<div class="rtb-admin-bookings-filters-start">'+
+		'<label for="start-date" class="screen-reader-text">Select Year</label>'+
+		'<select class="year_filter mb-3" id="filter_year"  style="width:200px;height:45px">';
+		htmlContent +=dropdownHtml;
+		htmlContent +='</select></div>'+
+		'<input type="submit" onClick="reportsFilter(2)" class="button button-secondary" value="Apply">'+
+		'</div>';
+	}
+	Swal.fire({
+		title: '<strong>Select Date</strong>',
+		html:htmlContent,
+		showCloseButton: true,
+		showCancelButton: false,
+		focusConfirm: false,
+		showConfirmButton:false
+	  });
+	  jQuery('#start-date-swal,#end-date-swal').datetimepicker({
+		format: jQuery(".scw_date_format").val(),
+		closeOnDateSelect: false,
+		timepicker:false
+	});
+}
+function reportsFilterYear(year)
+{
+	var startDate='';
+	var endDate='';
+	var filterText='';
+	jQuery(".weeks-option__item_year").removeClass("active")
+	jQuery(".weeks-option__item.year_"+year).addClass("active")
+	startDate=year+"-01-01";
+	endDate=year+"-12-31";
+	if(startDate!='') startDate=startDate+" 00:00:00";
+	if(endDate!='') endDate=endDate+" 23:59:59";
+	Swal.fire('Loading.....')
+	
+	jQuery.ajax({
+		url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
+		data: {
+			startDate:startDate,
+			endDate:endDate,
+			year:year,
+			type:'year',
+			task : "revenue_filter"
+		},
+		type: 'POST',
+		dataType:'JSON',
+		beforeSend: function(data){
+			swal.close();
+			
+		},
+		success: function(data){
+			
+			drawChart(data.total_revenue,data.total_expenses)
+			
+		},
+		error:function(data)
+		{
+			
+			
+		}
+	});
+		
+}
+function reportsFilter(type=0)
+{
+	var startDate='';
+	var endDate='';
+	var year='';
+	var filterText='';
+	jQuery(".weeks-option__item").removeClass("active")
+	jQuery(".weeks-option__item."+type).addClass("active")
+	if(type=="1")
+	{
+
+		startDate=jQuery("#start-date-swal").val();
+		endDate=jQuery("#end-date-swal").val();
+		
+	}
+	else if(type=="2")
+	{
+		year=jQuery("#filter_year").val();
+		startDate=year+"-01-01";
+		endDate=year+"-12-31";
+		filterText = "Year "+year
+	}
+	else if(type=="last_week")
+	{
+		startDate=moment().subtract(1, 'weeks').startOf('week').format('YYYY-MM-DD');
+        endDate=moment().subtract(1, 'weeks').endOf('week').format('YYYY-MM-DD');
+	}
+	else if(type=="week")
+	{
+		startDate=moment().startOf('week').format('YYYY-MM-DD');
+		endDate=moment().endOf('week').format('YYYY-MM-DD');
+	}
+	else if(type=="yesterday")
+	{
+		startDate=moment().subtract(1, 'day').format('YYYY-MM-DD');
+        endDate=moment().subtract(1, 'day').format('YYYY-MM-DD');
+	}
+	else if(type=="today")
+	{
+		startDate=moment().format('YYYY-MM-DD');
+        endDate=moment().format('YYYY-MM-DD');
+	}
+	else if(type=="month")
+	{
+		startDate=moment().startOf('month').format('YYYY-MM-DD');
+		endDate=moment().endOf('month').format('YYYY-MM-DD');
+	}
+	else if(type=="last_month")
+	{
+		startDate=moment().subtract(1, 'months').startOf('month').format('YYYY-MM-DD');
+        endDate=moment().subtract(1, 'months').endOf('month').format('YYYY-MM-DD');
+	}
+	filterText = startDate +" - "+endDate
+jQuery("#filter_label").text(filterText)
+	if(startDate!='') startDate=startDate+" 00:00:00";
+	if(endDate!='') endDate=endDate+" 23:59:59";
+	Swal.fire('Loading.....')
+	
+	jQuery.ajax({
+		url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
+		data: {
+			startDate:startDate,
+			endDate:endDate,
+			year:year,
+			type:type,
+			task : "reports_filter"
+		},
+		type: 'POST',
+		dataType:'JSON',
+		beforeSend: function(data){
+			swal.close();
+			jQuery(".cards.reports-filter .card").css("display","none");
+		},
+		success: function(data){
+			jQuery(".cards.reports-filter .card").css("display","block");
+			
+			jQuery(".card__title.online_revenue").text("$"+data.online_revenue)
+			jQuery(".card__title.booked_table").text(data.booked_table)
+			jQuery(".card__title.cancelled_table").text(data.cancelled_table)
+			jQuery(".card__title.confirmed_table").text(data.confirmed_table)
+			jQuery(".card__title.total_expenses").text("$"+data.total_expenses)
+			jQuery(".card__title.total_revenue").text("$"+data.total_revenue)
+		},
+		error:function(data)
+		{
+			jQuery(".cards.reports-filter .card").css("display","block");
+			jQuery(".card__title.online_revenue").text("$0.00")
+			jQuery(".card__title.booked_table").text('0')
+			jQuery(".card__title.cancelled_table").text('0')
+			jQuery(".card__title.confirmed_table").text('0')
+			jQuery(".card__title.total_expenses").text("$0.00")
+			jQuery(".card__title.total_revenue").text("$0.00")
+		}
+	});
+}
 function totalCounts()
 {
 	var tableCount =jQuery(".name-table.active").length;
@@ -11,7 +199,7 @@ function totalCounts()
 	{
 		tableName.push(jQuery(".name-table.active:eq('"+i+"')").data("name"));
 	}
-	console.log(tableName)
+	
 	jQuery("#total-table-list").text(tableName.toString())
 	
 }
@@ -93,7 +281,7 @@ jQuery(document)
 		return false;
 	}
 });
-
+reportsFilter('month');
 function filterByName() {
 let text = jQuery('#rtb-filters .filter_name input').val();
 let href = jQuery('#rtb-filters .filter_name a').prop('href');
@@ -107,7 +295,7 @@ jQuery(document).on('click', '.date-filters input[type="submit"]', function(even
 	let args = [];
 	let url = new URL(window.location.href);
 
-	jQuery('.date-filters input[type="type"]').each((i, x) => {
+	jQuery('.date-filters input[type="text"]').each((i, x) => {
 		'' === jQuery(x).val() ? null : args.push([jQuery(x).prop('name'), jQuery(x).val()]);
 	});
 
@@ -122,6 +310,7 @@ jQuery('.rtb-admin-bookings-filters-start #start-date,#end-date').datetimepicker
 	step: 5,
 	defaultTime: "00:00"
 });
+
 jQuery('#alt_example_4_alt').datetimepicker({
 	format: jQuery(".scw_date_format").val()+' H:i',
 	closeOnDateSelect: false,
@@ -1051,3 +1240,63 @@ function getCookie(cname) {
     }
     return "";
 }
+function drawChart(salesL,cancelL)
+{
+	const ctx = document.getElementById('myChart');
+if(ctx)
+{
+	const MONTHS = [
+		'January',
+		'February',
+		'March',
+		'April',
+		'May',
+		'June',
+		'July',
+		'August',
+		'September',
+		'October',
+		'November',
+		'December'
+	  ];
+	  const COLORS = [
+		'#4dc9f6',
+		'#f67019',
+		'#f53794',
+		'#537bc4',
+		'#acc236',
+		'#166a8f',
+		'#00a950',
+		'#58595b',
+		'#8549ba'
+	  ];
+  const labels = MONTHS;
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Sales',
+        data: salesL,
+        borderWidth: 1
+      },
+	  {
+        label: 'Cancelled Booking',
+        data: cancelL,
+        borderWidth: 2
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+}
+
+jQuery(document).ready(function(){
+	reportsFilterYear('2023')
+})

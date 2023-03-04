@@ -719,3 +719,98 @@ if($task == "add_page")
 	wp_mail( array($email, $adminEmail), $subject, $body, $headers );
 	echo wp_send_json($gateway);
 }
+else if($task == "reports_filter")
+{
+	$table_name = $wpdb->prefix . 'scwatbwsr_orders';
+	$where = "WHERE p.productId > 0";
+	$filter_type = filter_var($_POST["type"], FILTER_VALIDATE_INT);
+	$result= [
+		"online_revenue"=>0,
+		"booked_table"=>0,
+		"cancelled_table"=>0,
+		"confirmed_table"=>0,
+		"total_expenses"=>0,
+		"total_revenue"=>0,
+	];
+	$startDate = filter_var($_POST["startDate"], FILTER_SANITIZE_STRING);
+	$enddDate = filter_var($_POST["endDate"], FILTER_SANITIZE_STRING);
+	   
+	$where .= " AND p.schedule >= '" . $startDate . "'";	
+	$where .= " AND p.schedule <= '" . $enddDate . "'";
+	
+	$result["total_revenue"] = $wpdb->get_var("select sum(total) from $table_name p $where");
+	$result["booked_table"] = $wpdb->get_var("select count(id) from $table_name p $where");
+	$result["cancelled_table"] = $wpdb->get_var("select count(id) from $table_name p $where AND booking_status='trash'");
+	$result["confirmed_table"] = $wpdb->get_var("select count(id) from $table_name p $where AND (booking_status='confirmed' OR booking_status='closed')");
+	$result["total_expenses"] = $wpdb->get_var("select sum(_ipp_tax) from $table_name p $where");
+	$result["online_revenue"] = $wpdb->get_var("select sum(total) from $table_name p $where AND p.tran_id!='offline' AND p._ipp_status='Completed'");
+	$result["online_revenue"] = ($result["online_revenue"]=='null')?$result["online_revenue"]:"0.00";
+	echo wp_send_json($result);
+}
+else if($task == "revenue_filter")
+{
+	$table_name = $wpdb->prefix . 'scwatbwsr_orders';
+	$where = "WHERE p.productId > 0";
+	$filter_type = filter_var($_POST["type"], FILTER_VALIDATE_INT);
+	$result= [
+		"online_revenue"=>0,
+		"booked_table"=>0,
+		"cancelled_table"=>0,
+		"confirmed_table"=>0,
+		"total_expenses"=>0,
+		"total_revenue"=>0,
+	];
+	$startDate = filter_var($_POST["startDate"], FILTER_SANITIZE_STRING);
+	$enddDate = filter_var($_POST["endDate"], FILTER_SANITIZE_STRING);
+	   
+	$where .= " AND p.schedule >= '" . $startDate . "'";	
+	$where .= " AND p.schedule <= '" . $enddDate . "'";
+	
+	$result["total_revenue"] = $wpdb->get_results("select sum(total) as total ,MONTH(schedule) as month from $table_name p $where group by month",ARRAY_A);
+	$result["booked_table"] = $wpdb->get_results("select sum(total) as total ,MONTH(schedule) as month from $table_name p $where",ARRAY_A);
+	$result["cancelled_table"] = $wpdb->get_results("select sum(total) as total ,MONTH(schedule) as month from $table_name p $where AND booking_status='trash'",ARRAY_A);
+	$result["confirmed_table"] = $wpdb->get_results("select sum(total) as total ,MONTH(schedule) as month from $table_name p $where AND (booking_status='confirmed' OR booking_status='closed')",ARRAY_A);
+	$result["total_expenses"] = $wpdb->get_results("select sum(total) as total ,MONTH(schedule) as month from $table_name p $where",ARRAY_A);
+	$result["online_revenue"] = $wpdb->get_results("select sum(total) as total ,MONTH(schedule) as month from $table_name p $where AND p.tran_id!='offline' AND p._ipp_status='Completed'",ARRAY_A);
+	
+	$result['check'] = $result["booked_table"];
+	$result['total_revenue'] = array_key_filter_count($result['total_revenue']);
+	$result["booked_table"] =array_key_filter_count($result['booked_table']);
+	$result["cancelled_table"] = array_key_filter_count($result['cancelled_table']);
+	$result["confirmed_table"] =array_key_filter_count($result['confirmed_table']);
+	$result["total_expenses"] = array_key_filter_count($result['total_expenses']);
+	$result["online_revenue"] = array_key_filter_count($result['online_revenue']);
+	echo wp_send_json($result);
+}
+function array_key_filter_count($result)
+{
+	$month_arr = [
+		'1',
+		'2',
+		'3',
+		'4',
+		'5',
+		'6',
+		'7',
+		'8',
+		'9',
+		'10',
+		'11',
+		'12'
+	  ];
+	$total_revenue = array_column($result, 'month');
+	
+	foreach($month_arr as $key=>$val)
+	{
+		if(!in_array($val,$total_revenue))
+		{
+			$result[$key]= array("total"=>0,"month"=>$key);
+		}
+		else 
+		{
+			$result[$key] = array("total"=>$result[$key]["total"]?$result[$key]["total"]:0,"month"=>$key);
+		}
+	}
+	$result=array_column($result,"total");
+	return $result;
+}

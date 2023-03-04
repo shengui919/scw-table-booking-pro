@@ -196,7 +196,7 @@ class scwBookingsTable extends WP_List_Table {
 			)[ 'singular' ]
 		);
 		$this->booking_statuses[ 'pending' ] = array( 
-			'label' => __( 'Pen', 'scwatbwsr-translate' ),
+			'label' => __( 'Pending', 'scwatbwsr-translate' ),
 			'count' => _n_noop(
 				'Pending <span class="count">(%s)</span>', 
 				'Pending <span class="count">(%s)</span>', 
@@ -239,8 +239,10 @@ class scwBookingsTable extends WP_List_Table {
 
 		$this->filter_start_date 	= $start_date;
 		$this->filter_end_date 		= $end_date;
-		$this->filter_start_time 	= $start_time;
-		$this->filter_end_time 		= $end_time;
+		$this->filter_start_time    = $start_time;
+		$this->filter_end_time      = $end_time;
+		
+		
 
 		if ( $start_date === null ) {
 			$this->filter_start_date = !empty( $_GET['start_date'] ) ? sanitize_text_field( $_GET['start_date'] ) : null;
@@ -251,16 +253,31 @@ class scwBookingsTable extends WP_List_Table {
 			$this->filter_end_date = !empty( $_GET['end_date'] ) ? sanitize_text_field( $_GET['end_date'] ) : null;
 			$this->filter_end_date = !empty( $_POST['end_date'] ) ? sanitize_text_field( $_POST['end_date'] ) : $this->filter_end_date;
 		}
-
-		if ( $start_time === null ) {
-			$this->filter_start_time = !empty( $_GET['start_time'] ) ? sanitize_text_field( $_GET['start_time'] ) : null;
-			$this->filter_start_time = !empty( $_POST['start_time'] ) ? sanitize_text_field( $_POST['start_time'] ) : $this->filter_start_time;
+       
+		
+		$start_time_check = null;
+		if(!is_null($this->filter_start_date))
+		{
+		  $start_time_check= date("Y-m-d H:i:s",strtotime($this->filter_start_date));
+		  $this->filter_start_date = date("Y-m-d",strtotime($start_time_check));
+		  if (DateTime::createFromFormat('Y-m-d H:i:s', $start_time_check) !== false) 
+		  {
+			$this->filter_start_time 	= date("H:i:s",strtotime($start_time_check));
+		  }
+		}
+		$end_time_check = null;
+		
+        if(!is_null($this->filter_end_date))
+		{
+			$end_time_check= date("Y-m-d H:i:s",strtotime($this->filter_end_date));
+			$this->filter_end_date = date("Y-m-d",strtotime($end_time_check));
+			if (DateTime::createFromFormat('Y-m-d H:i:s', $end_time_check) !== false) 
+		  {
+			$this->filter_end_time 	= date("H:i:s",strtotime($end_time_check));
+		  }
 		}
 
-		if ( $end_time === null ) {
-			$this->filter_end_time = !empty( $_GET['end_time'] ) ? sanitize_text_field( $_GET['end_time'] ) : null;
-			$this->filter_end_time = !empty( $_POST['end_time'] ) ? sanitize_text_field( $_POST['end_time'] ) : $this->filter_end_time;
-		}
+		
 	}
 
 	/**
@@ -1222,7 +1239,7 @@ class scwBookingsTable extends WP_List_Table {
 	 * @since 0.0.1
 	 */
 	public function prepare_items() {
-
+        global  $wpdb;
 		$columns  = $this->get_columns();
 		$hidden   = array(); // No hidden columns
 		$sortable = $this->get_sortable_columns();

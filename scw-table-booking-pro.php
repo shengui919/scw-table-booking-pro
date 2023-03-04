@@ -328,6 +328,7 @@ function show_admin_bookings_page() {
 	wp_enqueue_style('adminbookingcss');
 	$bookings_table = new scwBookingsTable();
 	$bookings_table->prepare_items();
+	$booking_status = $bookings_table->booking_statuses;
 	include_once dirname(__FILE__) . '/includes/admin-scw-bookings.php';
 	
 }
@@ -335,6 +336,8 @@ function show_admin_bookings_page() {
 	
 function scwatbwsr_dashboard_page()
 {
+	wp_register_style('admindashboardcss', SCWATBWSR_URL .'css/dashboard.css',array(),time());
+	wp_enqueue_style('admindashboardcss');
 	include_once dirname(__FILE__) . '/includes/admin-css-js.php';
 	include_once dirname(__FILE__) . '/includes/admin-scw-dashboard.php';
 	
@@ -367,4 +370,15 @@ function adminMenuPage()
 		</div>
 	<?php
 }
+// Register settings using the Settings API
+function wpdocs_register_my_setting() {
+	register_setting( 'my-options-group', 'my-option-name', 'intval' );
+}
+add_action( 'admin_init', 'wpdocs_register_my_setting' );
+
+// Modify capability
+function wpdocs_my_page_capability( $capability ) {
+	return 'edit_others_posts';
+}
+add_filter( 'option_page_capability_my-options-group', 'wpdocs_my_page_capability' );
 
