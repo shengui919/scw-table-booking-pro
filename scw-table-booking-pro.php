@@ -252,25 +252,35 @@ function scwatbwsr_install(){
 
 add_action( 'admin_menu', 'scwatbwsr_admin_menu' );
 function scwatbwsr_admin_menu(){
+	
 	add_menu_page(
-        'SCW Bookings Settings',
-        'SCW Bookings Settings',
-        'manage_options',
-        'scwatbwsr-table-settings',
-        'scwatbwsr_parameters'
-    );
-    add_submenu_page(
-		'scwatbwsr-table-settings',
-		'SCW Bookings Dashboard',
-        'SCW Bookings Dashboard',
+		'SCW  Dashboard',
+        'SCW  Dashboard',
         'manage_options',
         'scwatbwsr-table-dashboard',
         'scwatbwsr_dashboard_page'
 	);
 	add_submenu_page(
-		'scwatbwsr-table-settings',
-		'SCW Table Bookings',
-        'SCW Table Bookings',
+		'scwatbwsr-table-dashboard',
+        'SCW  Rooms',
+        'SCW  Rooms',
+        'manage_options',
+        'scwatbwsr-table-settings',
+        'scwatbwsr_parameters'
+    );
+	add_submenu_page(
+		'scwatbwsr-table-dashboard',
+		'SCW Payment',
+        'SCW Payment',
+        'manage_options',
+        'scwatbwsr-payment-settings',
+        'show_admin_payment_page'
+	);
+    
+	add_submenu_page(
+		'scwatbwsr-table-dashboard',
+		'SCW  Bookings',
+        'SCW  Bookings',
         'manage_options',
         'scwatbwsr-table-bookings',
         'show_admin_bookings_page'
@@ -302,6 +312,7 @@ function scwatbwsr_parameters(){
 	include_once dirname(__FILE__) . '/includes/admin-css-js.php';
 	include_once dirname(__FILE__) . '/includes/admin-scw-settings.php';
 }
+
 include_once dirname(__FILE__) . '/includes/booking-form.php';
 add_shortcode('scw_booking_form', 'scwatbwsr_content');
 
@@ -319,6 +330,13 @@ function getActiveClass($roomId,$scwatbwsr_tab1)
 		if($scwatbwsr_tab1=="scwatbwsr_tab1")
 		echo "active";
 	}
+}
+function show_admin_payment_page()
+{
+	include_once dirname(__FILE__) . '/includes/admin-css-js.php';
+	include_once dirname(__FILE__) . '/includes/functions.php';
+	include_once dirname(__FILE__) . '/includes/admin-scw-payment.php';
+	
 }
 function show_admin_bookings_page() {
     include_once dirname(__FILE__) . '/includes/admin-css-js.php';
@@ -363,8 +381,11 @@ function adminMenuPage()
 				<a id="bookings-menu" href="admin.php?page=scwatbwsr-table-bookings" class="menu-tab nav-tab <?php if($page=='scwatbwsr-table-bookings') echo 'nav-tab-active';?>">
 					Bookings				</a>
 
-									<a id="options-menu" href="admin.php?page=scwatbwsr-table-settings" class="menu-tab nav-tab <?php if($page=='scwatbwsr-table-settings') echo 'nav-tab-active';?>">
-						Settings					</a>
+									
+						<a id="options-menu" href="admin.php?page=scwatbwsr-table-settings" class="menu-tab nav-tab <?php if($page=='scwatbwsr-table-settings') echo 'nav-tab-active';?>">
+						Rooms Settings					</a>
+						<a id="options-menu" href="admin.php?page=scwatbwsr-payment-settings" class="menu-tab nav-tab <?php if($page=='scwatbwsr-payment-settings') echo 'nav-tab-active';?>">
+						Payment Settings					</a>
 								
 							
 		</div>

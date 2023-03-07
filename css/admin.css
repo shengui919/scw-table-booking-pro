@@ -83,6 +83,26 @@
     width: 100%;
 	
 }
+.mt-3-right
+{
+    float: right;
+    margin-top:5px;
+}
+.new_room_link
+{
+    float:right !important;
+    background:rgb(66 99 159);
+    text-decoration: none;
+    color:#fff;
+    padding:10px;
+    margin-bottom:20px;
+}
+.new_room_link:hover{
+    color:#FFF;
+}
+.new_room_link i{
+    color:#fff;
+}
 .scwatbwsr_room {
     float: left;
     width: 100%;
@@ -95,6 +115,8 @@
     color: #fff;
     height: 40px;
     line-height: 37px;
+    margin-bottom:2px;
+    cursor: pointer;
 }
 .scwatbwsr_room_head .fa-angle-double-right,
 .scwatbwsr_room_head .fa-angle-double-down {
@@ -1908,4 +1930,7 @@ table.fixed {
 {
     position: inherit;
 }
-
+.scwatbwsr_content .content
+{
+  padding:25px;
+}

@@ -38,8 +38,9 @@ if($task == "add_page")
 		$wpdb->query($wpdb->prepare("INSERT INTO $roomsTb (roomname)
 		VALUES (%s)", 
 		$roomName));
-		$proid = $reservations_page;
-	    $vl = filter_var($_POST["vl"], FILTER_VALIDATE_INT);
+		$allOptions = get_option('scw-settings');
+		$proid = $allOptions['scw-booking-page'];
+	    $vl = $wpdb->insert_id;
 	
 	$tableName = $wpdb->prefix . 'scwatbwsr_products';
 	$getrs = $wpdb->prepare("SELECT * from {$tableName} where proid=%d", $proid);
@@ -318,16 +319,21 @@ if($task == "add_page")
 	
 	$tableRooms = $wpdb->prefix . 'scwatbwsr_rooms';
 	
-	$getMaxid = $wpdb->prepare("SELECT MAX(id) maxid from {$tableRooms} where %d", 1);
-	$getMaxidRs = $wpdb->get_results($getMaxid);
-	$maxid = $getMaxidRs[0]->maxid + 1;
+	$getMaxid = $wpdb->prepare("SELECT MAX(id) maxid from {$tableRooms} where roomname=%s", $newname);
+	$getMaxidRs = $wpdb->get_var($getMaxid);
+	if($getMaxidRs)
+	{
+		echo "Room name is exits!";
+		die;
+	}
 	
 	$getRoomData = $wpdb->prepare("SELECT * from {$tableRooms} where id=%d", $roomId);
 	$roomData = $wpdb->get_results($getRoomData);
 	if($roomData){
-		$wpdb->query($wpdb->prepare("INSERT INTO $tableRooms (id, roomname, roomcolor, roombg, width, height, tbbookedcolor, seatbookedcolor)
-		VALUES (%d, %s, %s, %s, %s, %s, %s, %s)",
-		$maxid, $newname, $roomData[0]->roomcolor, $roomData[0]->roombg, $roomData[0]->width, $roomData[0]->height, $roomData[0]->tbbookedcolor, $roomData[0]->seatbookedcolor));
+		$wpdb->query($wpdb->prepare("INSERT INTO $tableRooms ( roomname, roomcolor, roombg, width, height, tbbookedcolor, seatbookedcolor)
+		VALUES ( %s, %s, %s, %s, %s, %s, %s)",
+		$newname, $roomData[0]->roomcolor, $roomData[0]->roombg, $roomData[0]->width, $roomData[0]->height, $roomData[0]->tbbookedcolor, $roomData[0]->seatbookedcolor));
+	    $maxid = $wpdb->insert_id;
 	}
 	
 	$tableDailySche = $wpdb->prefix . 'scwatbwsr_dailyschedules';
@@ -344,9 +350,9 @@ if($task == "add_page")
 	$dailyTime = $wpdb->get_results($getDailyTime);
 	if($dailyTime){
 		foreach($dailyTime as $dt){
-			$wpdb->query($wpdb->prepare("INSERT INTO $tableDailyTime (roomid, time)
-			VALUES (%d, %s)",
-			$maxid, $dt->time));
+			$wpdb->query($wpdb->prepare("INSERT INTO $tableDailyTime (roomid, start_time,end_time,week_day)
+			VALUES (%d, %s, %s, %s)",
+			$maxid, $dt->start_time,$dt->end_time,$dt->week_day));
 		}
 	}
 	
@@ -355,9 +361,9 @@ if($task == "add_page")
 	$sches = $wpdb->get_results($getSches);
 	if($sches){
 		foreach($sches as $sche){
-			$wpdb->query($wpdb->prepare("INSERT INTO $tableSches (roomid, schedule)
-			VALUES (%d, %s)",
-			$maxid, $sche->schedule));
+			$wpdb->query($wpdb->prepare("INSERT INTO $tableSches (roomid, schedule, start_time, end_time)
+			VALUES (%d, %s, %s, %s)",
+			$maxid, $sche->schedule, $sche->start_time, $sche->end_time));
 		}
 	}
 	
@@ -368,14 +374,12 @@ if($task == "add_page")
 	if($types){
 		$getMaxType = $wpdb->prepare("SELECT MAX(id) maxtypeid from {$tableTypes} where %d", 1);
 		$getMaxTypeRs = $wpdb->get_results($getMaxType);
-		$maxtype = $getMaxTypeRs[0]->maxtypeid + 1;
-	
+		
 		foreach($types as $type){
-			$wpdb->query($wpdb->prepare("INSERT INTO $tableTypes (id, roomid, name, tbbg, tbshape, tbrecwidth, tbrecheight, tbcirwidth, seatbg, seatshape, seatwidth)
+			$wpdb->query($wpdb->prepare("INSERT INTO $tableTypes ( roomid, name, tbbg, tbshape, tbrecwidth, tbrecheight, tbcirwidth, seatbg, seatshape, seatwidth)
 			VALUES (%d, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-			$maxtype, $maxid, $type->name, $type->tbbg, $type->tbshape, $type->tbrecwidth, $type->tbrecheight, $type->tbcirwidth, $type->seatbg, $type->seatshape, $type->seatwidth));
-			
-			$oldid = $type->id;
+			 $maxid, $type->name, $type->tbbg, $type->tbshape, $type->tbrecwidth, $type->tbrecheight, $type->tbcirwidth, $type->seatbg, $type->seatshape, $type->seatwidth));
+			 $maxtype = $wpdb->insert_id;
 			
 			$getPrice = $wpdb->prepare("SELECT * from {$tablePrices} where typeid=%d", $oldid);
 			$price = $wpdb->get_results($getPrice);
@@ -385,12 +389,13 @@ if($task == "add_page")
 				$maxtype, $price[0]->price, $price[0]->type));
 			}
 			
-			$maxtype++;
+			
 		}
 	}
 	
 	$tableTables = $wpdb->prefix . 'scwatbwsr_tables';
 	$tableSeats = $wpdb->prefix . 'scwatbwsr_seats';
+	$tableBookedSeats=$wpdb->prefix . 'scwatbwsr_bookedseats';
 	$getTables = $wpdb->prepare("SELECT * from {$tableTables} where roomid=%d", $roomId);
 	$tables = $wpdb->get_results($getTables);
 	if($tables){
@@ -401,8 +406,8 @@ if($task == "add_page")
 		foreach($tables as $table){
 			$wpdb->query($wpdb->prepare("INSERT INTO $tableTables (id, roomid, label, seats, type, tleft, ttop)
 			VALUES (%d, %d, %s, %s, %d, %s, %s)",
-			$maxtb, $maxid, $table->label, $table->seats, $table->type, $table->tleft, $table->ttop));
-			
+			$maxtb, $maxid, $table->label, $table->seats, $maxtype, $table->tleft, $table->ttop));
+			$maxtb = $wpdb->insert_id;
 			$oldid = $table->id;
 			
 			$getSeat = $wpdb->prepare("SELECT * from {$tableSeats} where tbid=%d", $oldid);
@@ -412,10 +417,13 @@ if($task == "add_page")
 					$wpdb->query($wpdb->prepare("INSERT INTO $tableSeats (tbid, seat, tleft, ttop)
 					VALUES (%d, %s, %s, %s)",
 					$maxtb, $s->seat, $s->tleft, $s->ttop));
+					$wpdb->query($wpdb->prepare("INSERT INTO $tableBookedSeats (roomid, tb, tb_id, seat)
+					VALUES (%d, %s, %d, %d)",
+					$maxid, $table->label, $s->tb_id, $s->seat));
 				}
 			}
 			
-			$maxtb++;
+			
 		}
 	}
 }elseif($task == "delete_room"){
@@ -646,8 +654,9 @@ else if($task == "booking_change_status")
 
 	orderUpdate($booking_id,["booking_status"=>$booking_status]);
 
-	$booking['textarea_email'] = " Previous status is $booking[status] Restaurant manager change to new status <strong>$booking_status</strong>";
+	$booking['textarea_email'] = " Previous status is $booking[booking_status] Restaurant manager change to new status $booking_status";
 
+	echo send_message(strip_tags($booking['textarea_email']),$booking['phone']);
 	bookingEmail($booking ,"Booking status is updated!");
 }
 else if($task == "booking_change_schedule")
@@ -661,8 +670,8 @@ else if($task == "booking_change_schedule")
 
 	orderUpdate($booking_id,["schedule"=>date("Y-m-d h:i",strtotime($schedule))]);
 
-	$booking['textarea_email'] = " Previous Booking Date is date('F j, Y, H:i',strtotime($booking[schedule])) Restaurant manager change to new Date <strong>date('F j, Y, H:i',strtotime($schedule))</strong>";
-
+	$booking['textarea_email'] = " Previous Booking Date is date('F j, Y, H:i',strtotime($booking[schedule])) Restaurant manager change to new Date date('F j, Y, H:i',strtotime($schedule))";
+    echo send_message(strip_tags($booking['textarea_email']),$booking['phone']);
 	bookingEmail($booking ,"Booking Date  is updated!");
 }
 else if($task == "booking_change_payment")
@@ -676,8 +685,8 @@ else if($task == "booking_change_payment")
 
 	orderUpdate($booking_id,["_ipp_status"=>$payment_status]);
 
-	$booking['textarea_email']= " Previous payment status is $booking[status] Restaurant manager change to new payment status <strong>$payment_status</strong>";
-
+	$booking['textarea_email']= " Previous payment status is $booking[_ipp_status] Restaurant manager change to new payment status $payment_status";
+    echo send_message(strip_tags($booking['textarea_email']),$booking['phone']);
 	bookingEmail($booking ,"Booking payment status is updated!");
 }
 elseif($task == "send_mail"){
@@ -766,6 +775,7 @@ elseif($task == "send_mail"){
 		$body .= 'Status: Completed<br>';
 
 	}
+	send_message(date('F j, Y, H:i',strtotime($schedule)),$phone);
 	wp_mail( array($email, $adminEmail), $subject, $body, $headers );
 	echo wp_send_json($gateway);
 }

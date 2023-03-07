@@ -8,6 +8,45 @@ function rangeyears (startYear) {
     }   
     return years;
 }
+function newRoom()
+{
+	htmlContent = '<div class="scwatbwsr_add">'+
+	'<div class="scwatbwsr_add_head">Add a Room</div>'+
+	'<input class="scwatbwsr_add_name" placeholder="Room Name" type="text">'+
+	'<span class="scwatbwsr_add_button mt-3-right"><i class="fa fa-plus" aria-hidden="true"></i> ADD </span>'+
+    '</div>';
+	Swal.fire({
+		title: '',
+		html:htmlContent,
+		showCloseButton: true,
+		showCancelButton: false,
+		focusConfirm: false,
+		showConfirmButton:false
+	  });
+	  jQuery(".scwatbwsr_add_button").on("click", function(){
+		var roomName = jQuery(".scwatbwsr_add_name").val();
+		if(roomName){
+			jQuery.ajax({
+				url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
+				data: {
+					roomName : roomName,
+					task : "add_room"
+				},
+				type: 'POST',
+				beforeSend: function(data){
+					jQuery(".scwatbwsr_add_button").append(' <i class="fa fa-refresh fa-spin scwspin"></i>');
+				},
+				success: function(data){
+					jQuery(".scwspin").remove();
+					if(!data)
+						location.reload();
+					else
+						alert(data);
+				}
+			});
+		}
+	});  
+}
 function openCustomDate(htmlType=1)
 {
 	var htmlContent = '<div class="date-filters-swal">'+
@@ -610,29 +649,41 @@ jQuery('#alt_example_4_alt').datetimepicker({
 	});
 	
 	///////
-	jQuery(".rooms_area").each(function(lotkey, lotval){
+	jQuery(".scwatbwsr_room").each(function(lotkey, lotval){
 		var elthis = jQuery(this);
 		var roomId = jQuery(".scwatbwsr_room_id").val();
 		
-		elthis.children(".scwatbwsr_room_head").children("i").on("click", function(){
+		elthis.children(".scwatbwsr_room_head,.scwatbwsr_room_head_name").on("click", function(){
+			
 			if(elthis.children(".scwatbwsr_room_content").is(":visible")){
 				elthis.children(".scwatbwsr_room_content").slideUp();
 				setCookie("status"+lotkey, "close", 1);
-				jQuery(this).removeClass("fa-angle-double-down");
-				jQuery(this).addClass("fa-angle-double-right");
+				jQuery(this).find("i.fadown").removeClass("fa-angle-double-down");
+				jQuery(this).find("i.fadown").addClass("fa-angle-double-right");
 			}else{
 				elthis.children(".scwatbwsr_room_content").slideDown();
 				setCookie("status"+lotkey, "open", 1);
-				jQuery(this).removeClass("fa-angle-double-right");
-				jQuery(this).addClass("fa-angle-double-down");
+				jQuery(this).find("i.fadown").removeClass("fa-angle-double-right");
+				jQuery(this).find("i.fadown").addClass("fa-angle-double-down");
 			}
+			// var selectRoom=jQuery(this).data("id");
+			// if(jQuery("."+selectRoom+".scwatbwsr_room_content .scwatbwsr_room_content_tabs_label.active").length == 0)
+			// {
+				
+			// 	jQuery("."+selectRoom+".scwatbwsr_room_content .scwatbwsr_room_content_tabs_input.first").trigger("click")
+			// }
+
 		});
 		var checkStatus = getCookie("status"+lotkey);
+		    // jQuery(".scwatbwsr_room_content").slideUp();
+			// jQuery(".scwatbwsr_room_head").children("i.fadown").addClass("fa-angle-double-right");
+			// jQuery(".scwatbwsr_room_head").children("i.fadown").removeClass("fa-angle-double-down");
 		if(checkStatus == "open"){
-			elthis.children(".scwatbwsr_room_content").slideDown();
-			elthis.children(".scwatbwsr_room_head").children("i").removeClass("fa-angle-double-right");
-			elthis.children(".scwatbwsr_room_head").children("i").addClass("fa-angle-double-down");
+			elthis.children(".scwatbwsr_room_content").slideDown()
+			elthis.children(".scwatbwsr_room_head").children("i.fadown").removeClass("fa-angle-double-right");
+			elthis.children(".scwatbwsr_room_head").children("i.fadown").addClass("fa-angle-double-down");
 		}
+		
 		
 		//////////
 		elthis.find(".scwatbwsr_room_content_tabs_input").each(function(key, val){
@@ -1189,8 +1240,8 @@ jQuery('#alt_example_4_alt').datetimepicker({
 			}
 		});
 		elthis.find(".scwatbwsr_tables_add_reload,.scwatbwsr_schedules_spec_add_reload,.scwatbwsr_roomtype_add_reload,.scwatbwsr_daily_schedules_times_refresh_button").on("click", function(){
-			
-			   window.location.href="admin.php?page=scwatbwsr-table-settings&tab="+jQuery(".scwatbwsr_room_content_tabs_label.active").attr("for")
+			   var dataId=jQuery(this).data("id");
+			   window.location.href="admin.php?page=scwatbwsr-table-settings&tab="+jQuery(".scwatbwsr_room_content."+dataId+" .scwatbwsr_room_content_tabs_label.active").attr("for")
 		});
 		
 		elthis.find(".scwatbwsr_tables_list_item").each(function(){
@@ -1442,6 +1493,13 @@ jQuery('#alt_example_4_alt').datetimepicker({
 		
 		
 		
+	});
+	///////
+	jQuery(".scwatbwsr_room_content").each(function(lotkey, lotval){
+		if(jQuery(this).find(".scwatbwsr_room_content_tabs_label.active").length == 0)
+		{
+			jQuery(this).slideUp();
+		}
 	});
 })(jQuery);
 

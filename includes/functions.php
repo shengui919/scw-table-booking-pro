@@ -1,4 +1,6 @@
 <?php
+require_once dirname(dirname(__FILE__))."/library/twilio/autoload.php";	
+use Twilio\Rest\Client;
 require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/wp-config.php');
 function orderUpdate($order_id,$updateArray)
 { 
@@ -639,3 +641,42 @@ function bookingEmail($booking,$subject='')
 
 	wp_mail( array($booking['email'], $adminEmail), $subject, $body, $headers );
 }
+    function setUSANumber($phone)
+	{
+		$phone = preg_replace('/[^0-9]/', '', $phone);
+		$phone = substr($phone,-10);
+		return  "+1".$phone;
+	}
+   function send_message($message, $to)
+    {
+     
+	
+		$api_details = get_option( 'scwatbwsr_settings' );
+        
+        if (is_array($api_details) and count($api_details) != 0) {
+            $TWILIO_SID = $api_details["twilio_sid"];
+            $TWILIO_SECERT = $api_details["twilio_secert"];
+			$TWILIO_ACCOUNT_SID = $api_details['twilio_account_sid'];
+			$TWILIO_SENDER_ID = $api_details['twilio_number'];
+			
+        }
+		
+        $to = setUSANumber($to);
+		$TWILIO_SENDER_ID = setUSANumber($TWILIO_SENDER_ID);
+		
+        try {
+            $client = new Client($TWILIO_SID, $TWILIO_SECERT, $TWILIO_ACCOUNT_SID);
+            $response = $client->messages->create(
+                $to,
+                array(
+                    "from" => $TWILIO_SENDER_ID,
+                    "body" => $message
+                )
+            );
+			
+            return true;
+        } catch (Exception $e) {
+			
+           return false;
+        }
+    }
