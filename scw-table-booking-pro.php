@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Advance Table Booking PRO with Seat Reservation
  * Plugin URI: http://smartcmsmarket.net/
@@ -7,11 +8,12 @@
  * Author: SmartCms Team
  * Author URI: http://smartcmsmarket.net/
  * License: GPLv2 or later
-*/
+ */
 
-define ( 'SCWATBWSR_URL', plugin_dir_url(__FILE__));
-define ('SCW_BOOKING_POST_TYPE','scw-booking');
-function scwatbwsr_boot_session(){
+define('SCWATBWSR_URL', plugin_dir_url(__FILE__));
+define('SCW_BOOKING_POST_TYPE', 'scw-booking');
+function scwatbwsr_boot_session()
+{
 	if (session_status() == PHP_SESSION_NONE)
 		session_start();
 }
@@ -25,12 +27,13 @@ $wnm_db_version = "1.0";
 
 
 
-function scwatbwsr_install(){
+function scwatbwsr_install()
+{
 	global $wpdb;
 	global $wnm_db_version;
-	
+
 	$charset_collate = $wpdb->get_charset_collate();
-	
+
 	$roomsTB = $wpdb->prefix . 'scwatbwsr_rooms';
 	$typesTB = $wpdb->prefix . 'scwatbwsr_types';
 	$schedulesTB = $wpdb->prefix . 'scwatbwsr_schedules';
@@ -42,7 +45,9 @@ function scwatbwsr_install(){
 	$productsTb = $wpdb->prefix . 'scwatbwsr_products';
 	$ordersTB = $wpdb->prefix . 'scwatbwsr_orders';
 	$bookedTB = $wpdb->prefix . 'scwatbwsr_bookedseats';
-	
+	$bookingpaymenthistoryTB = $wpdb->prefix . 'scwatbwsr_booking_payment_history';
+
+
 	$roomsSql = "CREATE TABLE $roomsTB (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`roomname` varchar(255) DEFAULT NULL,
@@ -57,7 +62,7 @@ function scwatbwsr_install(){
 		`zoomoption` int(11) DEFAULT NULL,
 		PRIMARY KEY (`id`)
 	) $charset_collate;";
-	
+
 	$typesSql = "CREATE TABLE $typesTB (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`roomid` varchar(255) DEFAULT NULL,
@@ -72,7 +77,7 @@ function scwatbwsr_install(){
 		`seatwidth` varchar(255) DEFAULT NULL,
 		PRIMARY KEY (`id`)
 	) $charset_collate;";
-	
+
 	$schedulesSql = "CREATE TABLE $schedulesTB (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`roomid` int(11) DEFAULT NULL,
@@ -82,14 +87,14 @@ function scwatbwsr_install(){
 		`status` int(11) DEFAULT 1
 		PRIMARY KEY (`id`)
 	) $charset_collate;";
-	
+
 	$dailyschedulesSql = "CREATE TABLE $dailyschedulesTB (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`roomid` int(11) DEFAULT NULL,
 		`daily` varchar(255) DEFAULT NULL,
 		PRIMARY KEY (`id`)
 	) $charset_collate;";
-	
+
 	$dailytimesSql = "CREATE TABLE $dailytimesTB (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`roomid` int(11) DEFAULT NULL,
@@ -98,7 +103,7 @@ function scwatbwsr_install(){
 		`week_day` varchar(255) DEFAULT NULL
 		PRIMARY KEY (`id`)
 	) $charset_collate;";
-	
+
 	$priceSql = "CREATE TABLE $pricesTB (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`typeid` int(11) DEFAULT NULL,
@@ -106,7 +111,7 @@ function scwatbwsr_install(){
 		`type` varchar(255) DEFAULT NULL,
 		PRIMARY KEY (`id`)
 	) $charset_collate;";
-	
+
 	$tablesSql = "CREATE TABLE $tablesTB (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`roomid` int(11) DEFAULT NULL,
@@ -117,7 +122,7 @@ function scwatbwsr_install(){
 		`ttop` varchar(255) DEFAULT NULL,
 		PRIMARY KEY (`id`)
 	) $charset_collate;";
-	
+
 	$seatsSql = "CREATE TABLE $seatsTB (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`tbid` int(11) DEFAULT NULL,
@@ -126,14 +131,14 @@ function scwatbwsr_install(){
 		`ttop` varchar(255) DEFAULT NULL,
 		PRIMARY KEY (`id`)
 	) $charset_collate;";
-	
+
 	$productsSql = "CREATE TABLE $productsTb (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`roomid` int(11) DEFAULT NULL,
 		`proid` int(11) DEFAULT NULL,
 		PRIMARY KEY (`id`)
 	) $charset_collate;";
-	
+
 	$ordersSql = "CREATE TABLE $ordersTB (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`orderId` varchar(255) DEFAULT NULL,
@@ -167,7 +172,7 @@ function scwatbwsr_install(){
 		`tran_id` varchar(255) DEFAULT NULL,
 		PRIMARY KEY (`id`)
 	) $charset_collate;";
-	
+
 	$bookedSql = "CREATE TABLE $bookedTB (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
 		`roomid` int(11) DEFAULT NULL,
@@ -177,7 +182,16 @@ function scwatbwsr_install(){
 		`order_id` INT DEFAULT NULL,
 		PRIMARY KEY (`id`)
 	) $charset_collate;";
-	
+
+	$bookingpaymenthistorySql = "CREATE TABLE $bookingpaymenthistoryTB (
+		`id` int(11) NOT NULL AUTO_INCREMENT,
+		`booking_id` int(11) DEFAULT NULL,
+		`date`  DATE,
+	    `price` varchar(255) DEFAULT NULL,
+		`payment_type` varchar(255) NOT NULL,	
+		PRIMARY KEY (`id`)
+	) $charset_collate;";
+
 	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 	dbDelta($roomsSql);
 	dbDelta($typesSql);
@@ -190,115 +204,131 @@ function scwatbwsr_install(){
 	dbDelta($productsSql);
 	dbDelta($ordersSql);
 	dbDelta($bookedSql);
-	
+	dbDelta($bookingpaymenthistorySql);
+
 	add_option("wnm_db_version", $wnm_db_version);
 	$reservations_page = wp_insert_post(array(
 		'post_title' => sanitize_text_field('Reservations'),
 		'post_content' => '[scw_booking_form]',
 		'post_status' => 'publish',
 		'post_type' => 'page'
-		
+
 	));
 
-	if ( $reservations_page ) { 
-		$rtb_options = get_option( 'scw-settings' );
+	if ($reservations_page) {
+		$rtb_options = get_option('scw-settings');
 		$rtb_options['scw-booking-page'] = $reservations_page;
-		update_option( 'scw-settings', $rtb_options );
-		
+		update_option('scw-settings', $rtb_options);
 	}
 	$roomName = filter_var("My Room", FILTER_SANITIZE_STRING);
-	
+
 	$roomsTb = $wpdb->prefix . 'scwatbwsr_rooms';
 	$getdtSql = $wpdb->prepare("SELECT * from {$roomsTb} where roomname = %s", $roomName);
 	$rs = $wpdb->get_results($getdtSql);
-	
-	if(!$rs){
-		
-		$vl =$wpdb->query($wpdb->prepare("INSERT INTO $roomsTb (roomname)
-		VALUES (%s)", 
-		$roomName));
+
+	if (!$rs) {
+
+		$vl = $wpdb->query($wpdb->prepare(
+			"INSERT INTO $roomsTb (roomname)
+		VALUES (%s)",
+			$roomName
+		));
 		$proid = $reservations_page;
-	    
 	}
 	$tableName = $wpdb->prefix . 'scwatbwsr_products';
 	$getrs = $wpdb->prepare("SELECT * from {$tableName} where proid=%d", $proid);
 	$rs = $wpdb->get_results($getrs);
-	
-	if($rs){
-		$wpdb->query($wpdb->prepare("UPDATE {$tableName} SET roomid=%d where proid=%d",
-		$vl, $proid));
-	}else{
-		$wpdb->query($wpdb->prepare("INSERT INTO $tableName (roomid, proid)
+
+	if ($rs) {
+		$wpdb->query($wpdb->prepare(
+			"UPDATE {$tableName} SET roomid=%d where proid=%d",
+			$vl,
+			$proid
+		));
+	} else {
+		$wpdb->query($wpdb->prepare(
+			"INSERT INTO $tableName (roomid, proid)
 		VALUES (%d, %d)",
-		$vl, $proid));
+			$vl,
+			$proid
+		));
 	}
 	$roomId = $vl;
 	$weekDays = array(
-		"monday","tuesday","wednesday","thursday","friday","saturday","sunday"
+		"monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"
 	);
 	$dailyTimeTb = $wpdb->prefix . 'scwatbwsr_dailytimes';
-	foreach($weekDays as $w=>$week){
-	$getdtSql = $wpdb->prepare("SELECT * from {$dailyTimeTb} where roomid=%s and week_day=%s", $roomId, $week);
-	$rs = $wpdb->get_results($getdtSql);
-	
-	if(!$rs){
-		
-		$wpdb->query($wpdb->prepare("INSERT INTO $dailyTimeTb (roomid, start_time, end_time, week_day)
-		VALUES (%d, %s, %s, %s)", 
-		$roomId, "09:00","15:00",$week));
+	foreach ($weekDays as $w => $week) {
+		$getdtSql = $wpdb->prepare("SELECT * from {$dailyTimeTb} where roomid=%s and week_day=%s", $roomId, $week);
+		$rs = $wpdb->get_results($getdtSql);
+
+		if (!$rs) {
+
+			$wpdb->query($wpdb->prepare(
+				"INSERT INTO $dailyTimeTb (roomid, start_time, end_time, week_day)
+		VALUES (%d, %s, %s, %s)",
+				$roomId,
+				"09:00",
+				"15:00",
+				$week
+			));
+		}
 	}
-  }
 }
 
-add_action( 'admin_menu', 'scwatbwsr_admin_menu' );
-function scwatbwsr_admin_menu(){
-	
+add_action('admin_menu', 'scwatbwsr_admin_menu');
+function scwatbwsr_admin_menu()
+{
+
 	add_menu_page(
 		'SCW  Dashboard',
-        'SCW  Dashboard',
-        'manage_options',
-        'scwatbwsr-table-dashboard',
-        'scwatbwsr_dashboard_page'
+		'SCW  Dashboard',
+		'manage_options',
+		'scwatbwsr-table-dashboard',
+		'scwatbwsr_dashboard_page'
 	);
 	add_submenu_page(
 		'scwatbwsr-table-dashboard',
-        'SCW  Rooms',
-        'SCW  Rooms',
-        'manage_options',
-        'scwatbwsr-table-settings',
-        'scwatbwsr_parameters'
-    );
+		'SCW  Rooms',
+		'SCW  Rooms',
+		'manage_options',
+		'scwatbwsr-table-settings',
+		'scwatbwsr_parameters'
+	);
 	add_submenu_page(
 		'scwatbwsr-table-dashboard',
 		'SCW Payment',
-        'SCW Payment',
-        'manage_options',
-        'scwatbwsr-payment-settings',
-        'show_admin_payment_page'
+		'SCW Payment',
+		'manage_options',
+		'scwatbwsr-payment-settings',
+		'show_admin_payment_page'
 	);
-    
+
 	add_submenu_page(
 		'scwatbwsr-table-dashboard',
 		'SCW  Bookings',
-        'SCW  Bookings',
-        'manage_options',
-        'scwatbwsr-table-bookings',
-        'show_admin_bookings_page'
+		'SCW  Bookings',
+		'manage_options',
+		'scwatbwsr-table-bookings',
+		'show_admin_bookings_page'
 	);
-	
 }
 
-function scwatbwsr_options_page(){
-	do_settings_sections( 'pluginSCWTBWSRPage' );
-		
+function scwatbwsr_options_page()
+{
+	do_settings_sections('pluginSCWTBWSRPage');
 }
-	
-add_action( 'admin_init', 'scwatbwsr_settings_init' );
-function scwatbwsr_settings_init() {
+
+add_action('admin_init', 'scwatbwsr_settings_init');
+function scwatbwsr_settings_init()
+{
 	scwatbwsr_options_page();
-	register_setting( 'pluginSCWTBWSRPage', 'scwatbwsr_settings' );
+	register_setting('pluginSCWTBWSRPage', 'scwatbwsr_settings');
 	add_settings_section(
-		'smartcms_pluginPage_section', '', '', 'pluginSCWTBWSRPage'
+		'smartcms_pluginPage_section',
+		'',
+		'',
+		'pluginSCWTBWSRPage'
 	);
 	// add_settings_field( 
 	// 	'','',
@@ -308,7 +338,8 @@ function scwatbwsr_settings_init() {
 	// );
 }
 
-function scwatbwsr_parameters(){
+function scwatbwsr_parameters()
+{
 	include_once dirname(__FILE__) . '/includes/admin-css-js.php';
 	include_once dirname(__FILE__) . '/includes/admin-scw-settings.php';
 }
@@ -316,19 +347,15 @@ function scwatbwsr_parameters(){
 include_once dirname(__FILE__) . '/includes/booking-form.php';
 add_shortcode('scw_booking_form', 'scwatbwsr_content');
 
-function getActiveClass($roomId,$scwatbwsr_tab1)
+function getActiveClass($roomId, $scwatbwsr_tab1)
 {
 
-   if(isset($_GET['tab']) && $_GET['tab']!='')
-    {
-		if($_GET['tab']==$scwatbwsr_tab1.$roomId)
-		echo "active";
-		
-	}
-	else
-	{
-		if($scwatbwsr_tab1=="scwatbwsr_tab1")
-		echo "active";
+	if (isset($_GET['tab']) && $_GET['tab'] != '') {
+		if ($_GET['tab'] == $scwatbwsr_tab1 . $roomId)
+			echo "active";
+	} else {
+		if ($scwatbwsr_tab1 == "scwatbwsr_tab1")
+			echo "active";
 	}
 }
 function show_admin_payment_page()
@@ -336,70 +363,68 @@ function show_admin_payment_page()
 	include_once dirname(__FILE__) . '/includes/admin-css-js.php';
 	include_once dirname(__FILE__) . '/includes/functions.php';
 	include_once dirname(__FILE__) . '/includes/admin-scw-payment.php';
-	
 }
-function show_admin_bookings_page() {
-    include_once dirname(__FILE__) . '/includes/admin-css-js.php';
+function show_admin_bookings_page()
+{
+	include_once dirname(__FILE__) . '/includes/admin-css-js.php';
 	include_once dirname(__FILE__) . '/includes/functions.php';
 	include_once dirname(__FILE__) . '/includes/WP_List_Table.BookingsTable.class.php';
-	wp_register_style('adminbookingcss', SCWATBWSR_URL .'css/bookings.css',array(),time());
+	wp_register_style('adminbookingcss', SCWATBWSR_URL . 'css/bookings.css', array(), time());
 	wp_enqueue_style('adminbookingcss');
 	$bookings_table = new scwBookingsTable();
 	$bookings_table->prepare_items();
 	$booking_status = $bookings_table->booking_statuses;
 	include_once dirname(__FILE__) . '/includes/admin-scw-bookings.php';
-	
 }
 
-	
+
 function scwatbwsr_dashboard_page()
 {
-	wp_register_style('admindashboardcss', SCWATBWSR_URL .'css/dashboard.css',array(),time());
+	wp_register_style('admindashboardcss', SCWATBWSR_URL . 'css/dashboard.css', array(), time());
 	wp_enqueue_style('admindashboardcss');
 	include_once dirname(__FILE__) . '/includes/admin-css-js.php';
 	include_once dirname(__FILE__) . '/includes/admin-scw-dashboard.php';
-	
 }
 function scwatbwsr_bookings_page()
 {
-	
+
 	include_once dirname(__FILE__) . '/includes/admin-css-js.php';
 	include_once dirname(__FILE__) . '/includes/admin-scw-bookings.php';
-	
 }
 function adminMenuPage()
 {
-	$page=$_GET['page'];
-	?>
+	$page = $_GET['page'];
+?>
 	<div class="rtb-admin-header-menu">
-			
-				
 
-									<a id="dashboard-menu" href="admin.php?page=scwatbwsr-table-dashboard" class="menu-tab nav-tab <?php if($page=='scwatbwsr-table-dashboard') echo 'nav-tab-active';?>">
-						Dashboard					</a>
-				
-				<a id="bookings-menu" href="admin.php?page=scwatbwsr-table-bookings" class="menu-tab nav-tab <?php if($page=='scwatbwsr-table-bookings') echo 'nav-tab-active';?>">
-					Bookings				</a>
 
-									
-						<a id="options-menu" href="admin.php?page=scwatbwsr-table-settings" class="menu-tab nav-tab <?php if($page=='scwatbwsr-table-settings') echo 'nav-tab-active';?>">
-						Rooms Settings					</a>
-						<a id="options-menu" href="admin.php?page=scwatbwsr-payment-settings" class="menu-tab nav-tab <?php if($page=='scwatbwsr-payment-settings') echo 'nav-tab-active';?>">
-						Payment Settings					</a>
-								
-							
-		</div>
-	<?php
+
+		<a id="dashboard-menu" href="admin.php?page=scwatbwsr-table-dashboard" class="menu-tab nav-tab <?php if ($page == 'scwatbwsr-table-dashboard') echo 'nav-tab-active'; ?>">
+			Dashboard </a>
+
+		<a id="bookings-menu" href="admin.php?page=scwatbwsr-table-bookings" class="menu-tab nav-tab <?php if ($page == 'scwatbwsr-table-bookings') echo 'nav-tab-active'; ?>">
+			Bookings </a>
+
+
+		<a id="options-menu" href="admin.php?page=scwatbwsr-table-settings" class="menu-tab nav-tab <?php if ($page == 'scwatbwsr-table-settings') echo 'nav-tab-active'; ?>">
+			Rooms Settings </a>
+		<a id="options-menu" href="admin.php?page=scwatbwsr-payment-settings" class="menu-tab nav-tab <?php if ($page == 'scwatbwsr-payment-settings') echo 'nav-tab-active'; ?>">
+			Payment Settings </a>
+
+
+	</div>
+<?php
 }
 // Register settings using the Settings API
-function wpdocs_register_my_setting() {
-	register_setting( 'my-options-group', 'my-option-name', 'intval' );
+function wpdocs_register_my_setting()
+{
+	register_setting('my-options-group', 'my-option-name', 'intval');
 }
-add_action( 'admin_init', 'wpdocs_register_my_setting' );
+add_action('admin_init', 'wpdocs_register_my_setting');
 
 // Modify capability
-function wpdocs_my_page_capability( $capability ) {
+function wpdocs_my_page_capability($capability)
+{
 	return 'edit_others_posts';
 }
-add_filter( 'option_page_capability_my-options-group', 'wpdocs_my_page_capability' );
-
+add_filter('option_page_capability_my-options-group', 'wpdocs_my_page_capability');

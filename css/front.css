@@ -1,4 +1,38 @@
+.room-label {
+    color: white;
+    padding: 8px;
+    cursor: pointer;
 
+  }
+  .roomselection
+  {
+    margin-top: 5px;
+  }
+  .room-selected {background-color: #04AA6D;border:1px solid #000;} /* Green */
+  .room-open {background-color: #2196F3;} /* Blue */
+  .room-closed {background-color: #f44336;} /* Red */
+ 
+
+.alert-error {
+    padding: 20px;
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .closebtn-error {
+    margin-left: 15px;
+    color: white;
+    font-weight: bold;
+    float: right;
+    font-size: 22px;
+    line-height: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .closebtn-error:hover {
+    color: black;
+  }
 #main.site-main{
 	max-width: 100%;
 }

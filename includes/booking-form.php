@@ -20,18 +20,12 @@ function scwatbwsr_content($content){
 	$ordersTb = $wpdb->prefix . 'scwatbwsr_orders';
 	$bookedTB = $wpdb->prefix . 'scwatbwsr_bookedseats';
 	
-	$getRoomSql = $wpdb->prepare("SELECT * from {$tableProducts} where proid=%d", $proId);
-	$room = $wpdb->get_results($getRoomSql);
-	if(count($room)==0)
-	{
-		$getRoomSql = $wpdb->prepare("SELECT * from {$tableProducts} where roomid!=0 limit 1");
-	    $room = $wpdb->get_results($getRoomSql);
-	}
-	else if(count($room)>0 && $room[0]->roomid==0)
-	{
-		$getRoomSql = $wpdb->prepare("SELECT * from {$tableProducts} where roomid!=%d limit 1",0);
-	    $room = $wpdb->get_results($getRoomSql);
-	}
+	$getRoomSql = $wpdb->prepare("SELECT r.*,t.roomid,s.tbid,t.id as tid,s.id as sid from {$tableRooms} AS r 
+	  INNER JOIN {$tablesTb} AS t ON r.id= t.roomid
+	  INNER JOIN {$seatsTb}  AS s ON t.id= s.tbid
+	  where t.roomid!=%d", 0);
+	$rooms = $wpdb->get_results($getRoomSql);
+	
 	
 	$ippay_return= file_get_contents('php://input');
     parse_str($ippay_return,$obj);
@@ -80,12 +74,13 @@ function scwatbwsr_content($content){
 		</script>
 	<?php }  }
 		
-	
-	if(  $room &&  $room[0]->roomid){
+	wp_register_style('scwatbwsr-style-frontend', SCWATBWSR_URL .'css/front.css',array(),time());
+	wp_enqueue_style('scwatbwsr-style-frontend');
+	if(count($rooms) > 0){
 		
 		ob_start();
 		
-		$roomid = $room[0]->roomid;
+		
 		wp_register_script('scwjquery', SCWATBWSR_URL .'js/jquery.min.js');
 		wp_enqueue_script('scwjquery');
 		wp_register_script('datetimepicker', SCWATBWSR_URL .'datetimepicker/jquery.datetimepicker.full.min.js');
@@ -100,8 +95,7 @@ function scwatbwsr_content($content){
 		wp_enqueue_script('sweetalert');
 		wp_register_script('scwatbwsr-script-frontend', SCWATBWSR_URL .'js/front.js',array(),time(),true);
 		wp_enqueue_script('scwatbwsr-script-frontend');
-		wp_register_style('scwatbwsr-style-frontend', SCWATBWSR_URL .'css/front.css',array(),time());
-		wp_enqueue_style('scwatbwsr-style-frontend');
+		
 		if($ipp_message!='')
 		{
 		add_action('wp_print_footer_scripts', function() use ($ipp_message){
@@ -109,48 +103,7 @@ function scwatbwsr_content($content){
 		});
 		do_action('scw_this_script_footer');
 		}
-		$getRoomDataSql = $wpdb->prepare("SELECT * from {$tableRooms} where id=%d", $roomid);
-		$roomData = $wpdb->get_results($getRoomDataSql);
 		
-		$getTypeSql = $wpdb->prepare("SELECT * from {$tableTypes} where roomid=%d", $roomid);
-		$types = $wpdb->get_results($getTypeSql);
-		$nowtime = date("Y-m-d H:i:s");
-	    $wpdb->query($wpdb->prepare("UPDATE $tableSchedules SET status=%d  WHERE schedule <= %s",
-	0,$nowtime));
-		$getSchedulesSql = $wpdb->prepare("SELECT * from {$tableSchedules} where roomid=%d and status=%d order by schedule asc", $roomid,1);
-		$checkSchedules = $wpdb->get_results($getSchedulesSql);
-		
-		if(isset($roomData[0]->tbbookedcolor))
-			$tbbookedcolor = $roomData[0]->tbbookedcolor;
-		else
-			$tbbookedcolor = "#000";
-		if(isset($roomData[0]->seatbookedcolor))
-			$seatbookedcolor = $roomData[0]->seatbookedcolor;
-		else
-			$seatbookedcolor = "#000";
-		
-		$getTablesSql = $wpdb->prepare("SELECT * from {$tablesTb} where roomid=%d", $roomid);
-		$tables = $wpdb->get_results($getTablesSql);
-		
-		$bookedSeats = array();
-		$getOrdersSql = $wpdb->prepare("SELECT * from {$ordersTb} where productId=%d", $proId);
-		$orders = $wpdb->get_results($getOrdersSql);
-		if($orders){
-			foreach($orders as $order){
-				$oseats = explode(",", $order->seats);
-				foreach($oseats as $os){
-					array_push($bookedSeats, $os);
-				}
-			}
-		}
-		$getBookedSql = $wpdb->prepare("SELECT * from {$bookedTB} where roomid=%d", $roomid);
-		$bookeds = $wpdb->get_results($getBookedSql);
-		if($bookeds){
-			foreach($bookeds as $bk){
-				array_push($bookedSeats, $bk->tb .".".$bk->seat);
-			}
-		}
-		$bookedSeats = array_unique($bookedSeats);
 		?>
 		<script type='text/javascript'>
 		var customer_table ="<?=@$options["customer_table"]?>";
@@ -159,17 +112,7 @@ function scwatbwsr_content($content){
 		<div class="scw_front_content">
 			<div class="scwatbwsr_content <?php echo get_post_type($proId) ?>">
 			<form action="post" id="scw-booking-form">
-			<input type="hidden" value="<?php echo esc_attr(SCWATBWSR_URL) ?>" class="scwatbwsr_url">
-			<input type="hidden" value="<?php echo esc_attr($proId) ?>" class="product_id">
-			<input type="hidden" value="<?php echo esc_attr($roomid) ?>" class="profileid">
-			<input type="hidden" value="<?php echo esc_attr($tbbookedcolor) ?>" class="tbbookedcolor">
-			<input type="hidden" value="<?php echo esc_attr($seatbookedcolor) ?>" class="seatbookedcolor">
-			<input type="hidden" value="<?php echo esc_attr($roomData[0]->compulsory) ?>" class="scw_compulsory">
-			<input type="hidden" value="<?php echo esc_attr($roomData[0]->bookingtime) ?>" class="scw_bookingtime">
-			<input type="hidden" value="<?php echo esc_attr(get_option('date_format')) ?>" class="scw_date_format">
-			<input type="hidden" value="<?php echo esc_attr(get_post_type($proId)) ?>" class="scw_posttype">
-			<input type="hidden" value="<?php echo esc_attr($roomData[0]->zoomoption) ?>" class="scw_zoomoption">
-			<input type="hidden" value="" id="time_hidden" />
+			
 			
 			<div class="scwatbwsr_sendform">
 			        <div class="bghover_scw">
@@ -189,17 +132,90 @@ function scwatbwsr_content($content){
 								<label><?php echo esc_html__("Phone", "scwatbwsr-translate") ?></label>
 								<input name="phone"  id="phone" class="scwatbwsr_form_phone_input scwatcommon_style" required type="text" autocomplete="off">
 							</div>
-							<?php 
-			               if(@$options["customer_table"]!="yes"):?>
-						   <div class="scwatbwsr_form_item scw_form_phone">
-								<label><?php echo esc_html__("No of Seats", "scwatbwsr-translate") ?></label>
-								<input name="no_seats"  id="no_seats" class="scwatbwsr_form_seat_input scwatcommon_style" min="1" required type="number" autocomplete="off">
-							</div>
-						   <?php endif;?>
+							
 							<div class="scwatbwsr_form_item scw_form_note">
 								<label><?php echo esc_html__("Note", "scwatbwsr-translate") ?></label>
 								<textarea name="note" class="scwatbwsr_form_note_input scwatcommon_style" rows="4"></textarea>
 							</div>
+			<?php
+			$getRoomDataSql = $wpdb->prepare("SELECT * from {$tableRooms}  where id!=%d", 0);
+			$roomData = $wpdb->get_results($getRoomDataSql);
+			?>
+			<input type="hidden" value="<?php echo esc_attr(SCWATBWSR_URL) ?>" class="scwatbwsr_url">
+			<input type="hidden" value="<?php echo esc_attr($proId) ?>" class="product_id">
+			<input type="hidden" value="<?php echo esc_attr($roomData[0]->id) ?>" class="profileid">
+			<input type="hidden" value="<?php echo esc_attr($roomData[0]->tbbookedcolor) ?>" class="tbbookedcolor">
+			<input type="hidden" value="<?php echo esc_attr($roomData[0]->seatbookedcolor) ?>" class="seatbookedcolor">
+			<input type="hidden" value="<?php echo esc_attr($roomData[0]->compulsory) ?>" class="scw_compulsory">
+			<input type="hidden" value="<?php echo esc_attr($roomData[0]->bookingtime) ?>" class="scw_bookingtime">
+			<input type="hidden" value="<?php echo esc_attr(get_option('date_format')) ?>" class="scw_date_format">
+			<input type="hidden" value="<?php echo esc_attr(get_post_type($proId)) ?>" class="scw_posttype">
+			<input type="hidden" value="<?php echo esc_attr($roomData[0]->zoomoption) ?>" class="scw_zoomoption">
+			<input type="hidden" value="" id="time_hidden" />
+							<?php 
+			               if(@$options["customer_table"]!="yes"){?>
+						   <div class="scwatbwsr_form_item scw_form_phone">
+								<label><?php echo esc_html__("No of Seats", "scwatbwsr-translate") ?></label>
+								<input name="no_seats"  id="no_seats" class="scwatbwsr_form_seat_input scwatcommon_style" min="1" required type="number" autocomplete="off">
+							</div>
+						   <?php } 
+							
+							?>
+			
+							<?php
+							foreach($roomData as $roomcount=>$room)
+							{
+							$roomid = $room->id;
+							$getTypeSql = $wpdb->prepare("SELECT * from {$tableTypes} where roomid=%d", $roomid);
+							$types = $wpdb->get_results($getTypeSql);
+							$nowtime = date("Y-m-d H:i:s");
+							$wpdb->query($wpdb->prepare("UPDATE $tableSchedules SET status=%d  WHERE schedule <= %s",
+						0,$nowtime));
+							$getSchedulesSql = $wpdb->prepare("SELECT * from {$tableSchedules} where roomid=%d and status=%d order by schedule asc", $roomid,1);
+							$checkSchedules = $wpdb->get_results($getSchedulesSql);
+							
+							if(isset($roomData[0]->tbbookedcolor))
+								$tbbookedcolor = $roomData[0]->tbbookedcolor;
+							else
+								$tbbookedcolor = "#000";
+							if(isset($roomData[0]->seatbookedcolor))
+								$seatbookedcolor = $roomData[0]->seatbookedcolor;
+							else
+								$seatbookedcolor = "#000";
+							
+							$getTablesSql = $wpdb->prepare("SELECT * from {$tablesTb} where roomid=%d", $roomid);
+							$tables = $wpdb->get_results($getTablesSql);
+							
+							$bookedSeats = array();
+							$getOrdersSql = $wpdb->prepare("SELECT * from {$ordersTb} where roomid=%d", $roomid);
+							$orders = $wpdb->get_results($getOrdersSql);
+							if($orders){
+								foreach($orders as $order){
+									$oseats = explode(",", $order->seats);
+									foreach($oseats as $os){
+										array_push($bookedSeats, $os);
+									}
+								}
+							}
+							$getBookedSql = $wpdb->prepare("SELECT * from {$bookedTB} where roomid=%d", $roomid);
+							$bookeds = $wpdb->get_results($getBookedSql);
+							if($bookeds){
+								foreach($bookeds as $bk){
+									array_push($bookedSeats, $bk->tb .".".$bk->seat);
+								}
+							}
+							$bookedSeats = array_unique($bookedSeats);
+							$tableDailySchedules = $wpdb->prefix . 'scwatbwsr_dailyschedules';
+					        $getDSSql = $wpdb->prepare("SELECT * from {$tableDailySchedules} where roomid=%d", $roomid);
+					        $getDSRs = $wpdb->get_results($getDSSql);
+							if($checkSchedules  || $getDSRs) {
+						    ?>
+							<div class="scwatbwsr_form_item">
+							<label>Select Room</label>
+								<div class="roomselection">
+								<span class="room-label room-<?php if($roomcount==0) echo'selected';?>"><?=$room->roomname?></span>
+								</div>
+						    </div>
 							<div class="scwatbwsr_form_item scw_form_calendar">
 								<label>
 									<?php echo esc_html__("Booking Date", "scwatbwsr-translate");?>
@@ -218,9 +234,7 @@ function scwatbwsr_content($content){
 					$arrDay = array();
 					$arrTime = "";
 					
-					$tableDailySchedules = $wpdb->prefix . 'scwatbwsr_dailyschedules';
-					$getDSSql = $wpdb->prepare("SELECT * from {$tableDailySchedules} where roomid=%d", $roomid);
-					$getDSRs = $wpdb->get_results($getDSSql);
+					
 					if(isset($getDSRs[0]->daily)) $dailies = explode(",", $getDSRs[0]->daily);
 					else $dailies = array();
 					if($dailies){
@@ -261,7 +275,7 @@ function scwatbwsr_content($content){
 						}
 					}
 					
-					if($dailies[0]){
+					if(count($dailies) > 0 && $dailies[0]){
 						?>
 						<input class="array_dates" type="hidden" value='<?php echo json_encode($arrfDay, 1) ?>'>
 						<input class="array_times" type="hidden" value="<?php echo esc_attr($arrTime) ?>">
@@ -270,16 +284,12 @@ function scwatbwsr_content($content){
 					}
 				     ?>
 									    </div>
-					                <?php } ?>
+					                
 								
 							</div>
-                            <div class="scwatbwsr_form_item scw_form_time" id="show_time">
-							<label><?php echo esc_html__("Time", "scwatbwsr-translate") ?></label>
-							<p id="show_time_text"></p>
-				            </div>
-						</div>
-					
-			</div>
+                           
+							
+						
 			
 			<?php 
 			if(@$options["customer_table"]=="yes"):?>
@@ -393,7 +403,11 @@ function scwatbwsr_content($content){
 					</div>
 				</div>			
 			</div>
-            <?php endif;?>
+            <?php endif;
+							} // check schedules available
+							  }
+							}
+							?>
 			<div class="mainpage-seats">
 				<div class="scwatbwsr_form">
 					
@@ -525,9 +539,24 @@ function scwatbwsr_content($content){
 		    </div>
 	    </div>
 		<?php
-		$string = ob_get_contents();
+		
+	}
+	else
+	{
+     ?>
+	 <div class="scw_front_content">
+			<div class="scwatbwsr_content page">
+			<div class="alert-error">
+				<span class="closebtn-error" onclick="this.parentElement.style.display='none';">&times;</span> 
+				<strong>Danger!</strong> Booking is closed.
+			</div>
+	        </div>
+	</div>
+	
+	 <?php
+	}
+	     $string = ob_get_contents();
 		ob_end_clean();
 		$content .= $string;
-	}
 	return $content;
 }

@@ -56,7 +56,29 @@
 							</div>
 							<div class="general-setting-scw">
 								<div class="general-setting-left">
-									<p>Table Choose by customer</p>
+									<p><?php echo __('Enable Offline Payment','scwatbwsr-translate')?></p>
+								</div>
+								<div class="general-setting-right">
+									<!-- <input type="checkbox"> -->
+									<label class="sap-admin-switch">
+										<input name="scwatbwsr_settings[offline_payment]" <?php if(@$options['offline_payment']=="on") echo "checked='true'";?> type="checkbox" class="sap-admin-option-toggle">
+										<span class="sap-admin-switch-slider round"></span>
+									</label>
+									<p><?php echo __('Customer can pay offline  in restaurants','scwatbwsr-translate')?></p>
+								</div>
+							</div>
+							<div class="general-setting-scw">
+								<div class="general-setting-left">
+									<p><?php echo __('Online Payment Paritial %','scwatbwsr-translate')?></p>
+								</div>
+								<div class="general-setting-right">
+									<input type="number"  min="1" max="99" value="<?=@$options['pay_later']?>" name="scwatbwsr_settings[pay_later]" class="require-deposit-scw">
+									<p><?php echo __('OnlinePayment paritial %,user can pay offline or online in restaurants','scwatbwsr-translate')?></p>
+								</div>
+							</div> 
+							<div class="general-setting-scw">
+								<div class="general-setting-left">
+									<p><?php echo __('Table Choose by customer','scwatbwsr-translate');?></p>
 								</div>
 								<div class="general-setting-right">
 									<div class="form-radio-scw-per">
@@ -67,7 +89,7 @@
 											<input type="radio" id="guest" <?php if(@$options['customer_table']=="no") echo "checked='true'";?> name="scwatbwsr_settings[customer_table]" value="no">
 											<label for="css">No</label>
 										</div>
-									<p>Table choose by, per customer or Manager?</p>
+									<p><?php echo __('Table choose by, per customer or Manager','scwatbwsr-translate')?>?</p>
 								</div>
 							</div>
 							<div class="general-setting-scw">
@@ -90,7 +112,7 @@
 							</div> 
 							<div class="general-setting-scw">
 								<div class="general-setting-left">
-									<p>Ippayware  Comission</p>
+									<p><?php echo __('Ippayware  Comission','scwatbwsr-translate')?></p>
 								</div>
 								<div class="general-setting-right">
 									<input type="text"  value="<?=$options['commission']?>" name="scwatbwsr_settings[commission]" class="require-deposit-scw">
@@ -133,6 +155,7 @@
 									<p><?php echo __('Send ID Number','scwatbwsr-translate')?></p>
 								</div>
 							</div> 
+							
 						</div>
 						<?php
 

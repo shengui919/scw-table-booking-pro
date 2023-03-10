@@ -113,7 +113,7 @@ $count_week_booking['saturday'] = $wpdb->get_var("select count(id) from $table_n
                                 </div>
                                 
                             </div>
-                            <a href="admin.php?page=scwatbwsr-table-bookings&booking_id=<?=$booking->id?>" class="weeks-option__item_edit">Edit</a>
+                            <a href="admin.php?page=scwatbwsr-table-bookings&type=view&booking_id=<?=$booking->id?>" class="weeks-option__item_edit">Edit</a>
                                 
                         </li>
                       <?php  } ?>
