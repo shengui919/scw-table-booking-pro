@@ -128,7 +128,7 @@
 
 										<section id="scwatbwsr_content2<?php echo esc_attr($room->id) ?>" class="tab-content <?= getActiveClass($room->id, 'scwatbwsr_tab2') ?>">
 											<span class="scwatbwsr_roomtype_add">
-												<span class="scwatbwsr_roomtype_add_head"><?php echo esc_html__("Add a type", "scwatbwsr-translate") ?></span>
+												<span class="scwatbwsr_roomtype_add_head"><?php echo esc_html__("Add a table setting", "scwatbwsr-translate") ?></span>
 												<input class="scwatbwsr_roomtype_add_name" placeholder="Name of type" type="text">
 												<span class="scwatbwsr_roomtype_add_table"><?php echo esc_html__("Table", "scwatbwsr-translate") ?></span>
 												<span class="scwatbwsr_roomtype_add_tbcolor">
@@ -172,7 +172,7 @@
 												<span class="scwatbwsr_roomtype_add_reload" data-id="<?= $room->id ?>"><?php echo esc_html__("Refresh Data", "scwatbwsr-translate") ?> <i class="fa fa-refresh" aria-hidden="true"></i></span>
 											</span>
 											<span class="scwatbwsr_roomtype_items">
-												<span class="scwatbwsr_roomtype_items_head"><?php echo esc_html__("Types", "scwatbwsr-translate") ?></span>
+												<span class="scwatbwsr_roomtype_items_head"><?php echo esc_html__("Table Settings", "scwatbwsr-translate") ?></span>
 												<?php
 												if ($types) {
 													foreach ($types as $type) {

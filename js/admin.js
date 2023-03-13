@@ -1507,24 +1507,66 @@ function getCookie(cname) {
 	return "";
 }
 
-function openOfflinePayment(booking_id) {
+jQuery("#add_offline_payment").click(function () {
+	var booking_id = jQuery(this).attr('data-id');
+	var order_amount = jQuery(this).attr('data-orderAmount');
+	
+	var htmlContent = '<form method="post" id="offlinePayment" action="#" ><table>' +
+						'<tr><td>Date</td><td><input type="date" class="form-control" style="width:11rem;" id="paymentDate" placeholder="date">' + '</td>' +
+						'<tr><td>Amount</td><td><input type="text" class="form-control" id="amount" placeholder="price">' + '</td>' +
+						'<tr><td>Payment Type</td><td><select class="form-control" style="width:11rem;" id="paymentType"><option value="cash">'+'cash'+ '</option><option value="swipe">'+'swipe'+'</option></td>' +
+						'<tr><td colspan="2"><button type="submit" onClick="openOfflinePayment(' + booking_id + ')" class="btn--primary">Submit</button></td>'+ '</td></form>';
 
-	htmlContent += '<tr><td>Date</td><td>' + booking.booking_status + '</td>' +
-		'<tr><td>Order ID</td><td><input type="text" class="booking-amount"></td>' +
-		'<tr><td>Order ID</td><td><select class="form-select" aria-label="Default select example">  <option selected>Select payment type</option><option value="1">' + One + '</option> <option value="1">' + One + '</option></td>' +
+		Swal.fire({
+            title: "Offline Payment",
+            html:htmlContent,
+            showCloseButton: true,
+            showCancelButton: false,
+            focusConfirm: false,
+            showConfirmButton:false
+          });
 
-		'<tr><td colspan="2"><button type="button" onClick="sendEmailBooking(' + booking_id + ')" class="btn--primary">Send</button></td>' +
-		'</table>';
-	var bDate = new Date(booking.schedule)
-	Swal.fire({
-		title: bDate.toLocaleString('default', { month: 'long' }) + ', ' + bDate.toLocaleDateString("en-Latn-US", { weekday: 'long' }) + ' ' + bDate.getDate(),
-		html: htmlContent,
-		showCloseButton: true,
-		showCancelButton: false,
-		focusConfirm: false,
-		showConfirmButton: false
+	
+});
+
+
+
+
+function openOfflinePayment(booking_id ) {
+var payment_date = jQuery('#paymentDate').val();
+var price = jQuery('#amount').val();
+var payment_type = jQuery('#paymentType').val();
+
+if (amount) {
+	
+	jQuery.ajax({
+		url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
+		data: {
+			bookingId: booking_id,
+			date:payment_date,
+			amount:price,
+			paymentType:payment_type,
+			task: "offline_payment_history"
+		},
+		type: 'POST',
+		
+		success: function (data) {
+
+					swal.close();
+					Swal.fire(
+						'Offline Payment Saved!',
+						'Offline payment saved successfully!',
+						'success'
+					)
+		
+		
+				},
+				error: function (data) {
+				
+					alert('Try again!')
+				}
 	});
-
+}
 
 }
 

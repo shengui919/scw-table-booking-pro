@@ -170,7 +170,7 @@
 									$getPriceSql = $wpdb->prepare("SELECT * from {$pricesTB} where typeid=%d", $type->id);
 									$price = $wpdb->get_row($getPriceSql);
 								?>
-									<button type="button" class="submit-button-bottom btn--primary btn--inside">Update Table</button>
+									
 									<div class="col-md-2 col-sm-6 col-xs-6 column1">
 										<?php
 										foreach ($tables as $key => $table) {
@@ -212,7 +212,7 @@
 									</div>
 
 								<?php } ?>
-
+								<button type="button" class="submit-button-bottom btn--primary btn--inside">Update Table</button>
 
 							</div>
 
@@ -326,7 +326,10 @@
 												<?php } ?>
 											</tbody>
 										</table>
-										<button onclick=openOfflinePayment($booking_id) type="button" class="btn--primary btn--inside promo-right  mb-3 pt-4" value="<?= $_GET['booking_id'] ?>" id="add_offline_payment">Add Offline Payment</button>
+									
+										
+										<button type="button" class="btn--primary btn--inside promo-right  mb-3 pt-4"  data-id="<?= esc_attr($booking_id) ?>" 
+										data-orderAmount="<?= esc_attr($order->total) ?>" id="add_offline_payment">Add Offline Payment</button>
 									</div>
 								</div>
 

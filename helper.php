@@ -6,7 +6,9 @@ global $wpdb;
 if (isset($_GET['notify']) && $_GET['notify'] == 1) {
 	orderUpdate($_GET['id'], ["seats" => "Booked"]);
 }
+
 $task = $_POST["task"];
+
 if ($task == "add_page") {
 	$reservations_page = wp_insert_post(array(
 		'post_title' => (isset($_POST['reservations_page_title']) ? sanitize_text_field($_POST['reservations_page_title']) : ''),
@@ -360,6 +362,30 @@ if ($task == "add_page") {
 			$trs[0]->ttop,
 		));
 	}
+}elseif($task == "offline_payment_history"){
+
+	$bookingId = $_POST['bookingId'];
+	$date = $_POST['date'];
+	$price = $_POST['amount'];
+	$type = $_POST['paymentType'];
+
+	$bookingpaymenthistoryTB = $wpdb->prefix . 'scwatbwsr_booking_payment_history';
+	$getdatatSql = $wpdb->prepare("SELECT sum(price) from {$bookingpaymenthistoryTB} where booking_id=%d", $bookingId);
+	$trs = $wpdb->get_results($getdatatSql);
+	echo $trs;
+	die;
+
+	$wpdb->query($wpdb->prepare(
+		"INSERT INTO $bookingpaymenthistoryTB (booking_id, date,price, payment_type)
+	VALUES (%d, %s, %d, %s)",
+
+		$bookingId,
+		$date,
+		$price,
+		$type,
+		
+	));
+	
 } elseif ($task == "save_mapping") {
 	$tbstring = filter_var($_POST["tbstring"], FILTER_SANITIZE_STRING);
 	$tbstring = explode("@", $tbstring);
@@ -1021,6 +1047,7 @@ if ($task == "add_page") {
 
 	echo wp_send_json(array_values($result));
 }
+
 function array_key_filter_count($result)
 {
 	$output = [];

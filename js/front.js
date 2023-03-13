@@ -3,6 +3,9 @@
 	
 	
 	$( document ).ready(function() {
+
+		
+
 		$(".body .is-layout-flow").css({'clear':'both'})
 		var url = jQuery(".scwatbwsr_url").val();
 		var proid = jQuery(".product_id").val();
@@ -130,12 +133,13 @@
 	}
 		
 
-		$("#scw-booking-form").validate ({
+	$("#scw-booking-form").validate ({
 			submitHandler: function(form) {  
 				formBook();
 			}
-		});
-		
+	});
+	
+	
 	jQuery(".woocommerce-tabs").before(jQuery(".scwatbwsr_content").show());
 	jQuery(".scwatbwsr_content").after(jQuery("form.cart"));
 	
@@ -147,44 +151,12 @@
 		if(jQuery(".array_times").val()){
 			var array_times = jQuery(".array_times").val().split(",");
 			var todayDateDayName = myDateDay();
-			jQuery('#scwatbwsr_schedules_picker').datetimepicker({
-				disabledWeekDays: array_dates,
-				format: date_format+' H:i',
-				minDate:0,
-				timepicker:false,
-				
-				closeOnDateSelect: false,
-				onSelectTime:function(ct, $i){
-					checkSchedule($i[0].value,$i);
-					$i.datetimepicker({closeOnDateSelect: false,timepicker:false});
-					$("#show_time_text,#time_hidden").text($i[0].value.slice("-5"))
-					$("#time_hidden").val($i[0].value.slice("-5"))
-				},
-				onSelectDate:function(ct,$i){
-					
-					
-					$i.datetimepicker({
-				timepicker:true,
-				step: jQuery(".scw_bookingtime").val(),
-				minTime:jQuery(".array_times_start_"+todayDateDayName).val(),
-				maxTime:jQuery(".array_times_end_"+todayDateDayName).val(),
-					});
-				}
-			});
+			
 		}else{
-			jQuery('#scwatbwsr_schedules_picker').datetimepicker({
-				disabledWeekDays: array_dates,
-				step: 5,
-				format: date_format+' H:i',
-				defaultTime: "00:00",
-				closeOnDateSelect: false,
-				onSelectTime:function(ct, $i){
-					checkSchedule($i[0].value);
-				},
-				onSelectDate:function(ct,$i){
-					checkSchedule($i[0].value);
-				}
-			});
+			jQuery('#scwatbwsr_schedules_picker').mobiscroll().datepicker({
+				controls: ['calendar', 'timegrid'],
+				touchUi: true
+			})
 		}
 	}else{
 		jQuery(".scwatbwsr_schedules_item").each(function(){
@@ -205,6 +177,7 @@
 					datepicker:false,
 					step: jQuery(".scw_bookingtime").val(),
 					format:'H:i',
+					
 					defaultTime: "00:00",
 					minTime:jQuery(".scwatbwsr_schedules_item.active").data("mintime"),
 					maxTime:jQuery(".scwatbwsr_schedules_item.active").data("maxtime"),
@@ -433,3 +406,4 @@
 	
 });
 })(jQuery);
+

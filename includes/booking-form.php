@@ -60,6 +60,20 @@ function scwatbwsr_content($content){
 	{
 		$ipp_message="Payment Cancelled by the customer and Booking is Pending";
 	}
+	if(!function_exists('scw_this_datepicker_footer'))
+	{
+		function scw_this_datepicker_footer(){
+	?>
+	<script type='text/javascript'>
+		
+		mobiscroll.datepicker('#scwatbwsr_schedules_picker', {
+			controls: ['calendar', 'timegrid'],
+			display: 'inline'
+		});
+		</script>
+	<?php	
+		}
+	}
 	if(!function_exists('scw_this_script_footer')) { 
 	function scw_this_script_footer($ipp_message){ 
 		
@@ -70,10 +84,15 @@ function scwatbwsr_content($content){
 		'Booking Status',
 		'<?=$ipp_message?>',
 		'success'
-		)
+		);
+		mobiscroll.datepicker('#scwatbwsr_schedules_picker', {
+			controls: ['calendar', 'timegrid'],
+			display: 'inline'
+		});
 		</script>
 	<?php }  }
-		
+    wp_register_style('mobiscrollcss',SCWATBWSR_URL.'css/mobiscroll.javascript.min.css');
+	wp_enqueue_style('mobiscrollcss');
 	wp_register_style('scwatbwsr-style-frontend', SCWATBWSR_URL .'css/front.css',array(),time());
 	wp_enqueue_style('scwatbwsr-style-frontend');
 	if(count($rooms) > 0){
@@ -81,12 +100,12 @@ function scwatbwsr_content($content){
 		ob_start();
 		
 		
-		wp_register_script('scwjquery', SCWATBWSR_URL .'js/jquery.min.js');
+		wp_register_script('scwjquery', 'https://code.jquery.com/jquery-1.11.2.min.js',array(),time(),true);
 		wp_enqueue_script('scwjquery');
-		wp_register_script('datetimepicker', SCWATBWSR_URL .'datetimepicker/jquery.datetimepicker.full.min.js');
-		wp_enqueue_script('datetimepicker');
-		wp_register_style('datetimepicker', SCWATBWSR_URL .'datetimepicker/jquery.datetimepicker.css');
-		wp_enqueue_style('datetimepicker');
+	   
+		
+		wp_register_script('mobiscrolljs', SCWATBWSR_URL .'js/mobiscroll.javascript.min.js');
+		wp_enqueue_script('mobiscrolljs');
 		wp_register_script('jqueryvalidation','https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js');
 		wp_enqueue_script('jqueryvalidation');
 		wp_register_script('panzoom', 'https://cdn.jsdelivr.net/npm/@panzoom/panzoom/dist/panzoom.min.js');
@@ -96,6 +115,10 @@ function scwatbwsr_content($content){
 		wp_register_script('scwatbwsr-script-frontend', SCWATBWSR_URL .'js/front.js',array(),time(),true);
 		wp_enqueue_script('scwatbwsr-script-frontend');
 		
+		add_action('wp_print_footer_scripts', function() {
+			scw_this_datepicker_footer();
+		});
+		do_action('scw_this_datepicker_footer');
 		if($ipp_message!='')
 		{
 		add_action('wp_print_footer_scripts', function() use ($ipp_message){
@@ -112,7 +135,21 @@ function scwatbwsr_content($content){
 		<div class="scw_front_content">
 			<div class="scwatbwsr_content <?php echo get_post_type($proId) ?>">
 			<form action="post" id="scw-booking-form">
-			
+			<?php
+			$getRoomDataSql = $wpdb->prepare("SELECT * from {$tableRooms}  where id!=%d", 0);
+			$roomData = $wpdb->get_results($getRoomDataSql);
+			?>
+			<input type="hidden" value="<?php echo esc_attr(SCWATBWSR_URL) ?>" class="scwatbwsr_url">
+			<input type="hidden" value="<?php echo esc_attr($proId) ?>" class="product_id">
+			<input type="hidden" value="<?php echo esc_attr($roomData[0]->id) ?>" class="profileid">
+			<input type="hidden" value="<?php echo esc_attr($roomData[0]->tbbookedcolor) ?>" class="tbbookedcolor">
+			<input type="hidden" value="<?php echo esc_attr($roomData[0]->seatbookedcolor) ?>" class="seatbookedcolor">
+			<input type="hidden" value="<?php echo esc_attr($roomData[0]->compulsory) ?>" class="scw_compulsory">
+			<input type="hidden" value="<?php echo esc_attr($roomData[0]->bookingtime) ?>" class="scw_bookingtime">
+			<input type="hidden" value="<?php echo esc_attr(get_option('date_format')) ?>" class="scw_date_format">
+			<input type="hidden" value="<?php echo esc_attr(get_post_type($proId)) ?>" class="scw_posttype">
+			<input type="hidden" value="<?php echo esc_attr($roomData[0]->zoomoption) ?>" class="scw_zoomoption">
+			<input type="hidden" value="" id="time_hidden" />
 			
 			<div class="scwatbwsr_sendform">
 			        <div class="bghover_scw">
@@ -137,21 +174,8 @@ function scwatbwsr_content($content){
 								<label><?php echo esc_html__("Note", "scwatbwsr-translate") ?></label>
 								<textarea name="note" class="scwatbwsr_form_note_input scwatcommon_style" rows="4"></textarea>
 							</div>
-			<?php
-			$getRoomDataSql = $wpdb->prepare("SELECT * from {$tableRooms}  where id!=%d", 0);
-			$roomData = $wpdb->get_results($getRoomDataSql);
-			?>
-			<input type="hidden" value="<?php echo esc_attr(SCWATBWSR_URL) ?>" class="scwatbwsr_url">
-			<input type="hidden" value="<?php echo esc_attr($proId) ?>" class="product_id">
-			<input type="hidden" value="<?php echo esc_attr($roomData[0]->id) ?>" class="profileid">
-			<input type="hidden" value="<?php echo esc_attr($roomData[0]->tbbookedcolor) ?>" class="tbbookedcolor">
-			<input type="hidden" value="<?php echo esc_attr($roomData[0]->seatbookedcolor) ?>" class="seatbookedcolor">
-			<input type="hidden" value="<?php echo esc_attr($roomData[0]->compulsory) ?>" class="scw_compulsory">
-			<input type="hidden" value="<?php echo esc_attr($roomData[0]->bookingtime) ?>" class="scw_bookingtime">
-			<input type="hidden" value="<?php echo esc_attr(get_option('date_format')) ?>" class="scw_date_format">
-			<input type="hidden" value="<?php echo esc_attr(get_post_type($proId)) ?>" class="scw_posttype">
-			<input type="hidden" value="<?php echo esc_attr($roomData[0]->zoomoption) ?>" class="scw_zoomoption">
-			<input type="hidden" value="" id="time_hidden" />
+							
+			
 							<?php 
 			               if(@$options["customer_table"]!="yes"){?>
 						   <div class="scwatbwsr_form_item scw_form_phone">
@@ -161,7 +185,10 @@ function scwatbwsr_content($content){
 						   <?php } 
 							
 							?>
-			
+			                <div mbsc-page class="demo-date-time-picker" >
+								
+								<div id="scwatbwsr_schedules_picker"></div>
+							</div>
 							<?php
 							foreach($roomData as $roomcount=>$room)
 							{
@@ -279,7 +306,7 @@ function scwatbwsr_content($content){
 						?>
 						<input class="array_dates" type="hidden" value='<?php echo json_encode($arrfDay, 1) ?>'>
 						<input class="array_times" type="hidden" value="<?php echo esc_attr($arrTime) ?>">
-						<input id="scwatbwsr_schedules_picker" autocomplete="off" class="scwatcommon_style" type="text">
+						
 						<?php
 					}
 				     ?>
