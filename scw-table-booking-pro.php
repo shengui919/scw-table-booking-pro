@@ -12,6 +12,18 @@
 
 define('SCWATBWSR_URL', plugin_dir_url(__FILE__));
 define('SCW_BOOKING_POST_TYPE', 'scw-booking');
+define('roomsTB', $wpdb->prefix . 'scwatbwsr_rooms');
+define('typesTB', $wpdb->prefix . 'scwatbwsr_types');
+define('schedulesTB', $wpdb->prefix . 'scwatbwsr_schedules');
+define('dailyschedulesTB', $wpdb->prefix . 'scwatbwsr_dailyschedules');
+define('dailytimesTB', $wpdb->prefix . 'scwatbwsr_dailytimes');
+define('pricesTB', $wpdb->prefix . 'scwatbwsr_prices');
+define('tablesTB', $wpdb->prefix . 'scwatbwsr_tables');
+define('seatsTB',$wpdb->prefix . 'scwatbwsr_seats');
+define('productsTb', $wpdb->prefix . 'scwatbwsr_products');
+define('ordersTB',$wpdb->prefix . 'scwatbwsr_orders');
+define('bookedTB', $wpdb->prefix . 'scwatbwsr_bookedseats');
+define('bookingpaymenthistoryTB', $wpdb->prefix . 'scwatbwsr_booking_payment_history');
 function scwatbwsr_boot_session()
 {
 	if (session_status() == PHP_SESSION_NONE)
@@ -60,6 +72,8 @@ function scwatbwsr_install()
 		`compulsory` varchar(255) DEFAULT NULL,
 		`bookingtime` int(11) DEFAULT NULL,
 		`zoomoption` int(11) DEFAULT NULL,
+		`rtop` int NOT NULL DEFAULT '5',
+		`rleft` INT NOT NULL DEFAULT '5' ,
 		PRIMARY KEY (`id`)
 	) $charset_collate;";
 
@@ -301,7 +315,7 @@ function scwatbwsr_admin_menu()
 		'SCW Payment',
 		'manage_options',
 		'scwatbwsr-payment-settings',
-		'show_admin_payment_page'
+		'show_admin_settings_page'
 	);
 
 	add_submenu_page(
@@ -317,6 +331,9 @@ function scwatbwsr_admin_menu()
 function scwatbwsr_options_page()
 {
 	do_settings_sections('pluginSCWTBWSRPage');
+	do_settings_sections('pluginSCWTBWSRRest');
+	do_settings_sections('pluginSCWTBWSRPay');
+	do_settings_sections('pluginSCWTBWSRTwilio');
 }
 
 add_action('admin_init', 'scwatbwsr_settings_init');
@@ -324,26 +341,23 @@ function scwatbwsr_settings_init()
 {
 	scwatbwsr_options_page();
 	register_setting('pluginSCWTBWSRPage', 'scwatbwsr_settings');
-	add_settings_section(
-		'smartcms_pluginPage_section',
-		'',
-		'',
-		'pluginSCWTBWSRPage'
-	);
-	// add_settings_field( 
-	// 	'','',
-	// 	'scwatbwsr_parameters', 
-	// 	'pluginSCWTBWSRPage', 
-	// 	'smartcms_pluginPage_section' 
+	register_setting('pluginSCWTBWSRRest', 'scwatbwsr_settings_rest');
+	register_setting('pluginSCWTBWSRPay', 'scwatbwsr_settings_ippayware');
+	register_setting('pluginSCWTBWSRTwilio', 'scwatbwsr_settings_twilio');
+	// add_settings_section(
+	// 	'smartcms_pluginPage_section',
+	// 	'',
+	// 	'',
+	// 	'pluginSCWTBWSRPage'
 	// );
+	
 }
 
 function scwatbwsr_parameters()
 {
 	include_once dirname(__FILE__) . '/includes/admin-css-js.php';
-	include_once dirname(__FILE__) . '/includes/admin-scw-settings.php';
+	include_once dirname(__FILE__) . '/includes/admin-scw-rooms.php';
 }
-
 include_once dirname(__FILE__) . '/includes/booking-form.php';
 add_shortcode('scw_booking_form', 'scwatbwsr_content');
 
@@ -358,11 +372,11 @@ function getActiveClass($roomId, $scwatbwsr_tab1)
 			echo "active";
 	}
 }
-function show_admin_payment_page()
+function show_admin_settings_page()
 {
 	include_once dirname(__FILE__) . '/includes/admin-css-js.php';
 	include_once dirname(__FILE__) . '/includes/functions.php';
-	include_once dirname(__FILE__) . '/includes/admin-scw-payment.php';
+	include_once dirname(__FILE__) . '/includes/admin-scw-settings.php';
 }
 function show_admin_bookings_page()
 {
@@ -371,6 +385,7 @@ function show_admin_bookings_page()
 	include_once dirname(__FILE__) . '/includes/WP_List_Table.BookingsTable.class.php';
 	wp_register_style('adminbookingcss', SCWATBWSR_URL . 'css/bookings.css', array(), time());
 	wp_enqueue_style('adminbookingcss');
+	
 	$bookings_table = new scwBookingsTable();
 	$bookings_table->prepare_items();
 	$booking_status = $bookings_table->booking_statuses;
@@ -381,6 +396,7 @@ function show_admin_bookings_page()
 function scwatbwsr_dashboard_page()
 {
 	wp_register_style('admindashboardcss', SCWATBWSR_URL . 'css/dashboard.css', array(), time());
+	
 	wp_enqueue_style('admindashboardcss');
 	include_once dirname(__FILE__) . '/includes/admin-css-js.php';
 	include_once dirname(__FILE__) . '/includes/admin-scw-dashboard.php';
@@ -402,14 +418,12 @@ function adminMenuPage()
 		<a id="dashboard-menu" href="admin.php?page=scwatbwsr-table-dashboard" class="menu-tab nav-tab <?php if ($page == 'scwatbwsr-table-dashboard') echo 'nav-tab-active'; ?>">
 			Dashboard </a>
 
-		<a id="bookings-menu" href="admin.php?page=scwatbwsr-table-bookings" class="menu-tab nav-tab <?php if ($page == 'scwatbwsr-table-bookings') echo 'nav-tab-active'; ?>">
+		<a id="bookings-menu" href="admin.php?page=scwatbwsr-table-bookings&type=live" class="menu-tab nav-tab <?php if ($page == 'scwatbwsr-table-bookings') echo 'nav-tab-active'; ?>">
 			Bookings </a>
-
-
-		<a id="options-menu" href="admin.php?page=scwatbwsr-table-settings" class="menu-tab nav-tab <?php if ($page == 'scwatbwsr-table-settings') echo 'nav-tab-active'; ?>">
-			Rooms Settings </a>
 		<a id="options-menu" href="admin.php?page=scwatbwsr-payment-settings" class="menu-tab nav-tab <?php if ($page == 'scwatbwsr-payment-settings') echo 'nav-tab-active'; ?>">
-			Payment Settings </a>
+			Restaurant Settings </a>
+			<a id="options-menu" href="admin.php?page=scwatbwsr-table-settings" class="menu-tab nav-tab <?php if ($page == 'scwatbwsr-table-settings') echo 'nav-tab-active'; ?>">
+			Rooms Settings </a>
 
 
 	</div>

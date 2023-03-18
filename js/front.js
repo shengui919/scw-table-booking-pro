@@ -1,12 +1,14 @@
+var rest_settings;
+var listUnabvaileRoom;
+var setDate;
+var setTime;
 (function($) {
 "use strict";
 	
 	
 	$( document ).ready(function() {
 
-		
-
-		$(".body .is-layout-flow").css({'clear':'both'})
+	    $(".body .is-layout-flow").css({'clear':'both'})
 		var url = jQuery(".scwatbwsr_url").val();
 		var proid = jQuery(".product_id").val();
 		var roomid = jQuery(".profileid").val();
@@ -19,6 +21,39 @@
 		var roomheight = jQuery(".scw_roomheight").val();
 		var posttype = jQuery(".scw_posttype").val();
 		var zoomoption = jQuery(".scw_zoomoption").val();
+
+        $(".people_number_selected").html($(".people_number option:first").text());
+        $(".people_number").change(function(){
+			
+			$(".people_number_selected").html($(".people_number option:selected").text());
+		})
+		$(".booking_date_selected").html($(".booking_date option:first").text());
+        $(".booking_date").change(function(){
+			jQuery(".timebtn").html('')
+			$(".booking_date_selected").html($(".booking_date option:selected").text());
+			$(".Selected_Time").text(
+				"Booking Date : "+$(".booking_date_selected").html()+" "+$(".booking_time_selected").html()
+			)
+			$("#time_hidden").val($(".booking_date_selected").html()+" "+$(".booking_time_selected").html())
+		})
+		$(".booking_time_selected").html($(".booking_time option:first").text());
+		$(".bornone.booking_time").val("17:00").change();
+		$(".booking_time_selected").html($(".booking_time option:selected").text());
+		$(".Selected_Time").text(
+			"Booking Date "+$(".booking_date_selected").html()+" "+$(".booking_time_selected").html()
+		)
+		$("#time_hidden").val($(".booking_date_selected").html()+" "+$(".booking_time_selected").html())
+        $(".booking_time").change(function(){
+			jQuery(".timebtn").html('')
+			$(".booking_time_selected").html($(".booking_time option:selected").text());
+			$(".Selected_Time").text(
+				"Booking Date "+$(".booking_date_selected").html()+" "+$(".booking_time_selected").html()
+			)
+			$("#time_hidden").val($(".booking_date_selected").html()+" "+$(".booking_time_selected").html())
+		})
+		$("#time_hidden").val($(".booking_date_selected").html()+" "+$(".booking_time_selected").html())
+		$("#no_people_hidden").val($(".people_number option:first").val())
+
 	function myDateDay(speDay='') {
 			var a = new Date();
 			if(speDay && speDay!='')
@@ -37,23 +72,24 @@
 	function formBook()
 	{
 		 
-			        var name = jQuery(".scwatbwsr_form_name_input").val();
+			        var name = jQuery(".scwatbwsr_form_name_input").val() + jQuery(".scwatbwsr_form_name_last_ input").val();
 					var address = jQuery(".scwatbwsr_form_address_input").val();
 					var email = jQuery(".scwatbwsr_form_email_input").val();
 					var phone = jQuery(".scwatbwsr_form_phone_input").val();
 					var note = jQuery(".scwatbwsr_form_note_input").val();
-					var total = jQuery(".scwatbwsr_total_value").text().trim();
-					var seats = "";
-					var no_seat=0;
-					var schedule = jQuery(".scwatbwsr_schedules_item.active").text().trim();
-					if(!schedule) schedule = jQuery("#scwatbwsr_schedules_picker").val();
+					var total = jQuery(".scwatbwsr_total_value").val();
+					var no_seat= jQuery("#no_people_hidden").val();
+					var schedule = setDate+ " "+ setTime
+					var roomId = jQuery(".scwatbwsr_form_room_input").val();
 					var data= {
 						name: name,
 						address: address,
 						email: email,
 						phone: phone,
 						note: note,
-						proId: proid,
+						proId: 0,
+						seat:jQuery(".scwatbwsr_form_tabel_input").val(),
+						roomid: roomId,
 						total: total,
 						schedule: schedule,
 						task : "send_mail",
@@ -61,43 +97,43 @@
 						customer_table:customer_table,
 						enabled_payment:enabled_payment
 					}
-					if(customer_table=="yes")
-					{
+				// 	if(customer_table=="yes")
+				// 	{
 						
 					
-					jQuery(".scwatbwsr_map_tables_table").each(function(){
-						var tbname = jQuery(this).children(".scwatbwsr_map_tables_table_label").text().trim();
-						jQuery(this).find(".scwatbwsr_map_tables_table_seat.active").each(function(){
-							if(seats)
-								seats += "@"+tbname+"."+jQuery(this).text().trim();
-							else
-								seats += tbname+"."+jQuery(this).text().trim();
-						});
-					});
-					data.seats= seats;
-				   }
-				   else 
-				   {
-					  no_seat = jQuery(".scwatbwsr_form_seat_input").val();
-					  data.no_seat = no_seat;
-				   }
+				// 	jQuery(".scwatbwsr_map_tables_table").each(function(){
+				// 		var tbname = jQuery(this).children(".scwatbwsr_map_tables_table_label").text().trim();
+				// 		jQuery(this).find(".scwatbwsr_map_tables_table_seat.active").each(function(){
+				// 			if(seats)
+				// 				seats += "@"+tbname+"."+jQuery(this).text().trim();
+				// 			else
+				// 				seats += tbname+"."+jQuery(this).text().trim();
+				// 		});
+				// 	});
+				// 	data.seats= seats;
+				//    }
+				//    else 
+				//    {
+				// 	  no_seat = jQuery(".scwatbwsr_form_seat_input").val();
+				// 	  data.no_seat = no_seat;
+				//    }
 					
 					
-					if(enabled_payment=="yes")
+					if(enabled_payment=="on")
 					{
-						data.billing_first_name=$(".billing_first_name").val()
-						data.billing_last_name=$(".billing_last_name").val()
-						data.billing_address_1=$(".billing_address_1").val()
-						data.billing_address_2=$(".billing_address_2").val()
-						data.billing_city=$(".billing_city").val()
-						data.billing_state=$(".billing_state").val()
-						data.billing_postcode=$(".billing_postcode").val()
-						data.billing_country=$(".billing_country").val()
-						data.billing_email=$(".billing_email").val()
-						data.billing_phone=$(".billing_phone").val()
+						data.billing_first_name=$(".scwatbwsr_form_name_input").val()
+						data.billing_last_name=$(".scwatbwsr_form_name_last_input").val()
+						data.billing_address_1=$(".scwatbwsr_form_address_input").val()
+						data.billing_address_2='';//$(".billing_address_2").val()
+						data.billing_city='';//$(".billing_city").val()
+						data.billing_state='';//$(".billing_state").val()
+						data.billing_postcode='';//$(".billing_postcode").val()
+						data.billing_country='';//$(".billing_country").val()
+						data.billing_email=$(".scwatbwsr_form_email_input").val()
+						data.billing_phone=$(".scwatbwsr_form_phone_input").val()
 					}
 					
-					if(seats!='' || no_seat>0){
+					if(no_seat>0){
 						jQuery.ajax({
 							url: url+"helper.php",
 							data:data,
@@ -115,6 +151,7 @@
 										data.message,
 										'success'
 										)
+										window.location.reload();
 								}
 									
 								else
@@ -128,6 +165,10 @@
 							}
 						});
 					}
+					else 
+					{
+						alert('select seats')
+					}
 				
 			
 	}
@@ -139,271 +180,157 @@
 			}
 	});
 	
+	$(".findtable").click(function(){
+		checkSchedule();
+	})
+		
 	
-	jQuery(".woocommerce-tabs").before(jQuery(".scwatbwsr_content").show());
-	jQuery(".scwatbwsr_content").after(jQuery("form.cart"));
-	
-	if(compulsory == "yes")
-		jQuery(".single_add_to_cart_button").prop("disabled", true);
-	if(jQuery(".scwatbwsr_schedules_daily").length>0 && jQuery(".scwatbwsr_schedules_daily").length > 0){
-		var array_dates = jQuery(".array_dates").val();
+	function checkSchedule(){
 		
-		if(jQuery(".array_times").val()){
-			var array_times = jQuery(".array_times").val().split(",");
-			var todayDateDayName = myDateDay();
-			
-		}else{
-			jQuery('#scwatbwsr_schedules_picker').mobiscroll().datepicker({
-				controls: ['calendar', 'timegrid'],
-				touchUi: true
-			})
-		}
-	}else{
-		jQuery(".scwatbwsr_schedules_item").each(function(){
-			var thische = jQuery(this);
-			thische.on("click", function(){
-				jQuery(".scwatbwsr_schedules_item").removeClass("active");
-				thische.addClass("active");
-				Swal.fire({
-					title: '<strong>Select Time</strong>',
-					html:
-					  '<input type="text" class="scw_form_end_time" />' ,
-					showCloseButton: true,
-					showCancelButton: false,
-					focusConfirm: false,
-					showConfirmButton:false
-				  })
-				  $(".scw_form_end_time").datetimepicker({
-					datepicker:false,
-					step: jQuery(".scw_bookingtime").val(),
-					format:'H:i',
-					
-					defaultTime: "00:00",
-					minTime:jQuery(".scwatbwsr_schedules_item.active").data("mintime"),
-					maxTime:jQuery(".scwatbwsr_schedules_item.active").data("maxtime"),
-					closeOnDateSelect: true,
-					onSelectTime:function(ct, $i){
-						checkSchedule(jQuery(".scwatbwsr_schedules_item.active").text()+" "+jQuery(".scw_form_end_time").val());
-						jQuery("#time_hidden").val(jQuery(".scw_form_end_time").val())
-						jQuery("#show_time_text").text(jQuery(".scw_form_end_time").val())
-					    swal.close()
-					},
-					onSelectDate:function(ct,$i){
-						checkSchedule(jQuery(".scwatbwsr_schedules_item.active").text()+" "+jQuery(".scw_form_end_time").val());
-					    swal.close()
-						jQuery("#time_hidden").val(jQuery(".scw_form_end_time").val())
-						jQuery("#show_time_text").text(jQuery(".scw_form_end_time").val())
-					}
-				});
-				checkSchedule(thische.text());
-			});
-		});
-	}
-	function checkSchedule(schedule){
-		
-		// var todayDateDayName = myDateDay(schedule);
-		
-		// 	jQuery('#scwatbwsr_schedules_picker').datetimepicker({
-		// 		disabledWeekDays: jQuery(".array_dates").val(),
-		// 		format: date_format+' H:i',
-		// 		minDate:0,
-		// 		timepicker:true,
-		// 		step: jQuery(".scw_bookingtime").val(),
-		// 		minTime:jQuery(".array_times_start_"+todayDateDayName).val(),
-		// 		maxTime:jQuery(".array_times_end_"+todayDateDayName).val(),
-		// 		closeOnDateSelect: false,
-		// 		onSelectTime:function(ct, $i){
-		// 			checkSchedule($i[0].value);
-		// 		},
-		// 		onSelectDate:function(ct,$i){
-		// 			checkSchedule($i[0].value);
-		// 		}
-		// 	});
-		$("#show_time").css("display","block")
+		setDate= jQuery(".booking_date option:selected").val();
 		jQuery.ajax({
 			type: "POST",
 			url: url+"helper.php",
+			dataType:"JSON",
 			data:{
 				task: "check_schedule",
-				schedule: schedule,
-				roomid: roomid,
-				proid: proid,
-				bookingtime: bookingtime
+				schedule: jQuery(".booking_date option:selected").val()+" "+jQuery(".booking_time option:selected").val(),
+				seats: jQuery("#no_people_hidden").val()
 			},
 			beforeSend : function(data){
+				jQuery(".br-btm").css("display","none");
 				jQuery(".scwatbwsr_map").css("opacity", "0.5");
+				jQuery(".standard-outdoor").removeClass("hide");
+				jQuery(".timebtn").css({"opacity": "1","display":"block"});
+				jQuery(".timebtn").html('').css({"min-height":"100px"});
+				jQuery(".pricetrue").removeClass("hide")
+				jQuery("#nodata-table").html('');
 			},
 			success : function(data){
-				jQuery(".scwatbwsr_map").css("opacity", "1");
 				
-				jQuery(".scwatbwsr_map_tables_table").each(function(){
-					var thistb = jQuery(this);
-					
-					var tbreadcolor = thistb.children(".scwatbwsr_table_readcolor").val();
-					var seatreadcolor = thistb.children(".scwatbwsr_seat_readcolor").val();
-					
-					thistb.css("background", tbreadcolor+" none repeat scroll 0% 0% padding-box content-box");
-					thistb.find(".scwatbwsr_map_tables_table_seat").css("background", seatreadcolor).removeClass("seatbooked");
-				});
+				var html='';
 				
-				if(data.length > 0){
-					jQuery.each(data, function(key, val){
-						var seat = val.replace(".", "");
+				if(data && data.times && data.times.length>0)
+				{
+					var timeData= data.times;
+					var mH= parseInt(timeData.length)/4;
+					
+					mH= parseInt(Math.ceil(mH)*80) +80
+					jQuery(".timebtn").css({"height":mH+"px"})
+					rest_settings = data.rest_settings;
+					listUnabvaileRoom = data.listUnabvaileRoom;
+					if(listUnabvaileRoom && listUnabvaileRoom.length>0)
+					{
+						var nohtml='';
+						for(var i=0;i<listUnabvaileRoom.length;i++)
+					    {
+							var tt=listUnabvaileRoom[i];
+							
+							jQuery(".roomava-"+tt.roomid).addClass("hide");
+							var tName =jQuery(".roomava-"+tt.roomid).data("room")
+							nohtml+='<div class="mainlounge">'+tName+'</div>'+
+							'<div class="notable">No tables available.</div>';
+						}
+						jQuery(".br-btm").css("display","block");
+						jQuery("#nodata-table").html(nohtml);
+					}
+					if(data && data.rest_settings && data.rest_settings.enabled_payment!="on")
+					{
+						jQuery(".pricetrue").addClass("hide")
+					}
+					for(var i=0;i<timeData.length;i++)
+					{
 						
-						jQuery("#seat"+seat).css("background", seatbookedcolor).addClass("seatbooked");
-					});
-					
-					jQuery(".scwatbwsr_map_tables_table").each(function(){
-						if(jQuery(this).find(".scwatbwsr_map_tables_table_seat").length == jQuery(this).find(".scwatbwsr_map_tables_table_seat.seatbooked").length)
-							jQuery(this).css("background", tbbookedcolor+" none repeat scroll 0% 0% padding-box content-box");
-					});
+						var tt=timeData[i];
+						var timeInterval=tt.replace(":","");
+						html+="<button id='"+timeInterval+"' data-time='"+tt+"' data-id='"+setDate+" "+tt+"' onclick='myFunction("+timeInterval+")'><span>"+
+							'<i class="fa fa-clock-o time-3-icon"></i>'+
+						    '</span> '+tt+' </button>';
+					}
+				
 				}
+				else 
+				{
+				html+="<button style='width:100%'><span>"+
+					'<i class="fa fa-remove time-3-icon"></i>'+
+					'</span> Restaurant Closed! </button>';
+				}
+				
+				jQuery(".timebtn").html(html)
 			},
 			dataType: 'json'
 		});
 	}
 	
-	jQuery(".scwatbwsr_map_tables_table").each(function(){
-		var thistb = jQuery(this);
-		
-		thistb.find(".scwatbwsr_map_tables_table_seat.perseat").each(function(){
-			var thiseat = jQuery(this);
-			thiseat.on("click", function(){
-				
-				if(!thiseat.hasClass("seatbooked")){
-					if(jQuery("#scwatbwsr_schedules_picker").length > 0 || jQuery(".scwatbwsr_schedules_item").length > 0){
-						if(jQuery("#scwatbwsr_schedules_picker").val() || jQuery(".scwatbwsr_schedules_item.active").length > 0){
-							if(thiseat.hasClass("active"))
-								thiseat.removeClass("active");
-							else
-								thiseat.addClass("active");
-							sessSeat();
-						}else
-						Swal.fire(
-							'Error!',
-							"Please choose schedule first!",
-							'error'
-							);
-							
-					}else{
-						if(thiseat.hasClass("active"))
-							thiseat.removeClass("active");
-						else
-							thiseat.addClass("active");
-						sessSeat();
-					}
-				}
-			});
-		});
-		thistb.children(".scwatbwsr_map_tables_table_label").on("click", function(){
-			if(jQuery("#scwatbwsr_schedules_picker").length > 0 || jQuery(".scwatbwsr_schedules_item").length > 0){
-				if(jQuery("#scwatbwsr_schedules_picker").val() || jQuery(".scwatbwsr_schedules_item.active").length > 0){
-					if(thistb.find(".seatbooked").length > 0){
-						Swal.fire(
-							'Seat Status',
-							"Can not book whole table!",
-							'error'
-							);
-						
-					}else{
-						if(jQuery(this).hasClass("active")){
-							jQuery(this).removeClass("active");
-							thistb.find(".scwatbwsr_map_tables_table_seat").removeClass("active");
-						}else{
-							jQuery(this).addClass("active");
-							thistb.find(".scwatbwsr_map_tables_table_seat").addClass("active");
-						}
-						sessSeat();
-					}
-				}else
-				Swal.fire(
-					'Error!',
-					"Please choose schedule first!",
-					'error'
-					);
-					
-			}else{
-				if(thistb.find(".seatbooked").length > 0){
-					
-					Swal.fire(
-						'Error!',
-						"Can not book whole table!",
-						'error'
-						);
-				}else{
-					if(jQuery(this).hasClass("active")){
-						jQuery(this).removeClass("active");
-						thistb.find(".scwatbwsr_map_tables_table_seat").removeClass("active");
-					}else{
-						jQuery(this).addClass("active");
-						thistb.find(".scwatbwsr_map_tables_table_seat").addClass("active");
-					}
-					sessSeat();
-				}
-			}
-		});
-	});
 	
-	function sessSeat(){
-		var seats = "";
-		jQuery(".scwatbwsr_map_tables_table").each(function(){
-			var tbname = jQuery(this).children(".scwatbwsr_map_tables_table_label").text().trim();
-			jQuery(this).find(".scwatbwsr_map_tables_table_seat.active").each(function(){
-				if(seats)
-					seats += "@"+tbname+"."+jQuery(this).text().trim();
-				else
-					seats += tbname+"."+jQuery(this).text().trim();
-			});
-		});
-		
-		jQuery.ajax({
-			type: "POST",
-			url: url+"helper.php",
-			data:{
-				task: "sess_seats",
-				seats: seats,
-				proid: proid,
-				posttype: posttype
-			},
-			beforeSend : function(data){
-				jQuery(".scwatbwsr_map").css("opacity", "0.5");
-			},
-			success : function(data){
-				jQuery(".scwatbwsr_map").css("opacity", "1");
-				
-				if(compulsory == "yes"){
-					if(jQuery(".scwatbwsr_map_tables_table_seat.active").length > 0)
-						jQuery(".single_add_to_cart_button").prop("disabled", false);
-					else
-						jQuery(".single_add_to_cart_button").prop("disabled", true);
-				}
-				
-				if(posttype == "post" || posttype == "page"){
-					jQuery(".total_seats_count").text("Total Seats : "+jQuery(".scwatbwsr_map_tables_table_seat.active").length)
-					jQuery(".scwatbwsr_total_value").text("$"+data);
-				}
-			}
-		});
-	}
 	
-	if(zoomoption=="1"){
-		const element = document.getElementById('scwatbwsr_map_panzoom');
-		const zoomInButton = document.getElementById('scwatbwsr_map_zoom-in');
-		const zoomOutButton = document.getElementById('scwatbwsr_map_zoom-out');
-		const resetButton = document.getElementById('scwatbwsr_map_zoom_reset');
-		const panzoom = Panzoom(element, {
-			 bounds: true,
-			 zoomDoubleClickSpeed: 1,
-			 excludeClass: "scwatbwsr_map_exclude"
-		});
-		
-		const parent = element.parentElement
-		parent.addEventListener('wheel', panzoom.zoomWithWheel);
-		zoomInButton.addEventListener('click', panzoom.zoomIn)
-		zoomOutButton.addEventListener('click', panzoom.zoomOut)
-		resetButton.addEventListener('click', panzoom.reset)
-	}
+	
 	
 });
 })(jQuery);
 
+function myFunction(setDate) {
+	var vRoomLen=jQuery(".standard-outdoor").length-1;
+	var hRoomLen=jQuery(".mainlounge").length;
+	if(vRoomLen==hRoomLen)
+	{
+		jQuery("#booking-continue").removeClass("hideNone");
+		jQuery(".othertext").addClass("hideNone")
+		jQuery(".br-btm").addClass("hideNone")
+	}
+	
+	else 
+	{
+		jQuery("#booking-continue").addClass("hideNone");
+		jQuery(".othertext").removeClass("hideNone")
+		jQuery(".br-btm").removeClass("hideNone")
+		mysecondtab()
+	}
+	setTime = jQuery("#"+setDate).data("time");
+	var dateL=jQuery("#time_hidden").val().substring(0,jQuery("#time_hidden").val().length-5);
+	jQuery("#booking_time_span").html(dateL+" "+setTime);
+	jQuery("#span_booking_date").html(dateL)
+	jQuery("#span_booking_time").html(setTime)
+	jQuery("#span_people").html(jQuery("#no_people_hidden").val())
+	
+	
+	
+	
+	if(rest_settings && rest_settings.customer_table=="yes")
+	{
+	document.getElementById("myPopup").style.display = "block";
+	document.getElementById("topsectionid").style.display = "none";
+	
+	}
+  }
+function mybackfn() {
+	document.getElementById("myPopup").style.display = "none";
+	document.getElementById("topsectionid").style.display = "block";
+	jQuery("#secondidtabs").css("display","none");
+	jQuery("#sectioncon").css("display","block");
+	jQuery("#flifirsttabone").trigger("click")
+
+}
+function mysecondtab(id=0,rid=0){
+	
+	let priceEle = jQuery("#price-find-"+id);
+	jQuery(".scwatbwsr_total_value").val(jQuery(priceEle).data("price"))
+	document.getElementById("secondidtabs").style.display = "block";
+	document.getElementById("sectioncon").style.display = "none"
+	document.getElementById("bgtabcol").classList.add("flextablecolor");
+	document.getElementById("flifirsttab").style.display = 'block';
+	document.getElementById('flifirsttabone').style.display = 'none'
+	document.getElementById("myPopup").style.display = "none";
+	document.getElementById("topsectionid").style.display = "block";
+	jQuery(".scwatbwsr_form_room_input").val(rid)
+	jQuery(".scwatbwsr_form_tabel_input").val(id)
+}
+
+function mymainfirsttab() {
+	document.getElementById("bgtabcol").classList.remove("flextablecolor");
+	document.getElementById('flifirsttabone').style.display = 'block'
+	document.getElementById("flifirsttab").style.display = 'none';
+	document.getElementById("secondidtabs").style.display = "none";
+	document.getElementById("sectioncon").style.display = "block"
+	
+}

@@ -1,3 +1,16 @@
+<?php
+$roomsTB = $wpdb->prefix . 'scwatbwsr_rooms';
+$typesTB = $wpdb->prefix . 'scwatbwsr_types';
+$schedulesTB = $wpdb->prefix . 'scwatbwsr_schedules';
+$dailyschedulesTB = $wpdb->prefix . 'scwatbwsr_dailyschedules';
+$dailytimesTB = $wpdb->prefix . 'scwatbwsr_dailytimes';
+$pricesTB = $wpdb->prefix . 'scwatbwsr_prices';
+$tablesTB = $wpdb->prefix . 'scwatbwsr_tables';
+$seatsTB = $wpdb->prefix . 'scwatbwsr_seats';
+$productsTb = $wpdb->prefix . 'scwatbwsr_products';
+$ordersTB = $wpdb->prefix . 'scwatbwsr_orders';
+$bookedTB = $wpdb->prefix . 'scwatbwsr_bookedseats';
+?>
 <input type="hidden" value="<?php echo esc_attr(get_option('date_format')) ?>" class="scw_date_format">
 <div class="wrap">
 	<div class="scwatbwsr_content">
@@ -6,7 +19,8 @@
 	<div class="scwatbwsr_content mb-3">
 		<?php adminMenuPage() ?>
 	</div>
-	<?php if (@$_GET['type'] == 'view' && @$_GET['booking_id'] != '') {
+	<?php 
+	 if (@$_GET['type'] == 'view' && @$_GET['booking_id'] != '') {
 		$order  = orderGet($_GET['booking_id']);
 		$reload = '
 			<div class="scwatbwsr_schedules_spec_reload">
@@ -149,17 +163,7 @@
 						<div class="content-area">
 							<div class="model">
 								<?php
-								$roomsTB = $wpdb->prefix . 'scwatbwsr_rooms';
-								$typesTB = $wpdb->prefix . 'scwatbwsr_types';
-								$schedulesTB = $wpdb->prefix . 'scwatbwsr_schedules';
-								$dailyschedulesTB = $wpdb->prefix . 'scwatbwsr_dailyschedules';
-								$dailytimesTB = $wpdb->prefix . 'scwatbwsr_dailytimes';
-								$pricesTB = $wpdb->prefix . 'scwatbwsr_prices';
-								$tablesTB = $wpdb->prefix . 'scwatbwsr_tables';
-								$seatsTB = $wpdb->prefix . 'scwatbwsr_seats';
-								$productsTb = $wpdb->prefix . 'scwatbwsr_products';
-								$ordersTB = $wpdb->prefix . 'scwatbwsr_orders';
-								$bookedTB = $wpdb->prefix . 'scwatbwsr_bookedseats';
+								
 
 								$getTypesSql = $wpdb->prepare("SELECT * from {$typesTB} where roomid>%d", 0);
 								$types = $wpdb->get_results($getTypesSql);
@@ -174,9 +178,9 @@
 									<div class="col-md-2 col-sm-6 col-xs-6 column1">
 										<?php
 										foreach ($tables as $key => $table) {
-											$seats = explode(",", $table->seats);
-											$seatsC = count($seats);
-											$arrNumb = range(1, $seatsC);
+											$seats =  $table->seats;
+											
+											$arrNumb = range(1, $seats);
 											$even = range(0, count($arrNumb), 2);
 											$add = range(1, count($arrNumb), 2);
 
@@ -342,13 +346,15 @@
 			</div>
 		<?php
 		}
-	} else {
+	} 
+	else if (@$_GET['type'] == 'list') {
+		
 
 		?>
 		<div class="scwatbwsr_content pd-10">
 			<h2 class="mb-3">
 				<?php _e('Bookings', 'scwatbwsr-translate'); ?>
-
+                <a href="admin.php?page=scwatbwsr-table-bookings&type=live">Live View</a>
 			</h2>
 			<?php do_action('rtb_bookings_table_top'); ?>
 			<form id="rtb-bookings-table" method="POST" action="">
@@ -368,6 +374,17 @@
 		</div>
 	<?php
 	}
+	else 
+	{
+	
+		
+		wp_register_style('jquery-ui', '//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css', array(), time());
+		wp_enqueue_style('jquery-ui');
+		wp_register_style('adminlivecss', SCWATBWSR_URL . 'css/live-styles.css', array(), time());
+		wp_enqueue_style('adminlivecss');
+	require_once dirname(dirname(__FILE__))."/includes/booking-live.php";
+    }
+	
 	?>
 
 

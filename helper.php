@@ -63,7 +63,7 @@ if ($task == "add_page") {
 	}
 } elseif ($task == "save_base_setting") {
 	$roomId = filter_var($_POST["roomId"], FILTER_VALIDATE_INT);
-	$bktime = filter_var($_POST["bktime"], FILTER_VALIDATE_INT);
+	$bktime = filter_var(30, FILTER_VALIDATE_INT);
 	$width = filter_var($_POST["width"], FILTER_SANITIZE_STRING);
 	$height = filter_var($_POST["height"], FILTER_SANITIZE_STRING);
 	$newRoomname = filter_var($_POST["newRoomname"], FILTER_SANITIZE_STRING);
@@ -71,8 +71,8 @@ if ($task == "add_page") {
 	$bg = filter_var($_POST["bg"], FILTER_SANITIZE_STRING);
 	$tbbookedcolor = filter_var($_POST["tbbookedcolor"], FILTER_SANITIZE_STRING);
 	$seatbookedcolor = filter_var($_POST["seatbookedcolor"], FILTER_SANITIZE_STRING);
-	$compulsory = filter_var($_POST["compulsory"], FILTER_SANITIZE_STRING);
-	$zoom = filter_var($_POST["zoom"], FILTER_VALIDATE_INT);
+	$compulsory = filter_var("no", FILTER_SANITIZE_STRING);
+	$zoom = filter_var(1, FILTER_VALIDATE_INT);
 
 	$roomsTb = $wpdb->prefix . 'scwatbwsr_rooms';
 	$wpdb->query($wpdb->prepare(
@@ -89,7 +89,24 @@ if ($task == "add_page") {
 		$zoom,
 		$roomId
 	));
-} elseif ($task == "add_type") {
+	
+} 
+elseif ($task == "update_room_position") {
+	$roomId = filter_var($_POST["roomId"], FILTER_VALIDATE_INT);
+	$rleft = filter_var($_POST["rleft"], FILTER_SANITIZE_STRING);
+	$rtop = filter_var($_POST["rtop"], FILTER_SANITIZE_STRING);
+	
+
+	$roomsTb = $wpdb->prefix . 'scwatbwsr_rooms';
+	$wpdb->query($wpdb->prepare(
+		"UPDATE $roomsTb SET rleft=%s, rtop=%s  WHERE id=%d",
+		$rleft,
+		$rtop,
+		$roomId
+	));
+	
+}
+elseif ($task == "add_type") {
 	$roomId = filter_var($_POST["roomId"], FILTER_VALIDATE_INT);
 	$typename = filter_var($_POST["typename"], FILTER_SANITIZE_STRING);
 	$tbbg = filter_var($_POST["tbbg"], FILTER_SANITIZE_STRING);
@@ -662,32 +679,103 @@ if ($task == "add_page") {
 	$schedulesTB = $wpdb->prefix . 'scwatbwsr_schedules';
 	$wpdb->query($wpdb->prepare("DELETE FROM $schedulesTB where roomid=%d", $roomId));
 } elseif ($task == "check_schedule") {
-	$proid = filter_var($_POST["proid"], FILTER_VALIDATE_INT);
-	$roomid = filter_var($_POST["roomid"], FILTER_VALIDATE_INT);
-	$schedule = filter_var($_POST["schedule"], FILTER_SANITIZE_STRING);
-	$bookingtime = filter_var($_POST["bookingtime"], FILTER_SANITIZE_STRING);
+	
+	$schedule = date("Y-m-d H:i:s", strtotime(filter_var($_POST["schedule"], FILTER_SANITIZE_STRING)));
+	
+	$seats = filter_var($_POST["seats"], FILTER_SANITIZE_STRING);
+    
+	$dayname = strtolower(date("l",strtotime($schedule)));
+    
+	$bookingtime = date("H:i",strtotime($schedule));
 
-	$_SESSION["schedule" . $proid] = $schedule;
+	$rest_settings = get_option("scwatbwsr_settings_rest");
 
-	$bookedTB = $wpdb->prefix . 'scwatbwsr_bookedseats';
+	$duration = $rest_settings["booking_time"];
+
+	// find the daily schedules 
+
+	$startTime ="03:00 PM";
+
+	$endTime  ="10:00 PM";
+
+	$times = [];
+   
+	
+	
+    
+	$schedulesListQuery = $wpdb->prepare("SELECT * from ".schedulesTB." where roomid=%d and schedule>=%s",0,$schedule);
+    $schedulesList = $wpdb->get_results($schedulesListQuery,ARRAY_A);
+	$dailyschedulesListQuery = $wpdb->prepare("SELECT * from ".dailyschedulesTB);
+	$dailyschedulesList = $wpdb->get_results($dailyschedulesListQuery,ARRAY_A);
+	$dailytimesTBListQuery = $wpdb->prepare("SELECT * from ".dailytimesTB);
+	$dailytimesTBListQueryList = $wpdb->get_results($dailytimesTBListQuery,ARRAY_A);
+	$listUnabvaileRoom=[];
+	$findMatchingRoom =  array_filter($schedulesList,function($d)use($schedule){
+		return ($d["rooomid"]!="0" && date("Y-m-d",strtotime($d["schedule"])) == date("Y-m-d",strtotime($schedule)));
+	 });
+	 if($findMatchingRoom)
+	 array_push($listUnabvaileRoom,...array_values($findMatchingRoom));
+	 $findMatchingRoom =  array_filter($dailyschedulesList,function($d)use($dayname){
+		$daysArr=explode(",",$d["daily"]);
+		
+		return ($d["roomid"] != "0" && in_array($dayname,$daysArr));
+	});
+	if($findMatchingRoom)
+	array_push($listUnabvaileRoom,...array_values($findMatchingRoom));
+	if(count($schedulesList)>0)
+	{
+       $findMatchingDay =  array_filter($schedulesList,function($d)use($schedule){
+		  return (date("Y-m-d",strtotime($d["schedule"])) == date("Y-m-d",strtotime($schedule)));
+	   });
+	   if($findMatchingDay)
+	   {
+		$findMatchingDay = array_values($findMatchingDay);
+		 $startTime = $findMatchingDay[0]["start_time"];
+		 $endTime = $findMatchingDay[0]["end_time"];
+		 $times= bookingTimes($duration,$startTime,$endTime);
+	   }
+	}
+    else 
+	{
+		
+		
+		$findMatchingDay =  array_filter($dailyschedulesList,function($d)use($dayname){
+			$daysArr=explode(",",$d["daily"]);
+			
+			return ($d["roomid"] == "0" && in_array($dayname,$daysArr));
+		});
+		
+		if($findMatchingDay)
+		{
+		
+		$findMatchingDay = array_filter($dailytimesTBListQueryList,function($d)use($dayname){
+			return ($dayname==$d["week_day"]);
+		});
+		$findMatchingDay = array_values($findMatchingDay);
+			$startTime = $findMatchingDay[0]["start_time"];
+			$endTime = $findMatchingDay[0]["end_time"];
+			
+			$times= bookingTimes($duration,$startTime,$endTime);
+        }
+	
+	}
+    
 	$ordersTb = $wpdb->prefix . 'scwatbwsr_orders';
 
 	$bookedSeats = array();
+    
+	
 
 	if ($bookingtime) {
-		if (get_option('date_format') == "d/m/Y") {
-			$cschedule = explode(" ", $schedule);
-			$cschedule1 = explode("/", $cschedule[0]);
-			$schedule = $cschedule1[2] . "-" . $cschedule1[1] . "-" . $cschedule1[0] . " " . $cschedule[1];
-		} elseif (get_option('date_format') == "d-m-Y") {
+		
 			$cschedule = explode(" ", $schedule);
 			$cschedule1 = explode("-", $cschedule[0]);
 			$schedule = $cschedule1[2] . "-" . $cschedule1[1] . "-" . $cschedule1[0] . " " . $cschedule[1];
-		}
+		
 
 		for ($i = 0; $i <= $bookingtime; $i += 5) {
 			$datesche = date(get_option('date_format') . " H:i", strtotime("-" . $i . " minutes", strtotime($schedule)));
-			$getOrdersSql = $wpdb->prepare("SELECT * from {$ordersTb} where productId=%d and schedule=%s", $proid, $datesche);
+			$getOrdersSql = $wpdb->prepare("SELECT * from {$ordersTb} where  schedule=%s",  $datesche);
 			$orders = $wpdb->get_results($getOrdersSql);
 			if ($orders) {
 				foreach ($orders as $order) {
@@ -699,7 +787,7 @@ if ($task == "add_page") {
 			}
 		}
 	} else {
-		$getOrdersSql = $wpdb->prepare("SELECT * from {$ordersTb} where productId=%d and schedule=%s", $proid, $schedule);
+		$getOrdersSql = $wpdb->prepare("SELECT * from {$ordersTb} where schedule=%s",  $schedule);
 		$orders = $wpdb->get_results($getOrdersSql);
 		if ($orders) {
 			foreach ($orders as $order) {
@@ -711,16 +799,10 @@ if ($task == "add_page") {
 		}
 	}
 
-	$getBookedSql = $wpdb->prepare("SELECT * from {$bookedTB} where roomid=%d", $roomid);
-	$bookeds = $wpdb->get_results($getBookedSql);
-	if ($bookeds) {
-		foreach ($bookeds as $bk) {
-			array_push($bookedSeats, $bk->tb . "." . $bk->seat);
-		}
-	}
+	
 	$bookedSeats = array_unique($bookedSeats);
 
-	echo json_encode($bookedSeats, 1);
+	echo wp_send_json(array("times"=>$times,"bookedSeats"=>$bookedSeats,"rest_settings"=>$rest_settings,"listUnabvaileRoom"=>$listUnabvaileRoom));
 } elseif ($task == "sess_seats") {
 	$proid = filter_var($_POST["proid"], FILTER_VALIDATE_INT);
 	$seats = filter_var($_POST["seats"], FILTER_SANITIZE_STRING);
@@ -888,8 +970,8 @@ if ($task == "add_page") {
 	$note = $_POST["note"];
 	$proId = $_POST["proId"];
 	$total = $_POST["total"];
-	$seats = "";
-	$no_seat = 0;
+	$seats = $_POST["seat"];
+	$no_seat = $_POST['no_seat'];
 	$schedule = date("Y-m-d H:i:s", strtotime($_POST["schedule"]));
 	$billing_first_name = $_POST['billing_first_name'] ? $_POST['billing_first_name'] : '';
 	$billing_last_name = $_POST['billing_last_name'] ? $_POST['billing_last_name'] : '';
@@ -909,23 +991,20 @@ if ($task == "add_page") {
 	$table_name = $wpdb->prefix . 'scwatbwsr_orders';
 	$count_query = "select count(*) from $table_name";
 	$num = $wpdb->get_var($count_query);
-	$seatsnew = explode("@", $seats);
-	if ($_POST['customer_table'] != '' && $_POST['customer_table'] == 'yes') {
-		$seats = $_POST["seats"];
-	} else {
-		$no_seat = $_POST['no_seat'];
-	}
+	
+	
 	$booking_status = "Confirmed";
 	if ($_POST['enabled_payment'] != '' && $_POST['enabled_payment'] == 'yes') {
 		$booking_status = "Pending";
 	}
 	$wpdb->query($wpdb->prepare(
-		"INSERT INTO $table_name (`productId`, `orderId`, `seats`, `schedule`, `name`, `address`, `email`, `phone`, `note`, `total`,`_ipp_status`,`_ipp_transaction_id`,
+		"INSERT INTO $table_name (`roomid`,`productId`, `orderId`, `seats`, `schedule`, `name`, `address`, `email`, `phone`, `note`, `total`,`_ipp_status`,`_ipp_transaction_id`,
 	`billing_first_name`,`billing_last_name`,`billing_address_1`,`billing_address_2`,`billing_city`,`billing_country`,`billing_state`,`billing_postcode`,`billing_email`,`billing_phone`,`user`,`_ipp_payment_url`,`booking_status`,`no_seats`)
-	VALUES (%d, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d)",
+	VALUES (%d,%d, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d)",
+	    $proId,
 		$proId,
 		date("Ymdhis") . ($num + 1),
-		implode(",", $seatsnew),
+		$seats,
 		$schedule,
 		$name,
 		$address,
@@ -973,14 +1052,14 @@ if ($task == "add_page") {
 		include_once  'class-wc-gateway-ipp.php';
 		$wcGatewayIpp = new WC_Gateway_IPP($_POST['url']);
 		$gateway = $wcGatewayIpp->process_payment($lastid);
-		$body .= 'Seats: ' . str_replace("@", " ", $seats) . '<br>';
+		$body .= 'Seats: ' . $no_seat . '<br>';
 		$body .= 'Total: ' . $total . '<br>';
 	} else {
 		$gateway = array(
 			"message" => "Booked your table successfully",
 			"success" => true
 		);
-		$body .= 'Seats: ' . $no_seat . '<br>';
+		$body .= 'Table: ' . $no_seat . '<br>';
 		$body .= 'Status: Completed<br>';
 	}
 	send_message(date('F j, Y, H:i', strtotime($schedule)), $phone);

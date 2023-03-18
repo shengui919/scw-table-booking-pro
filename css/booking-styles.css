@@ -1,0 +1,425 @@
+
+
+h1, h2, h3, h4, h5, h6, p {
+    padding: 0px;
+    margin: 0px;
+}
+
+.maintabs {
+    margin-top: 100px;
+}
+
+.maintabs-sub {
+    width: 738px;
+    margin: 0 auto;
+    background-color: #fff;
+    border-radius: 6px;
+    padding: 40px;
+}
+
+.tabcontent {
+    box-shadow: rgb(204, 204, 204) 0px -1px 0px inset;
+    display: flex;
+    align-items: center;
+}
+#flifirsttab {
+    display: none;
+}
+.flextable {
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid red !important;
+    padding: 15px 0px;
+    cursor: pointer;
+    color: rgb(218, 55, 67) !important;
+}
+.flextabledf {
+    display: flex;
+    align-items: center;
+    padding: 15px 0px;
+    cursor: pointer;
+}
+
+.flextable2 {
+    display: flex;
+    align-items: center;
+    margin-left: 30px;
+    padding: 15px 0px;
+    cursor: pointer;
+}
+.flextablecolor{
+    border-bottom: 2px solid red;
+    color: rgb(218, 55, 67);
+}
+.flextable-toptext {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding-right: 6px;
+}
+
+.flextable-bottomtext {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.selectcontent {
+    display: flex;
+    align-items: center;
+    margin-top: 45px;
+    border-color: rgb(204, 204, 204) rgb(236, 236, 236) rgb(204, 204, 204) rgb(204, 204, 204);
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 8px;
+}
+
+.findtable {
+    flex: 1;
+    height: 67px;
+    font-size: 18px;
+    padding: 12px 35px;
+    font-weight: bold;
+    border-radius: 0px 8px 8px 0px;
+    border: unset;
+    outline: unset;
+    background-color: rgb(218, 55, 67) !important;
+    color: #ffffff !important;
+}
+
+.select1, .select2, .select3 {
+    flex: 1;
+    display: flex;
+    position: relative;
+    -webkit-box-align: center;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 15px;
+    border-right: 1px solid rgb(204, 204, 204);
+}
+.peopleset {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: rgb(51, 51, 51);
+    flex: 0 1 100%;
+}
+.ntd {
+    fill: rgb(153, 153, 153);
+    min-width: 0.75rem;
+    flex: 1 0 30%;
+}
+.success {
+    background-color: green;
+}
+.warning {
+    background-color: red;
+}
+
+.select1 select {
+    position: absolute;
+    box-sizing: border-box;
+    width: 100%;
+    opacity: 0;
+    appearance: menulist-button;
+    height: 52px;
+    border-radius: 8px 0px 0px 8px;
+    left: 0;
+    /* background-position: calc(89% - 40px) calc(1em + 0px), calc(100% - 27px) calc(1em + 16px), calc(100% - 16.5em) 19.5em; */
+}
+
+.select2 select {
+    position: absolute;
+    box-sizing: border-box;
+    width: 100%;
+    opacity: 0;
+    appearance: menulist-button;
+    height: 52px;
+    border-radius: 8px 0px 0px 8px;
+    left: 0;
+    /* background-position: calc(89% - 40px) calc(1em + 0px), calc(100% - 27px) calc(1em + 16px), calc(100% - 16.5em) 19.5em; */
+}
+
+.select3 select {
+    position: absolute;
+    box-sizing: border-box;
+    width: 100%;
+    opacity: 0;
+    appearance: menulist-button;
+    height: 52px;
+    border-radius: 8px 0px 0px 8px;
+    left: 0;
+    /* background-position: calc(89% - 40px) calc(1em + 0px), calc(100% - 27px) calc(1em + 16px), calc(100% - 16.5em) 19.5em; */
+}
+.standard-outdoor.hide
+{
+    display: none;
+}
+.timebtn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 0;
+    display: none;
+}
+.selected_date_time_text
+  {
+    font-size: 20px;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+    color: red;
+  }
+.timebtn button {
+    background-color: #da3743 !important;
+    border: unset;
+    
+    border-radius: 8px;
+    color: #fff !important;
+    font-size: 18px;
+    margin-top: 40px;
+    width: 20%;
+    float:left;
+    margin-left:2%;
+    cursor: pointer;
+}
+#secondidtabs {
+    display: none;
+}
+.timebtn button span {
+    vertical-align: middle !important;
+}
+
+#time-3-icon {
+    fill: #ffffff !important
+}
+
+.closebtn {
+    display: flex;
+    align-items: normal;
+}
+
+.closearrow {
+    padding-right: 4px;
+    font-size: 21px;
+    font-weight: 500;
+    color: #da3743;
+    cursor: pointer;
+}
+
+.closeback {
+    font-size: 20px;
+    font-weight: 500;
+    color: #da3743;
+    cursor: pointer;
+}
+
+.seat-text {
+    font-size: 32px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 20px;
+    color: rgb(51, 51, 51);;
+}
+
+.seat-textsub {
+    text-align: center;
+    font-size: 15px;
+    color:red;
+}
+
+.othertext {
+    font-size: 23px;
+    text-transform: uppercase;
+    padding-top: 40px;
+    padding-bottom: 20px;
+    font-weight: 600;
+}
+
+.standard-outdoor {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 20px;
+}
+
+.stand {
+    font-size: 18px;
+}
+
+.stand-btn {
+    font-size: 21px;
+    font-weight: 700;
+    padding: 0px 26px;
+    border: none;
+    background-color: #da3743;
+    height: 40px;
+    border-radius: 4px;
+    color: #ffffff;
+}
+.br-btm {
+    box-shadow: rgb(204, 204, 204) 0px -1px 0px inset;
+}
+.mainlounge {
+    font-size: 23px;
+    text-transform: uppercase;
+    padding-top: 40px;
+    padding-bottom: 20px;
+    font-weight: 600;
+}
+.notable{
+    font-size: 18px;
+}
+#myPopup {
+    display: none;
+}
+.topbacksection {
+    display: block;
+}
+.ability {
+    color: rgb(45, 51, 63);
+    font-size: 18px;
+    background-color: aliceblue;
+    padding: 12px;
+    border-radius: 4px;
+    margin-top: 30px;
+}
+.ability span {
+    font-weight: bold;
+}
+.forminput {
+    display: flex;
+    gap:30px;
+    margin-top: 30px;
+}
+.forminputmain {
+    flex: 1;
+}
+.forminput2 {
+    flex: 1;
+}
+.forminput1 input {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 4px;
+    border: 1px solid rgb(204, 204, 204);
+    font-weight: 600;
+    color: #2d333f;
+}
+.phoneinput {
+    display: flex;
+}
+.phoneinput select {
+    width: 100%;
+    padding: 0px 35px;
+    font-size: 15px;
+    border: 1px solid rgb(204, 204, 204);
+    font-weight: 600;
+    color: rgb(120 120 120);
+    flex: 1;
+    border-radius: unset;
+    border-right: unset;
+}
+.hideNone
+{
+    display: none;
+}
+.pricetrue.hide{
+    display: none;
+}
+.optionalinput select {
+    width: 100%;
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 4px;
+    border: 1px solid rgb(204, 204, 204);
+    font-weight: 600;
+    color: rgb(120 120 120);
+}
+.pad20 {
+    padding-bottom: 20px;
+}
+.checkboxsection {
+    /* display: flex; */
+    align-items: flex-start;
+    padding-bottom: 20px;
+}
+.checkboxsection input {
+    width: 30px;
+    height: 22px;
+}
+.checkbox-text {
+    font-size: 15px;
+    padding-left: 8px;
+    color: rgb(45, 51, 63);
+    font-weight: 500;
+}
+.cafetext {
+    font-size: 20px;
+    font-weight: 600;
+    padding-bottom: 15px;
+}
+.cafetextsub {
+    display: flex;
+    align-items: flex-start;
+    font-size: 15px;
+    font-weight: 600;
+    color: #141a26;
+}
+.cafetextsub svg {
+    margin-right: 10px;
+}
+.whatdo {
+    font-size: 15px;
+    font-weight: 600;
+    border-top: 1px solid rgb(204, 204, 204);
+    padding-top: 20px;
+    margin-top: 19px;
+    /* color: #6f737b; */
+    color: #2d333f;
+}
+.important-boldtext {
+    font-size: 15px;
+    line-height: 1.5;
+    color: rgb(45, 51, 63);
+    font-weight: 500;
+}
+label.error
+{
+    color:red;
+}
+.important-bold {
+    font-size: 13px;
+    font-weight: bold;
+    padding-top: 20px;
+    padding-bottom: 4px;
+    color: #2d333f;
+}
+.confirmbtn {
+    width: 100%;
+    font-size: 20px;
+    font-weight: 600;
+    padding: 15px;
+    border-radius: 6px;
+    border: unset;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    color: rgb(122 129 143);
+}
+.confirmbtn:hover{
+    background-color: #000;
+    color:#FFF;
+    font-weight: bold;
+}
+.privacytext {
+    font-size: 15px;
+    padding-bottom: 15px;
+    color: rgb(120 120 120);
+}
+.privacytext span {
+    color: #da3743;
+}

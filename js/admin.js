@@ -46,7 +46,7 @@ function newRoom() {
 		}
 	});
 }
-function openCustomDate(htmlType = 1) {
+function openCustomDate(htmlType = 1,redirect=0) {
 	var htmlContent = '<div class="date-filters-swal">' +
 		'<div class="rtb-admin-bookings-filters-start">' +
 		'<label for="start-date" class="screen-reader-text">Start Date:</label>' +
@@ -56,7 +56,7 @@ function openCustomDate(htmlType = 1) {
 		'<label for="end-date" class="screen-reader-text">End Date:</label>' +
 		'<input type="text" id="end-date-swal" name="end_date_swal" class="datepickerswal" value="" placeholder="End Date">' +
 		'</div>' +
-		'<input type="submit" onClick="reportsFilter(1)" class="button button-secondary" value="Apply">' +
+		'<input type="submit" onClick="reportsFilter(1,'+redirect+')" class="button button-secondary" value="Apply">' +
 		'</div>';
 	if (htmlType == '2') {
 		var dropdownHtml = '';
@@ -70,7 +70,7 @@ function openCustomDate(htmlType = 1) {
 			'<select class="year_filter mb-3" id="filter_year"  style="width:200px;height:45px">';
 		htmlContent += dropdownHtml;
 		htmlContent += '</select></div>' +
-			'<input type="submit" onClick="reportsFilter(2)" class="button button-secondary" value="Apply">' +
+			'<input type="submit" onClick="reportsFilter(2,'+redirect+')" class="button button-secondary" value="Apply">' +
 			'</div>';
 	}
 	Swal.fire({
@@ -163,7 +163,14 @@ function reportsFilterYear(year) {
 	});
 
 }
-function reportsFilter(type = 0) {
+function openDate(ID)
+{
+	var startTime =jQuery(".slider-time").text().trim();
+	var endTime =jQuery(".slider-time2").text().trim();
+	window.location.href="admin.php?page=scwatbwsr-table-bookings&type=live&selectedDate="+jQuery("#selectedDate"+ID).val()+"&startTime="+startTime+"&endTime="+endTime;
+}
+
+function reportsFilter(type = 0,redirect=0) {
 	var startDate = '';
 	var endDate = '';
 	var year = '';
@@ -210,6 +217,12 @@ function reportsFilter(type = 0) {
 	jQuery("#filter_label").text(filterText)
 	if (startDate != '') startDate = startDate + " 00:00:00";
 	if (endDate != '') endDate = endDate + " 23:59:59";
+	if(redirect==1)
+	{
+		window.location.href="admin.php?page=scwatbwsr-table-bookings&type=live&startDate="+startDate+"&endDate="+endDate
+	}
+	else 
+	{
 	Swal.fire('Loading.....')
 
 	jQuery.ajax({
@@ -247,6 +260,7 @@ function reportsFilter(type = 0) {
 			jQuery(".card__title.total_revenue").text("$0.00")
 		}
 	});
+}
 }
 function totalCounts() {
 	var tableCount = jQuery(".name-table.active").length;
@@ -352,10 +366,137 @@ function fetchTimeList(dateTime, elthis, i) {
 		minTime: time
 	});
 }
+function findMintesCount(element)
+{
+	if(jQuery(element).length>0)
+	 {
+		var times  =jQuery(element).text().trim();
+		var timesAmArr = times.split(" ");
+		var timeAm =  timesAmArr[1];
+		var timesArr = timesAmArr[0].trim().split(":");
+
+		var hoursNum = parseInt(timesArr[0]);
+		
+		var minsNum = parseInt(timesArr[1]);
+		
+		if(timeAm=="PM")
+		hoursNum = hoursNum+12;
+		return (hoursNum*60) + minsNum ;
+	 }
+	 else 
+	 return 540;
+}
 (function (jQuery) {
 	"use strict";
+     var values=[540,1020];
+	 var minStart = findMintesCount(".slider-time");
+	 var minEnd = findMintesCount(".slider-time2");
+	 
+	 if(minStart >0  && minEnd >0)
+	 values=[minStart,minEnd];
+    jQuery("#slider-range").slider({
+		range: true,
+		min: 0,
+		max: 1440,
+		step: 15,
+		values: values,
+		stop:function(event, ui) {
+			openDate('Current')
+		},
+		slide: function (e, ui) {
+			var hours1 = Math.floor(ui.values[0] / 60);
+			var minutes1 = ui.values[0] - (hours1 * 60);
+	
+			if (hours1.length == 1) hours1 = '0' + hours1;
+			if (minutes1.length == 1) minutes1 = '0' + minutes1;
+			if (minutes1 == 0) minutes1 = '00';
+			if (hours1 >= 12) {
+				if (hours1 == 12) {
+					hours1 = hours1;
+					minutes1 = minutes1 + " PM";
+				} else {
+					hours1 = hours1 - 12;
+					minutes1 = minutes1 + " PM";
+				}
+			} else {
+				hours1 = hours1;
+				minutes1 = minutes1 + " AM";
+			}
+			if (hours1 == 0) {
+				hours1 = 12;
+				minutes1 = minutes1;
+			}
+	
+	
+	
+			jQuery('.slider-time').html(hours1 + ':' + minutes1);
+			
+			var hours2 = Math.floor(ui.values[1] / 60);
+			var minutes2 = ui.values[1] - (hours2 * 60);
+	
+			if (hours2.length == 1) hours2 = '0' + hours2;
+			if (minutes2.length == 1) minutes2 = '0' + minutes2;
+			if (minutes2 == 0) minutes2 = '00';
+			if (hours2 >= 12) {
+				if (hours2 == 12) {
+					hours2 = hours2;
+					minutes2 = minutes2 + " PM";
+				} else if (hours2 == 24) {
+					hours2 = 11;
+					minutes2 = "59 PM";
+				} else {
+					hours2 = hours2 - 12;
+					minutes2 = minutes2 + " PM";
+				}
+			} else {
+				hours2 = hours2;
+				minutes2 = minutes2 + " AM";
+			}
+	
+			jQuery('.slider-time2').html(hours2 + ':' + minutes2);
+			
+		}
+	});
+	// room drag start
+	jQuery(".tablesize-drag").each(function () {
+		var thistbmap = jQuery(this);
+		thistbmap.draggable({
+			scroll: true,
+			drag: function () {
+				// thistbmap.children('.topline').css('display', 'block');
+				// thistbmap.children('.rightline').css('display', 'block');
+				// thistbmap.children('.botline').css('display', 'block');
+				// thistbmap.children('.leftline').css('display', 'block');
+			},
+			start: function () {
+				// thistbmap.children('.topline').css('display', 'block');
+				// thistbmap.children('.rightline').css('display', 'block');
+				// thistbmap.children('.botline').css('display', 'block');
+				// thistbmap.children('.leftline').css('display', 'block');
+			},
+			stop: function ($event) {
+				
+			   var room_id=jQuery($event.target).data("id");
+			   var sleft = jQuery($event.target).position().left;
+			   var stop = jQuery($event.target).position().top;
+			   jQuery.ajax({
+				url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
+				data: {
+					roomId: room_id,
+					rleft: sleft,
+					rtop: stop,
+					task: "update_room_position"
+				},
+				type: 'POST',
+				
+				
+			   });
+			}
+		});
 
-
+		
+	});
+	// room drag
 	jQuery("#booking_view_change_status_button").click(function () {
 		var schedule = jQuery("#booking_data_schedule").text().trim();
 		if (new Date(schedule) < new Date()) {
@@ -658,6 +799,7 @@ function fetchTimeList(dateTime, elthis, i) {
 
 		/////////
 		elthis.find(".scwatbwsr_basesetting_save").on("click", function () {
+			roomId  = elthis.find(".scwatbwsr_room_id").val()
 			var width = elthis.find(".scwatbwsr_roomsize_width").val();
 			var height = elthis.find(".scwatbwsr_roomsize_height").val();
 			var color = elthis.find(".scwatbwsr_roombg_con_color").val();
@@ -672,7 +814,7 @@ function fetchTimeList(dateTime, elthis, i) {
 			jQuery.ajax({
 				url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
 				data: {
-					roomId: roomId,
+					roomId: elthis.find(".scwatbwsr_room_id").val(),
 					width: width,
 					height: height,
 					color: color,
@@ -725,7 +867,7 @@ function fetchTimeList(dateTime, elthis, i) {
 				jQuery.ajax({
 					url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
 					data: {
-						roomId: roomId,
+						roomId: elthis.find(".scwatbwsr_room_id").val(),
 						typename: typename,
 						tbbg: tbbg,
 						tbshape: tbshape,
@@ -860,7 +1002,7 @@ function fetchTimeList(dateTime, elthis, i) {
 				jQuery.ajax({
 					url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
 					data: {
-						roomId: roomId,
+						roomId: elthis.find(".scwatbwsr_room_id").val(),
 						schedule: schedule,
 						endTime: endTime,
 						startTime: startTime,
@@ -993,7 +1135,7 @@ function fetchTimeList(dateTime, elthis, i) {
 				jQuery.ajax({
 					url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
 					data: {
-						roomId: roomId,
+						roomId:  elthis.find(".scwatbwsr_room_id").val(),
 						dailys: dailys,
 						task: "change_daily"
 					},
@@ -1021,7 +1163,7 @@ function fetchTimeList(dateTime, elthis, i) {
 				jQuery.ajax({
 					url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
 					data: {
-						roomId: roomId,
+						roomId:  elthis.find(".scwatbwsr_room_id").val(),
 						scheduletime: scheduletime,
 						task: "add_time"
 					},
@@ -1163,7 +1305,7 @@ function fetchTimeList(dateTime, elthis, i) {
 				jQuery.ajax({
 					url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
 					data: {
-						roomId: roomId,
+						roomId:  elthis.find(".scwatbwsr_room_id").val(),
 						label: label,
 						seats: seats,
 						type: type,
@@ -1308,11 +1450,7 @@ function fetchTimeList(dateTime, elthis, i) {
 				}
 			});
 
-			thistbmap.find(".scwatbwsr_mapping_table_seat").each(function () {
-				jQuery(this).draggable({
-					containment: "parent"
-				});
-			});
+			
 		});
 
 		/////////////
@@ -1377,7 +1515,7 @@ function fetchTimeList(dateTime, elthis, i) {
 					url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
 					data: {
 						newname: newname,
-						roomId: roomId,
+						roomId:  elthis.find(".scwatbwsr_room_id").val(),
 						task: "copy_room"
 					},
 					type: 'POST',
@@ -1402,7 +1540,7 @@ function fetchTimeList(dateTime, elthis, i) {
 				jQuery.ajax({
 					url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
 					data: {
-						roomId: roomId,
+						roomId: elthis.find(".scwatbwsr_room_id").val(),
 						task: "delete_room"
 					},
 					type: 'POST',
@@ -1456,7 +1594,7 @@ function fetchTimeList(dateTime, elthis, i) {
 			jQuery.ajax({
 				url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
 				data: {
-					roomId: roomId,
+					roomId:  elthis.find(".scwatbwsr_room_id").val(),
 					seat: jQuery(this).val(),
 					task: "make_as_booked"
 				},

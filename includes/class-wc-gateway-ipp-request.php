@@ -55,7 +55,7 @@ class WC_Gateway_IPP_Request
     {
         $this->gateway    = $gateway;
         $this->notify_url = WC_Gateway_IPP::$NOTIFY_URL;
-        $this->options =  get_option( 'scwatbwsr_settings' );
+        $this->options =  get_option( 'scwatbwsr_settings_ippayware' );
         $this->page = get_option(('scw-settings'));
     }
 
@@ -327,6 +327,15 @@ class WC_Gateway_IPP_Request
      */
     protected function get_transaction_args($order)
     {
+        if($order->billing_address_2=='')
+        if($order->billing_address_2=='Test Address')
+        $order->billing_city='Mimi';
+        if($order->billing_country=='')
+        $order->billing_country='US';
+        if($order->billing_postcode=='')
+        $order->billing_postcode='600334';
+        if($order->billing_state=='')
+        $order->billing_state='TN';
         return array_merge(
             array('currency_code' => 'USD'),
             array(

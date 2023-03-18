@@ -2,6 +2,42 @@
 require_once dirname(dirname(__FILE__))."/library/twilio/autoload.php";	
 use Twilio\Rest\Client;
 require_once(dirname(dirname(dirname(dirname(dirname(__FILE__))))) . '/wp-config.php');
+
+function bookingTimes($duration=30,$starttime='',$endtime='')
+{
+if($starttime=='')
+$starttime = '00:00';  // your start time
+if($endtime=='')
+$endtime = '23:59';  // End time
+
+
+$array_of_time = array ();
+$start_time    = strtotime ($starttime); //change to strtotime
+$end_time      = strtotime ($endtime); //change to strtotime
+
+$add_mins  = $duration * 60;
+
+while ($start_time <= $end_time) // loop between time
+{
+   $array_of_time[] = date ("H:i", $start_time);
+   $start_time += $add_mins; // to check endtie=me
+} 
+return $array_of_time;
+}
+function bookingDates($days=20)
+{
+$starttime = date('Y-m-d');  // your start time
+$array_of_time = array ();
+$endtime = date("Y-m-d", strtotime("+$days days"));
+$begin = new DateTime(date("Y-m-d"));
+$end = new DateTime($endtime);
+$interval = DateInterval::createFromDateString('1 day');
+$period = new DatePeriod($begin, $interval, $end);
+foreach ($period as $dt) {
+    $array_of_time[$dt->format("Y-m-d")]=$dt->format("l jS \of F");
+}
+return $array_of_time;
+}
 function orderUpdate($order_id,$updateArray)
 { 
     global $wpdb;
@@ -14,6 +50,106 @@ function orderGet($order_id)
     $ordersTb = $wpdb->prefix . 'scwatbwsr_orders';
 	$query = "SELECT * from $ordersTb where id=$order_id";
     return $wpdb->get_row($query);
+}
+function getAllroomsLiveView()
+{
+	global $wpdb;
+	
+	$rooomQuery = $wpdb->prepare("SELECT r.rtop,r.rleft,r.id,r.roomname,COUNT(t.id) as count from ".roomsTB." AS r
+	INNER JOIN ".tablesTB." AS t ON t.roomid = r.id
+	WHERE  t.seats>%d 
+	GROUP by t.roomid",0);
+	return $wpdb->get_results($rooomQuery);
+	
+}
+function getAllTableLiveView()
+{
+	global $wpdb;
+	
+	$rooomQuery = $wpdb->prepare("SELECT t.label,t.seats,t.ttop,t.tleft from ".tablesTB." AS t
+	INNER JOIN ".roomsTB." AS r ON t.roomid = r.id
+	WHERE  t.seats>%d 
+	GROUP by t.roomid",0);
+	return $wpdb->get_results($rooomQuery);
+	
+}
+function getAllTableLiveViewByRoom($roomid)
+{
+	global $wpdb;
+	
+	$rooomQuery = $wpdb->prepare("SELECT t.id,t.label,t.seats,t.ttop,t.tleft from ".tablesTB." AS t
+	INNER JOIN ".roomsTB." AS r ON t.roomid = r.id
+	WHERE  t.seats>%d  AND t.roomid=%d
+	GROUP by t.roomid",0,$roomid);
+	return $wpdb->get_results($rooomQuery);
+	
+}
+function getTablePrices($tid)
+{
+	global $wpdb;
+	
+	$rooomQuery = $wpdb->prepare("SELECT t.type,t.id,p.price from ".tablesTB." AS t
+	INNER JOIN ".pricesTB." AS p ON t.type = p.typeid
+	WHERE  t.seats>%d  AND t.roomid!=%d AND t.id=%d
+	",0,0,$tid);
+	return $wpdb->get_row($rooomQuery);
+	
+}
+function findBooking($selectedDate,$startTime,
+$endTime)
+{
+	$start = date("Y-m-d H:i:s",strtotime($selectedDate." ".$startTime));
+
+	$end = date("Y-m-d H:i:s",strtotime($selectedDate." ".$endTime));
+	
+	global $wpdb;
+	
+	$rooomQuery = $wpdb->prepare("SELECT o.* from ".ordersTB." AS o
+	
+	WHERE  o.schedule <= %s  AND o.schedule >= %s
+	",$start,$end);
+	return $wpdb->get_results($rooomQuery);
+	
+}
+function findBookingByTable($table,$selectedDate,$startTime,
+$endTime)
+{
+	$start = date("Y-m-d H:i:s",strtotime($selectedDate." ".$startTime));
+
+	$end = date("Y-m-d H:i:s",strtotime($selectedDate." ".$endTime));
+	global $wpdb;
+	//INNER JOIN ".roomsTB." AS r ON t.roomid = r.id
+	$rooomQuery = $wpdb->prepare("SELECT o.* from ".ordersTB." AS o
+	
+	WHERE  o.schedule <= %s  AND o.schedule >= %s AND o.seats = %s
+	",$table,$start,$end);
+	return $wpdb->get_results($rooomQuery);
+	
+}
+function findTableClass($seats)
+{
+	$tlClass="tablew5";
+	if($seats>=1 && $seats<=4)
+	{
+		$tlClass="tablew4";
+	}
+	else if($seats>=5 && $seats<=6)
+	{
+		$tlClass="tablew6";
+	}
+	else if($seats>=6 && $seats<=10)
+	{
+		$tlClass="tablew10";
+	}
+	else if($seats>=10 && $seats<=15)
+	{
+		$tlClass="tablew15";
+	}
+	else 
+	{
+		$tlClass ="tablew20";
+	}
+	return $tlClass;
 }
 add_action( 'add_meta_boxes', 'scwatbwsr_add_tab_admin_product', 10, 2 );
 function scwatbwsr_add_tab_admin_product(){
@@ -651,7 +787,7 @@ function bookingEmail($booking,$subject='')
     {
      
 	
-		$api_details = get_option( 'scwatbwsr_settings' );
+		$api_details = get_option( 'scwatbwsr_settings_twilio' );
         
         if (is_array($api_details) and count($api_details) != 0) {
             $TWILIO_SID = $api_details["twilio_sid"];

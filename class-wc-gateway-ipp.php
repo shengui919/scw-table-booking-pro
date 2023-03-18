@@ -83,7 +83,7 @@ class WC_Gateway_IPP
             'refunds'
         ];
 
-        $options = get_option( 'scwatbwsr_settings' );
+        $options = get_option( 'scwatbwsr_settings_ippayware' );
 
         // Define user set variables.
         $this->title = 'Ipp Payware';
