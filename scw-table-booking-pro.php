@@ -168,7 +168,7 @@ function scwatbwsr_install()
 		`total` double(10,2) NOT NULL DEFAULT 0.00,
 		`_ipp_tax` double(10,2) NOT NULL DEFAULT 0.00,
 		`_ipp_commission` double(10,2) NOT NULL DEFAULT 0.00,
-		`booking_status` enum('trash', 'pending', 'confirmed', 'closed') DEFAULT 'pending',
+		`booking_status` enum('trash', 'pending', 'confirmed', 'closed','progress') DEFAULT 'pending',
 		`_ipp_status` enum('Process','Pending','Completed') DEFAULT 'Pending',
 		`_ipp_transaction_id` varchar(255) DEFAULT NULL,
 		`billing_first_name` varchar(255) NOT NULL,

@@ -72,7 +72,7 @@ var setTime;
 	function formBook()
 	{
 		 
-			        var name = jQuery(".scwatbwsr_form_name_input").val() + jQuery(".scwatbwsr_form_name_last_ input").val();
+			        var name = jQuery(".scwatbwsr_form_name_input").val() +" "+ jQuery(".scwatbwsr_form_name_last_input").val();
 					var address = jQuery(".scwatbwsr_form_address_input").val();
 					var email = jQuery(".scwatbwsr_form_email_input").val();
 					var phone = jQuery(".scwatbwsr_form_phone_input").val();

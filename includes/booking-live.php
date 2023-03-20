@@ -37,127 +37,57 @@ $tableLists = getAllTableLiveView();
 
 $rest_settings = get_option('scwatbwsr_settings_rest');
 
-$allBookings = findBooking($selectedDate,$startTime,$endTime)
+$allBookings = findBooking($selectedDate,$startTime,$endTime);
+$seated = array_filter($allBookings,function($b){
+    return ($b->booking_status=="progress");
+});
+$seatedCounts=0;
+if($seated)
+$seatedCounts=count($seated);
+$statusArr=['trash', 'pending', 'confirmed', 'closed','progress'];
+$bookingFreeTable=[];
 
+$findBookingPending=array_filter($allBookings,function($b){
+    return ($b->booking_status=="pending");
+});
+if(!$findBookingPending) $bookingsPending=[];
 ?>
 
     <div class="maintabs">
         <div class="maintabs-sub">
             <div class="leftside">
                 <div class="reservationsec">
-                    <div class="reservationtext">RESERVATION</div>
-                    <div class="waitingtext">WAITING</div>
+                    <div  data-status="reservation" class="reservationtext">RESERVATION</div>
+                    <div data-status="waiting" class="waitingtext">WAITING</div>
+                    <div data-status="all" class="alltext">ALL</div>
                 </div>
                 <div class="searchguest">
-                    <input type="text" placeholder="Search Guest">
+                    <input id="myInput" type="text" placeholder="Search Guest">
                 </div>
+                
                 <div class="seated">
                     <div class="seatedtext">SEATED</div>
                     <div class="seatedtextnum">         
                         <i class="fa fa-user" aria-hidden="true"></i>
-                        18</div>
+                        <?=$seatedCounts?></div>
                 </div>
                 <?php foreach($allBookings as $b) {?>
-                <div class="maintopsec">
+                <div id="<?=$b->id?>" class="<?=$b->id?> filterrow maintopsec booking-<?=$b->booking_status?>">
                     <div class="leftfirst">
-                        <div class="timeinner">6:00 </div>
-                        <div class="pm">PM</div>
+                        <div class="timeinner"><?=date("h:i",strtotime($b->schedule))?> </div>
+                        <div class="pm"><?=date("A",strtotime($b->schedule))?></div>
                     </div>
                     <div class="leftsecont"> 
-                        <div class="leftsecont1">John Deo</div>
-                        <div  class="leftsecont2">045345345345</div>
-                        <div  class="leftsecont3">3 guest / main room</div>
+                        <div class="leftsecont1"><?=$b->name?></div>
+                        <div  class="leftsecont2"><?=$b->phone?></div>
+                        <div  class="leftsecont3"><?=$b->no_seats?> guest / <?=$b->seats?$b->roomname:"<span data-id='$b->id' class='sec12-open'>Select Table</span>"?></div>
                     </div>
                     <div>
-                        <div class="sec12">T1</div>
+                        <div data-id='<?=$b->id?>' class="sec12 live-<?=$b->booking_status?$b->booking_status:'open'?> sec12-<?=$b->tid?$b->tid:'open'?>">T<?=$b->tid?></div>
                     </div>
                 </div>
                 <?php  } ?>
-                <!--
-                <div class="maintopsec">
-                    <div class="leftfirst">
-                        <div>6:00 </div>
-                        <div>PM</div>
-                    </div>
-                    <div class="leftsecont"> 
-                        <div class="leftsecont1">John Deo</div>
-                        <div  class="leftsecont2">045345345345</div>
-                        <div  class="leftsecont3">3 guest / main room</div>
-                    </div>
-                    <div class="tablend">
-                        <div class="sec12">T2</div>
-                        <div class="staricon">
-                            <i class="fa fa-star" aria-hidden="true"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="maintopsec">
-                    <div class="leftfirst">
-                        <div>6:00 </div>
-                        <div>PM</div>
-                    </div>
-                    <div class="leftsecont"> 
-                        <div class="leftsecont1">John Deo</div>
-                        <div  class="leftsecont2">045345345345</div>
-                        <div  class="leftsecont3">3 guest / main room</div>
-                    </div>
-                    <div>
-                        <div class="sec12">T1</div>
-                    </div>
-                </div>
-                <div class="maintopsec">
-                    <div class="leftfirst">
-                        <div>6:00 </div>
-                        <div>PM</div>
-                    </div>
-                    <div class="leftsecont"> 
-                        <div class="leftsecont1">John Deo</div>
-                        <div  class="leftsecont2">045345345345</div>
-                        <div  class="leftsecont3">3 guest / main room</div>
-                    </div>
-                    <div class="tablend">
-                        <div class="sec12">T4</div>
-                        <div class="stariconleaves">
-                            <i class="fa fa-pagelines leaves" ></i>
-                            <i class="fa fa-star leavestar" aria-hidden="true"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="upcomingall">
-                    <div class="seatedtext">UPCOMING</div>
-                    <div class="seatedtextnum">         
-                        <i class="fa fa-user" aria-hidden="true"></i>
-                        7</div>
-                </div>
-                <div class="maintopsecup">
-                    <div class="leftfirst">
-                        <div class="timeinner">6:00 </div>
-                        <div class="pm">PM</div>
-                    </div>
-                    <div class="leftsecont"> 
-                        <div class="leftsecont1">John Deo</div>
-                        <div  class="leftsecont2">045345345345</div>
-                        <div  class="leftsecont3">3 guest / main room</div>
-                    </div>
-                    <div>
-                        <div class="sec12t4">T4</div>
-                    </div>
-                </div>
-                <div class="maintopsec">
-                    <div class="leftfirst">
-                        <div>6:00 </div>
-                        <div>PM</div>
-                    </div>
-                    <div class="leftsecont"> 
-                        <div class="leftsecont1">John Deo</div>
-                        <div  class="leftsecont2">045345345345</div>
-                        <div  class="leftsecont3">3 guest / main room</div>
-                    </div>
-                    <div class="tablend">
-                        <div class="sec12t4">T4</div>
-                    </div>
-                </div>
-                -->
+ 
             </div>
             <div class="mainside">
                 <div class="main">
@@ -227,12 +157,24 @@ $allBookings = findBooking($selectedDate,$startTime,$endTime)
                     <div class="fulltablemain">
                         <div class="allhead-content">
                             <div class="fulltablecontent">
-                                <?php foreach($roomLists as $r){?>
+                                <?php 
+                                $totalTable=0;
+                                foreach($roomLists as $r){
+                                    $totalTable =(int) $totalTable+$r->count;
+                                    $findBookedTable=array_filter($allBookings,function($b)use($r){
+                                        return ($b->roomid==$r->id);
+                                    });
+                                    $bookedCounts=0;
+                                    if($findBookedTable)
+                                    {
+                                        $bookedCounts=(int) $bookedCounts + count($findBookedTable);
+                                    }
+                                    ?>
                                 <div class="mainroomfull">
                                     <div class="mainroom-text">
                                         <?=$r->roomname?>
                                     </div>
-                                    <div class="mainroom-subtext">8/<?=$r->count?></div>
+                                    <div class="mainroom-subtext"><?=count($findBookedTable)?>/<?=$r->count?></div>
                                 </div>
                                 <?php  } ?>
                                 
@@ -254,7 +196,7 @@ $allBookings = findBooking($selectedDate,$startTime,$endTime)
                                     </div>
                                     <div class="avgmintext">
                                         <div class="avg-texta">Current Capacity</div>
-                                        <div  class="avg-subtexta">60% Full</div>
+                                        <div  class="avg-subtexta"><?=$totalTable*10?>% Full</div>
                                     </div>
                                 </div>
                             </div>
@@ -265,19 +207,41 @@ $allBookings = findBooking($selectedDate,$startTime,$endTime)
                                 <?php 
                                 $tableLists = getAllTableLiveViewByRoom($room->id);
                                 foreach($tableLists as $t){
-                                    $tableBookings= findBookingByTable($t->id,$selectedDate,$startTime,$endTime)
+                                    $tableBookings= findBookingTable($allBookings,$t->id);
+                                    if($tableBookings)
+                                    $tableBookings =$tableBookings[count($tableBookings)-1];
                                     ?>
-                                <div style="<?="top:".$t->ttop."px;left:".$t->tleft."px;"?>" class="tablet4 <?=findTableClass($t->seats)?> borderright green">
+                                <div  id="<?=$t->id?>:<?=$room->id?>" style="<?="top:".$t->ttop."px;left:".$t->tleft."px;"?>" class="tablet4 <?=findTableClass($t->seats)?> borderright live-<?=$tableBookings?$tableBookings->booking_status:'open'?>">
                                    <?php 
                                    for($i=1;$i<=$t->seats;$i++){
                                     ?>
-                                    <div class="tablebox-top<?=$i?>"><?=$i?>S</div>
+                                    <div class="tablebox-top<?=$i?>"><?=$i?></div>
                                     <?php } ?>
                                     <div class="t1_text"><?=$t->label?></div>
-                                    <div>
-                                        <div class="username">John Deo</div>
-                                        <div class="userroll green-color">Vacant</div>
+                                    <?php if($tableBookings){?>
+                                       
+                                    <div class="live-<?=$tableBookings->booking_status?>-label">
+                                        <div class="username"><?=$tableBookings->name?></div>
+                                        <div class="userroll green-color"><?=$tableBookings->booking_status?></div>
+                                        <div class="live-filter">
+                                        <div class="dropdown">
+                                        <button class="dropbtn weeks-option__item"> <i class="fa fa-filter" aria-hidden="true"></i></button>
+                                         <div class="dropdown-content">
+                                            <?php foreach($statusArr as $s){?>
+                                            <a  href="javascript:bookingChangeStatus(<?=$tableBookings->id?>,'<?=$s?>')" class="weeks-option__item <?php echo $s; if($s==$tableBookings->booking_status)echo " st-active";?>"><?=$s?></a>
+                                            <?php } ?>
+                                         </div>
+                                        </div>
+                                        </div>
                                     </div>
+                                    <?php } else { 
+                                        $bookingFreeTable[]=(Object) array("seats"=>$t->id,"roomid"=>$room->id,"roomname"=>$room->roomname,"label"=>$t->label,"price"=>$t->price?$t->price:'0');
+                                        ?>
+                                        <div class="live--label">
+                                        <div class="username"></div>
+                                        <div class="userroll green-color">Available</div>
+                                    </div>
+                                    <?php } ?>
                                 </div>
                                 <?php } ?>
                              </div>
@@ -290,3 +254,62 @@ $allBookings = findBooking($selectedDate,$startTime,$endTime)
             </div>
         </div>
     </div>
+<script>
+    <?php if(count($bookingFreeTable)>0){?>
+    var avaRoomLists=<?php echo  json_encode($bookingFreeTable);?>
+    <?php } else { ?>
+        var avaRoomLists=[];
+    <?php } ?>
+</script>
+<template id="my-template">
+  <swal-title>
+    Assign table to booking?
+  </swal-title>
+  <swal-html>
+  <div class="othertext">Rooms</div>
+  <?php if(count($bookingFreeTable)>0){
+    foreach($bookingFreeTable as $t){
+    ?>
+    <div data-room="<?=$t->roomname?>" class="roomava-<?=$t->roomid?> standard-outdoor roomselect-6">
+                    <div class="stand"><?=$t->roomname?>-<?=$t->label?></div>
+                    <button id="price-find-<?=$t->seats?>" data-price="<?=$t->price?>" class="stand-btn" onclick="mysecondtab(<?=$t->seats?>,<?=$t->roomid?>)">Select  <span class="pricetrue">$<?=$t->price?></span></button>
+     </div>
+    <?php } } else { ?>
+        <div class="timebtn" style="opacity: 1; display: block; min-height: 100px; height: 400px;"><button style="width:100%"><span><i class="fa fa-remove time-3-icon"></i></span> All Tables is Booked! </button></div>
+    <?php } ?>
+  </swal-html>
+  
+  <swal-button type="cancel">
+    Cancel
+  </swal-button>
+  
+</template>
+<template id="booking-template">
+  <swal-title>
+    Assign  booking to table?
+  </swal-title>
+  <swal-html id="pending-booking">
+  <?php foreach($findBookingPending as $b) {?>
+                <div id="<?=$b->id?>" class="<?=$b->id?> maintopsec">
+                    <div class="leftfirst">
+                        <div class="timeinner"><?=date("h:i",strtotime($b->schedule))?> </div>
+                        <div class="pm"><?=date("A",strtotime($b->schedule))?></div>
+                    </div>
+                    <div class="leftsecont"> 
+                        <div class="leftsecont1"><?=$b->name?></div>
+                        <div  class="leftsecont2"><?=$b->phone?></div>
+                        <div  class="leftsecont3"><?=$b->no_seats?> guest</div>
+                    </div>
+                    <div>
+                    <button   class="stand-btn" onclick="setBookingIdforTable(<?=$b->id?>)">Select</button>
+                    </div>
+                </div>
+                <?php  } ?>
+  
+  </swal-html>
+  
+  <swal-button type="cancel">
+    Cancel
+  </swal-button>
+  
+</template>

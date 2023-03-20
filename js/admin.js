@@ -8,6 +8,119 @@ function rangeyears(startYear) {
 	}
 	return years;
 }
+function bookingChangePayment(booking_id,status)
+{
+	Swal.fire({
+		title: 'Are you sure?',
+		text: "You won't be able to revert this!",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonColor: '#3085d6',
+		cancelButtonColor: '#d33',
+		confirmButtonText: 'Yes!'
+	  }).then((result) => {
+		if (result.isConfirmed) {
+            
+			jQuery.ajax({
+				url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
+				data: {
+					booking_id: booking_id,
+					payment_status: status,
+					task: "booking_change_payment"
+				},
+				type: 'POST',
+				dataType: 'JSON',
+				beforeSend: function (data) {
+
+
+				},
+				success: function (data) {
+					swal.close();
+					window.location.reload();
+				},
+				error: function (data) {
+					swal.close();
+					alert("Try again!")
+				}
+			});
+		}
+	});
+}
+function bookingChangeSchedule(booking_id,schedule)
+{
+	Swal.fire({
+		title: 'Are you sure?',
+		text: "You won't be able to revert this!",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonColor: '#3085d6',
+		cancelButtonColor: '#d33',
+		confirmButtonText: 'Yes!'
+	  }).then((result) => {
+		if (result.isConfirmed) {
+	       
+
+			jQuery.ajax({
+				url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
+				data: {
+					booking_id: booking_id,
+					schedule: schedule,
+					task: "booking_change_schedule"
+				},
+				type: 'POST',
+				dataType: 'JSON',
+				beforeSend: function (data) {
+
+
+				},
+				success: function (data) {
+					window.location.reload();
+				},
+				error: function (data) {
+					swal.close();
+					alert("Try again!")
+				}
+			});
+		}
+	});
+}
+function bookingChangeStatus(booking_id,booking_status)
+{
+	Swal.fire({
+		title: 'Are you sure?',
+		text: "You won't be able to revert this!",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonColor: '#3085d6',
+		cancelButtonColor: '#d33',
+		confirmButtonText: 'Yes!'
+	  }).then((result) => {
+		if (result.isConfirmed) {
+
+			jQuery.ajax({
+				url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
+				data: {
+					booking_id:booking_id,
+					booking_status:booking_status,
+					task: "booking_change_status"
+				},
+				type: 'POST',
+				dataType: 'JSON',
+				beforeSend: function (data) {
+
+
+				},
+				success: function (data) {
+					window.location.reload();
+				},
+				error: function (data) {
+					swal.close();
+					alert("Try again!")
+				}
+			});
+		}
+	});
+}
 function newRoom() {
 	htmlContent = '<div class="scwatbwsr_add">' +
 		'<div class="scwatbwsr_add_head">Add a Room</div>' +
@@ -386,8 +499,76 @@ function findMintesCount(element)
 	 else 
 	 return 540;
 }
+function showStatusDiv(status)
+{
+	jQuery(".maintopsec").addClass("hide");
+	jQuery(".maintopsec").each(function(i,e)
+	{
+        if(status=="all")
+		{
+			jQuery(this).removeClass("hide")
+		}
+		else if(status=='waiting')
+		{
+			if(jQuery(this).hasClass("booking-pending"))
+			jQuery(this).removeClass("hide");
+			if(jQuery(this).hasClass("booking-closed"))
+			jQuery(this).addClass("hide");
+		}
+		else if(status=='reservation')
+		{
+			
+			if(!jQuery(this).hasClass("booking-pending"))
+			jQuery(this).removeClass("hide");
+			if(jQuery(this).hasClass("booking-closed"))
+			jQuery(this).addClass("hide");
+		}
+	})
+}
+function setBookingIdforTable(bookingId)
+{
+	var table_id=jQuery("body").data("seats_id");
+	var roomid=jQuery("body").data("room_id");
+	booking_update(bookingId,{roomid:roomid,seats:table_id,booking_status:"Confirmed"})
+}
+function mysecondtab(table_id,roomid)
+{
+	var booking_id=jQuery("body").data("booking_id");
+	booking_update(booking_id,{roomid:roomid,seats:table_id,booking_status:"Confirmed"})
+}
+function booking_update(booking_id,booking_update)
+{
+	swal.close();
+	Swal.fire('Loading.....')
+
+			jQuery.ajax({
+				url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
+				data: {
+					booking_id: booking_id,
+					booking_update: booking_update,
+					task: "booking_update"
+				},
+				type: 'POST',
+				dataType: 'JSON',
+				beforeSend: function (data) {
+
+
+				},
+				success: function (data) {
+					swal.close();
+					alert("Succsully updated")
+					window.location.reload();
+				},
+				error: function (data) {
+					swal.close();
+					alert("Try again!")
+				}
+			});
+}
 (function (jQuery) {
 	"use strict";
+	
+	Swal.bindClickHandler();
      var values=[540,1020];
 	 var minStart = findMintesCount(".slider-time");
 	 var minEnd = findMintesCount(".slider-time2");
@@ -398,7 +579,7 @@ function findMintesCount(element)
 		range: true,
 		min: 0,
 		max: 1440,
-		step: 15,
+		step: 45,
 		values: values,
 		stop:function(event, ui) {
 			openDate('Current')
@@ -457,22 +638,69 @@ function findMintesCount(element)
 			
 		}
 	});
+	jQuery(".sec12-open").click(function(){
+		var bookingId=jQuery(this).data("id")
+
+	    jQuery("body").data("booking_id",bookingId)
+		Swal.fire({
+			template: '#my-template'
+		  });
+	})
+	jQuery(".live-open").click(function(){
+		var tables = jQuery(this).attr("id")
+		var table=tables.split(":");
+		var table_id=table[0];
+		var roomid=table[1];
+		jQuery("body").data("seats_id",table_id)
+		jQuery("body").data("room_id",roomid)
+		Swal.fire({
+			template: '#booking-template'
+		});
+		 
+	})
+	
+	jQuery(".reservationtext,.waitingtext,.alltext").click(function(){
+		showStatusDiv(jQuery(this).data("status"))
+	})
+	jQuery(".maintopsec.booking-pending").draggable({ helper: "clone",revert: "invalid" });
+	jQuery(".tablew4.live-open").droppable({
+		accept: ".maintopsec.booking-pending",
+		activeClass:true,
+		classes: {
+		  "ui-droppable-active": "ui-state-active",
+		  "ui-droppable-hover": "ui-state-hover"
+		},
+		drop: function( event, ui ) {
+		    if(ui && ui.draggable && ui.draggable.length>0)
+			{
+		       var booking_id = ui.draggable[0].id;
+			   var tables = jQuery(this)[0].id;
+			   var table=tables.split(":");
+			   var table_id=table[0];
+			   var roomid=table[1];
+			   booking_update(booking_id,{roomid:roomid,seats:table_id,booking_status:"Confirmed"})
+			   window.location.reload();
+			}
+		   
+		}
+	  
+	});
+	jQuery("#myInput").on("keyup", function() {
+		var value = jQuery(this).val().toLowerCase();
+		jQuery(".filterrow .leftsecont").filter(function() {
+			jQuery(this).parent().toggle(jQuery(this).text().toLowerCase().indexOf(value) > -1)
+		});
+	  });
 	// room drag start
 	jQuery(".tablesize-drag").each(function () {
 		var thistbmap = jQuery(this);
 		thistbmap.draggable({
 			scroll: true,
 			drag: function () {
-				// thistbmap.children('.topline').css('display', 'block');
-				// thistbmap.children('.rightline').css('display', 'block');
-				// thistbmap.children('.botline').css('display', 'block');
-				// thistbmap.children('.leftline').css('display', 'block');
+				
 			},
 			start: function () {
-				// thistbmap.children('.topline').css('display', 'block');
-				// thistbmap.children('.rightline').css('display', 'block');
-				// thistbmap.children('.botline').css('display', 'block');
-				// thistbmap.children('.leftline').css('display', 'block');
+				
 			},
 			stop: function ($event) {
 				
@@ -507,30 +735,9 @@ function findMintesCount(element)
 			)
 		}
 		else {
-			Swal.fire('Loading.....')
 
-			jQuery.ajax({
-				url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
-				data: {
-					booking_id: jQuery("#booking_view_booking_id").val(),
-					booking_status: jQuery("#booking_view_change_status_button_select").val(),
-					task: "booking_change_status"
-				},
-				type: 'POST',
-				dataType: 'JSON',
-				beforeSend: function (data) {
-
-
-				},
-				success: function (data) {
-					swal.close();
-					alert("Succsully updated")
-				},
-				error: function (data) {
-					swal.close();
-					alert("Try again!")
-				}
-			});
+			bookingChangeStatus(jQuery("#booking_view_booking_id").val(),
+jQuery("#booking_view_change_status_button_select").val());
 		}
 	})
 
@@ -545,30 +752,8 @@ function findMintesCount(element)
 			)
 		}
 		else {
-			Swal.fire('Loading.....')
-
-			jQuery.ajax({
-				url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
-				data: {
-					booking_id: jQuery("#booking_view_booking_id").val(),
-					schedule: jQuery("#alt_example_4_alt").val(),
-					task: "booking_change_schedule"
-				},
-				type: 'POST',
-				dataType: 'JSON',
-				beforeSend: function (data) {
-
-
-				},
-				success: function (data) {
-					swal.close();
-					alert("Succsully updated")
-				},
-				error: function (data) {
-					swal.close();
-					alert("Try again!")
-				}
-			});
+			bookingChangeSchedule(jQuery("#booking_view_booking_id").val(),jQuery("#alt_example_4_alt").val())
+			
 		}
 	})
 
@@ -582,30 +767,10 @@ function findMintesCount(element)
 			)
 		}
 		else {
-			Swal.fire('Loading.....')
 
-			jQuery.ajax({
-				url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
-				data: {
-					booking_id: jQuery("#booking_view_booking_id").val(),
-					payment_status: jQuery("#booking_view_payment_status_select").val(),
-					task: "booking_change_payment"
-				},
-				type: 'POST',
-				dataType: 'JSON',
-				beforeSend: function (data) {
+			bookingChangeSchedule(jQuery("#booking_view_booking_id").val(),jQuery("#booking_view_payment_status_select").val());
 
-
-				},
-				success: function (data) {
-					swal.close();
-					alert("Succsully updated")
-				},
-				error: function (data) {
-					swal.close();
-					alert("Try again!")
-				}
-			});
+			
 		}
 	})
 	jQuery('.name-table.table').click(function () {

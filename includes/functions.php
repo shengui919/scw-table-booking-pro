@@ -76,9 +76,11 @@ function getAllTableLiveView()
 function getAllTableLiveViewByRoom($roomid)
 {
 	global $wpdb;
-	
-	$rooomQuery = $wpdb->prepare("SELECT t.id,t.label,t.seats,t.ttop,t.tleft from ".tablesTB." AS t
+	//LEFT JOIN ".ordersTB." AS o ON  o.seats = t.id
+	//o.phone,o.name as customer_name,o.schedule,o.seats as tableID o.booking_status,
+	$rooomQuery = $wpdb->prepare("SELECT p.price,t.id,t.label,t.seats,t.ttop,t.tleft from ".tablesTB." AS t
 	INNER JOIN ".roomsTB." AS r ON t.roomid = r.id
+	LEFT JOIN ".pricesTB." AS p ON p.typeid = t.type
 	WHERE  t.seats>%d  AND t.roomid=%d
 	GROUP by t.roomid",0,$roomid);
 	return $wpdb->get_results($rooomQuery);
@@ -104,12 +106,29 @@ $endTime)
 	
 	global $wpdb;
 	
-	$rooomQuery = $wpdb->prepare("SELECT o.* from ".ordersTB." AS o
-	
-	WHERE  o.schedule <= %s  AND o.schedule >= %s
+	$rooomQuery = $wpdb->prepare("SELECT r.roomname,t.label,t.id as tid,r.id as rid,o.* from ".ordersTB." AS o
+	LEFT JOIN ".roomsTB." AS r ON o.roomid = r.id
+	LEFT JOIN ".tablesTB." AS t ON o.seats = t.id
+	WHERE  o.schedule >= %s  AND o.schedule <= %s
 	",$start,$end);
 	return $wpdb->get_results($rooomQuery);
 	
+}
+function findBookingTable($allBookings,$tid)
+{
+   $bookings=array_filter($allBookings,function($b) use ($tid){
+         return ($b->seats==$tid && $b->booking_status!="closed" && $b->booking_status!="trash");
+   });
+   if($bookings)
+   {
+	$bookings = array_values($bookings);
+   }
+   else 
+   {
+	
+	$bookings=false;
+   }
+   return $bookings;
 }
 function findBookingByTable($table,$selectedDate,$startTime,
 $endTime)
@@ -121,7 +140,7 @@ $endTime)
 	//INNER JOIN ".roomsTB." AS r ON t.roomid = r.id
 	$rooomQuery = $wpdb->prepare("SELECT o.* from ".ordersTB." AS o
 	
-	WHERE  o.schedule <= %s  AND o.schedule >= %s AND o.seats = %s
+	WHERE  o.schedule >= %s  AND o.schedule <= %s AND o.seats = %s
 	",$table,$start,$end);
 	return $wpdb->get_results($rooomQuery);
 	

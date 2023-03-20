@@ -922,6 +922,20 @@ elseif ($task == "add_type") {
 	$booking = $_POST;
 
 	bookingEmail($booking);
+} else if ($task == "booking_update") {
+	$booking_id = filter_var($_POST["booking_id"], FILTER_VALIDATE_INT);
+
+	$booking_update  = $_POST["booking_update"];
+
+    print_r($booking_update);
+	$booking = (array) orderGet($booking_id);
+
+	orderUpdate($booking_id, $booking_update);
+
+	$booking['textarea_email'] = " Previous status is $booking[booking_status] Restaurant manager change to new status $booking_status";
+
+	echo send_message(strip_tags($booking['textarea_email']), $booking['phone']);
+	bookingEmail($booking, "Booking status is updated!");
 } else if ($task == "booking_change_status") {
 	$booking_id = filter_var($_POST["booking_id"], FILTER_VALIDATE_INT);
 
@@ -993,10 +1007,8 @@ elseif ($task == "add_type") {
 	$num = $wpdb->get_var($count_query);
 	
 	
-	$booking_status = "Confirmed";
-	if ($_POST['enabled_payment'] != '' && $_POST['enabled_payment'] == 'yes') {
-		$booking_status = "Pending";
-	}
+	$booking_status = "Pending";
+	
 	$wpdb->query($wpdb->prepare(
 		"INSERT INTO $table_name (`roomid`,`productId`, `orderId`, `seats`, `schedule`, `name`, `address`, `email`, `phone`, `note`, `total`,`_ipp_status`,`_ipp_transaction_id`,
 	`billing_first_name`,`billing_last_name`,`billing_address_1`,`billing_address_2`,`billing_city`,`billing_country`,`billing_state`,`billing_postcode`,`billing_email`,`billing_phone`,`user`,`_ipp_payment_url`,`booking_status`,`no_seats`)
