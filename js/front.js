@@ -24,7 +24,7 @@ var setTime;
 
         $(".people_number_selected").html($(".people_number option:first").text());
         $(".people_number").change(function(){
-			
+			$("#no_people_hidden").val($(this).val())
 			$(".people_number_selected").html($(".people_number option:selected").text());
 		})
 		$(".booking_date_selected").html($(".booking_date option:first").text());
@@ -88,6 +88,7 @@ var setTime;
 						phone: phone,
 						note: note,
 						proId: 0,
+						no_seat:no_seat,
 						seat:jQuery(".scwatbwsr_form_tabel_input").val(),
 						roomid: roomId,
 						total: total,
@@ -97,26 +98,7 @@ var setTime;
 						customer_table:customer_table,
 						enabled_payment:enabled_payment
 					}
-				// 	if(customer_table=="yes")
-				// 	{
-						
-					
-				// 	jQuery(".scwatbwsr_map_tables_table").each(function(){
-				// 		var tbname = jQuery(this).children(".scwatbwsr_map_tables_table_label").text().trim();
-				// 		jQuery(this).find(".scwatbwsr_map_tables_table_seat.active").each(function(){
-				// 			if(seats)
-				// 				seats += "@"+tbname+"."+jQuery(this).text().trim();
-				// 			else
-				// 				seats += tbname+"."+jQuery(this).text().trim();
-				// 		});
-				// 	});
-				// 	data.seats= seats;
-				//    }
-				//    else 
-				//    {
-				// 	  no_seat = jQuery(".scwatbwsr_form_seat_input").val();
-				// 	  data.no_seat = no_seat;
-				//    }
+				
 					
 					
 					if(enabled_payment=="on")
@@ -301,6 +283,10 @@ function myFunction(setDate) {
 	document.getElementById("myPopup").style.display = "block";
 	document.getElementById("topsectionid").style.display = "none";
 	
+	}
+	else 
+	{
+		mysecondtab(0,0)
 	}
   }
 function mybackfn() {

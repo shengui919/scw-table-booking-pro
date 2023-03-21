@@ -26,8 +26,8 @@ define('bookedTB', $wpdb->prefix . 'scwatbwsr_bookedseats');
 define('bookingpaymenthistoryTB', $wpdb->prefix . 'scwatbwsr_booking_payment_history');
 function scwatbwsr_boot_session()
 {
-	if (session_status() == PHP_SESSION_NONE)
-		session_start();
+	// if (session_status() == PHP_SESSION_NONE)
+	// 	session_start();
 }
 add_action('wp_loaded', 'scwatbwsr_boot_session');
 

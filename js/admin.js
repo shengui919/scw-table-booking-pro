@@ -491,10 +491,14 @@ function findMintesCount(element)
 		var hoursNum = parseInt(timesArr[0]);
 		
 		var minsNum = parseInt(timesArr[1]);
-		
+		if(timeAm=="AM" && hoursNum==12)
+		return (10+minsNum);
+		else 
+		{
 		if(timeAm=="PM")
 		hoursNum = hoursNum+12;
 		return (hoursNum*60) + minsNum ;
+		}
 	 }
 	 else 
 	 return 540;
@@ -572,7 +576,7 @@ function booking_update(booking_id,booking_update)
      var values=[540,1020];
 	 var minStart = findMintesCount(".slider-time");
 	 var minEnd = findMintesCount(".slider-time2");
-	 
+	
 	 if(minStart >0  && minEnd >0)
 	 values=[minStart,minEnd];
     jQuery("#slider-range").slider({
