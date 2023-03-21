@@ -1,5 +1,5 @@
- <?php
- function scwatbwsr_content($content){
+<?php
+function scwatbwsr_content($content){
 	include_once dirname(__FILE__) . '/settings-ipp.php';
 	include_once dirname(__FILE__) . '/functions.php';
 	global $wpdb;
