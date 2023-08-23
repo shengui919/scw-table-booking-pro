@@ -37,9 +37,14 @@
 .scwatbwsr_content {
     background: #fff;
     box-sizing: border-box;
-    float: left;
+    /* float: left; */
     width: 100%;
     /* padding: 10px; */
+    display: inline-block;
+}
+.padequal {
+    padding-left: 25px;
+    padding-right: 15px;
 }
 
 .scwatbwsr_add {
@@ -182,14 +187,20 @@
 .scwatbwsr_room_content_tabs {
     width: 100%;
     position: relative;
-    height: calc(100vh);
+    /* height: calc(100vh); */
+    /* height: 100%; */
 }
-
+.disfleitem {
+    display: flex;
+}
+.tabmaxwidth {
+    width: 240px;
+}
 .scwatbwsr_room_content_tabs>input,
 .scwatbwsr_room_content_tabs>section {
-    height: 100vh;
-    width: calc(100% - 250px);
-    margin-left: 250px;
+    height: 100%;
+    /* width: calc(100% - 250px);
+    margin-left: 250px; */
     clear: both;
     /* padding-top: 20px; */
     display: none;
@@ -211,13 +222,13 @@
 }
 
 .scwatbwsr_room_content_tabs .tab-content.active {
-    display: inline-block;
+    display: block;
     background: #fff;
     color: #535252;
     position: relative;
-    width: calc(100% - 250px);
-    position: absolute;
-    top: 0;
+    /* width: calc(100% - 250px); */
+    /* position: absolute;
+    top: 0; */
 }
 
 .scwatbwsr_room_content_tabs .tab-content p,
@@ -941,7 +952,7 @@
 .scwatbwsr_schedules_right {
     float: left;
     width: 100%;
-    padding-left: 2%;
+    /* padding-left: 2%; */
 }
 
 .scwatbwsr_schedules_right_head {
@@ -1394,7 +1405,7 @@
     position: absolute;
     border-top: 1px red dotted;
     display: none;
-    vertical-align: :middle;
+    vertical-align:middle;
     top: -2px;
 }
 
@@ -1403,7 +1414,7 @@
     bottom: -2px;
     border-bottom: 1px red dotted;
     display: none;
-    vertical-align: :middle;
+    vertical-align:middle;
     margin-top: 500px;
 }
 
@@ -1412,7 +1423,7 @@
     left: -2px;
     border-left: 1px red dotted;
     display: none;
-    vertical-align: :middle;
+    vertical-align:middle;
 }
 
 .rightline {
@@ -1420,7 +1431,7 @@
     right: -2px;
     border-right: 1px red dotted;
     display: none;
-    vertical-align: :middle;
+    vertical-align:middle;
 }
 
 .scwatbwsr_mapping_table {
@@ -2324,5 +2335,8 @@ table.fixed {
 }
 
 .scwatbwsr_content .content {
-    padding: 25px;
+    /* padding: 25px; */
+}
+p {
+    margin: 0;
 }

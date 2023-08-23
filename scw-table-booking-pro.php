@@ -395,9 +395,9 @@ function show_admin_bookings_page()
 
 function scwatbwsr_dashboard_page()
 {
-	wp_register_style('admindashboardcss', SCWATBWSR_URL . 'css/dashboard.css', array(), time());
+	wp_register_style('admindashboardcss', SCWATBWSR_URL . 'css/dashboard.css', array(), time(), false);
 	
-	wp_enqueue_style('admindashboardcss');
+	wp_enqueue_style('admindashboardcss',true);
 	include_once dirname(__FILE__) . '/includes/admin-css-js.php';
 	include_once dirname(__FILE__) . '/includes/admin-scw-dashboard.php';
 }

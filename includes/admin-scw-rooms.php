@@ -57,7 +57,8 @@
 									<span class="scwatbwsr_room_head_copy"><i class="fa fa-files-o" aria-hidden="true"></i></span>
 								</span>
 								<div class="scwatbwsr_room_content <?= $room->id ?>">
-									<div class="scwatbwsr_room_content_tabs">
+									<div class="disfleitem">
+										<div class="scwatbwsr_room_content_tabs tabmaxwidth">
 										<input class="scwatbwsr_room_content_tabs_input" id="scwatbwsr_tab1<?php echo esc_attr($room->id) ?>" type="radio" name="scwatbwsr_tabs<?php echo esc_attr($room->id) ?>">
 										<label class="scwatbwsr_room_content_tabs_label <?= getActiveClass($room->id, 'scwatbwsr_tab1') ?>" for="scwatbwsr_tab1<?php echo esc_attr($room->id) ?>"><i class="fa fa-cog"></i><span><?php echo esc_html__("Room Setting", "scwatbwsr-translate") ?></span></label>
 
@@ -74,9 +75,9 @@
 
 										<input class="scwatbwsr_room_content_tabs_input" id="scwatbwsr_tab6<?php echo esc_attr($room->id) ?>" type="radio" name="scwatbwsr_tabs<?php echo esc_attr($room->id) ?>">
 										<label class="scwatbwsr_room_content_tabs_label <?= getActiveClass($room->id, 'scwatbwsr_tab6') ?>" for="scwatbwsr_tab6<?php echo esc_attr($room->id) ?>"><i class="fa fa-braille"></i><span><?php echo esc_html__("Mapping", "scwatbwsr-translate") ?></span></label>
+						</div>
 
-
-
+<div class="scwatbwsr_room_content_tabs padequal">
 										<section id="scwatbwsr_content1<?php echo esc_attr($room->id) ?>" class="tab-content <?= getActiveClass($room->id, 'scwatbwsr_tab1') ?>">
 											<span class="scwatbwsr_room_content_editname">
 												<span class="scwatbwsr_room_content_editname_head"><?php echo esc_html__("Edit Name", "scwatbwsr-translate") ?></span>
@@ -378,7 +379,7 @@
 
 										</section>
 
-										
+													</div>
 
 									</div>
 								</div>

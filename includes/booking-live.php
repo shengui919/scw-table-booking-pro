@@ -120,7 +120,7 @@ if(!$findBookingPending) $bookingsPending=[];
                             <div class="icon1">
                                
                                 <div class="dropdown">
-                              <button class="dropbtn weeks-option__item"> <i class="fa fa-calendar" aria-hidden="true"></i></button>
+                              <button class="dropbtn dropfont weeks-option__item"> <i class="fa fa-calendar" aria-hidden="true"></i></button>
                                   <div class="dropdown-content">
                                       <a href="javascript:reportsFilter('today',1)" class="weeks-option__item today">Today</a>
                                       <a href="javascript:reportsFilter('week',1)" class="weeks-option__item active week">Week</a>
@@ -146,11 +146,11 @@ if(!$findBookingPending) $bookingsPending=[];
                                 <i class="fa fa-cog" aria-hidden="true"></i>
                                 </a>
                             </div>
-                            <a href="<?=$newBookingUrl?>" class="resbutton">
+                            <a  href="<?=$newBookingUrl?>" class="resbutton">
                                 <div class="icon4">
                                     <i class="fa fa-plus" aria-hidden="true"></i>
                                 </div>
-                                <div>New Reservation</div>
+                                <div class="whitelab">New Reservation</div>
                             </a>
                         </div>
                     </div>
