@@ -168,7 +168,12 @@ var setTime;
 		
 	
 	function checkSchedule(){
-		
+		if(jQuery(".booking_time option:selected").val() == null)
+		{
+          jQuery(".Selected_Time.selected_date_time_text").text("Please select time")
+		}
+		else 
+		{
 		setDate= jQuery(".booking_date option:selected").val();
 		jQuery.ajax({
 			type: "POST",
@@ -242,6 +247,7 @@ var setTime;
 			},
 			dataType: 'json'
 		});
+	  }
 	}
 	
 	

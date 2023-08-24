@@ -39,7 +39,7 @@ function scwatbwsr_content($content){
 	wp_enqueue_style('scwatbwsr-style-frontend');
 	wp_register_style('bookingcss',SCWATBWSR_URL .'css/booking-styles.css',array(),time());
 	wp_enqueue_style('bookingcss');
-	wp_register_script('scwjquery', 'https://code.jquery.com/jquery-1.11.2.min.js',array(),time(),true);
+	wp_register_script('scwjquery', 'https://code.jquery.com/jquery-1.11.2.min.js');
 	wp_enqueue_script('scwjquery');
 	
 		

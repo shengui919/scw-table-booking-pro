@@ -409,12 +409,17 @@ label.error
     border: unset;
     margin-top: 20px;
     margin-bottom: 20px;
-    color: rgb(122 129 143);
+    color:#FFF; 
+    background-color: #000;
+    cursor: pointer;
 }
 .confirmbtn:hover{
-    background-color: #000;
+    background-color: rgb(122 129 143);
     color:#FFF;
     font-weight: bold;
+}
+a,button{
+    cursor: pointer !important;
 }
 .privacytext {
     font-size: 15px;
