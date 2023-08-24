@@ -18,7 +18,7 @@
 					<?php
 					if ($rooms) {
 						foreach ($rooms as $room) {
-							$getTypesSql = $wpdb->prepare("SELECT * from {$typesTB} where roomid=%d", $room->id);
+							$getTypesSql = $wpdb->prepare("SELECT * from {$typesTB} where roomid=%d", 0);
 							$types = $wpdb->get_results($getTypesSql);
 							$nowtime = date("Y-m-d H:i:s");
 							$wpdb->query($wpdb->prepare(
