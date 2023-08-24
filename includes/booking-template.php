@@ -192,18 +192,29 @@ look forward to serving you.. </p>
                 <div class="seat-text">Select a seating type</div>
                 <div class="seat-textsub">The following option are available for a reservation on <span id="booking_time_span"></span>.
                 </div>
-                <div class="othertext">Rooms</div>
+            <div class="roomsviewform">
+                <!-- <div class="othertext">Rooms</div> -->
                 <?php $roomLists = getAllroomsLiveView();
                 foreach($roomLists as $room){
-                     $tableLists = getAllTableLiveViewByRoom($room->id);
+                  
+                     $tableLists = getAllTableLiveViewFrontByRoom($room->id);
+                ?>
+                <div style="width:<?=$room->rw?>;height:<?=$room->rh?>;top:<?=$room->rtop;?>px;left:<?=$room->rleft?>px" data-room="<?=$room->roomname?>" class="roomava-<?=$room->id?> standard-outdoor roomviewselect roomselect-<?=$room->id?>">
+                
+                <?php
                     foreach($tableLists as $t){
                         $price=getTablePrices($t->id);
                 ?>
-                <div data-room="<?=$room->roomname?>" class="roomava-<?=$room->id?> standard-outdoor roomselect-<?=$room->id?>">
-                    <div class="stand"><?=$room->roomname."-".$t->label?></div>
-                    <button id="price-find-<?=$t->id?>" data-price="<?=$price?$price->price:"0.00"?>" class="stand-btn" onclick="mysecondtab(<?=$t->id?>,<?=$room->id?>)">Select  <span class="pricetrue"><?=$price?"$".$price->price:"Free"?></span></button>
+                    <div style="width:<?=$t->tw?>px;height:<?=$t->th?>px;top:<?=$t->ttop;?>px;left:<?=$t->tleft?>px" class="roomviewselectTable">
+                    
+                    <button style="width:<?=$t->tw?>px;height:<?=$t->th?>px;" id="price-find-<?=$t->id?>" data-price="<?=$price?$price->price:"0.00"?>" class="stand-btn" onclick="mysecondtab(<?=$t->id?>,<?=$room->id?>)"> <?=$room->roomname?> <br /><?=$t->label?>  
+                    <!-- <span class="pricetrue"><?=$price?"$".$price->price:"Free"?></span> -->
+                    </button>
+                    </div>
+                <?php }?>
                 </div>
-                <?php } } ?>
+            <?php } ?>
+            </div>
                 <div class="standard-outdoor br-btm" style="display:none">
                     
                 </div>

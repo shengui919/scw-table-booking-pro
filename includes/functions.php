@@ -55,7 +55,7 @@ function getAllroomsLiveView()
 {
 	global $wpdb;
 	
-	$rooomQuery = $wpdb->prepare("SELECT r.rtop,r.rleft,r.id,r.roomname,COUNT(t.id) as count from ".roomsTB." AS r
+	$rooomQuery = $wpdb->prepare("SELECT r.width as rw,r.height as rh,t.ttop,t.tleft,t.label as tname,r.rtop,r.rleft,r.id,r.roomname,COUNT(t.id) as count from ".roomsTB." AS r
 	INNER JOIN ".tablesTB." AS t ON t.roomid = r.id
 	WHERE  t.seats>%d 
 	GROUP by t.roomid",0);
@@ -66,10 +66,24 @@ function getAllTableLiveView()
 {
 	global $wpdb;
 	
-	$rooomQuery = $wpdb->prepare("SELECT t.label,t.seats,t.ttop,t.tleft from ".tablesTB." AS t
+	$rooomQuery = $wpdb->prepare("SELECT  r.width as rw,r.height as rh,t.label,t.seats,t.ttop,t.tleft from ".tablesTB." AS t
 	INNER JOIN ".roomsTB." AS r ON t.roomid = r.id
 	WHERE  t.seats>%d 
 	GROUP by t.roomid",0);
+	return $wpdb->get_results($rooomQuery);
+	
+}
+function getAllTableLiveViewFrontByRoom($roomid)
+{
+	global $wpdb;
+	//LEFT JOIN ".ordersTB." AS o ON  o.seats = t.id
+	//o.phone,o.name as customer_name,o.schedule,o.seats as tableID o.booking_status,
+	$rooomQuery = $wpdb->prepare("SELECT ty.tbrecwidth as tw,ty.tbrecheight as th,r.width as rw,r.height as rh,p.price,t.id,t.label,t.seats,t.ttop,t.tleft from ".tablesTB." AS t
+	INNER JOIN ".roomsTB." AS r ON t.roomid = r.id
+	LEFT JOIN ".pricesTB." AS p ON p.typeid = t.type
+	LEFT JOIN ".typesTB." AS ty ON t.type = ty.id
+	WHERE  t.seats>%d  AND t.roomid=%d
+	",0,$roomid);
 	return $wpdb->get_results($rooomQuery);
 	
 }
@@ -78,11 +92,13 @@ function getAllTableLiveViewByRoom($roomid)
 	global $wpdb;
 	//LEFT JOIN ".ordersTB." AS o ON  o.seats = t.id
 	//o.phone,o.name as customer_name,o.schedule,o.seats as tableID o.booking_status,
-	$rooomQuery = $wpdb->prepare("SELECT p.price,t.id,t.label,t.seats,t.ttop,t.tleft from ".tablesTB." AS t
+	$rooomQuery = $wpdb->prepare("SELECT ty.tbrecwidth as tw,ty.tbrecheight as th,r.width as rw,r.height as rh,p.price,t.id,t.label,t.seats,t.ttop,t.tleft from ".tablesTB." AS t
 	INNER JOIN ".roomsTB." AS r ON t.roomid = r.id
 	LEFT JOIN ".pricesTB." AS p ON p.typeid = t.type
-	WHERE  t.seats>%d  AND t.roomid=%d
-	GROUP by t.roomid",0,$roomid);
+	LEFT JOIN ".typesTB." AS ty ON t.type = ty.id
+	WHERE  t.seats>%d  AND t.roomid=%d 
+	GROUP by t.roomid
+	",0,$roomid);
 	return $wpdb->get_results($rooomQuery);
 	
 }

@@ -213,13 +213,13 @@ var setTime;
 					    {
 							var tt=listUnabvaileRoom[i];
 							
-							jQuery(".roomava-"+tt.roomid).addClass("hide");
+							//jQuery(".roomava-"+tt.roomid).addClass("hide");
 							var tName =jQuery(".roomava-"+tt.roomid).data("room")
 							nohtml+='<div class="mainlounge">'+tName+'</div>'+
 							'<div class="notable">No tables available.</div>';
 						}
 						jQuery(".br-btm").css("display","block");
-						jQuery("#nodata-table").html(nohtml);
+						//jQuery("#nodata-table").html(nohtml);
 					}
 					if(data && data.rest_settings && data.rest_settings.enabled_payment!="on")
 					{

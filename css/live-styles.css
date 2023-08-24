@@ -433,11 +433,11 @@
     border-radius: 25px;
 }
 .tablew4 .tablebox-top1 {
-    width: 30px;
+    width: auto;
     height: 30px;
     position: absolute;
     top: -30px;
-    left: 40%;
+    left: 0px;
     z-index: 1;
     background-color: #424245;
     display: flex;
@@ -1098,8 +1098,7 @@
     justify-content: center;
 }
 .tablew4 {
-    width: 120px;
-    height: 120px;
+   position: absolute;
 }
 .tablew6 {
     width: 120px;

@@ -558,3 +558,15 @@ footer{
 .findtable{
     cursor:pointer;
 }
+.roomsviewform{
+    position:  relative !important;
+    height:600px;
+}
+.roomviewselect
+{
+    position: absolute  !important;
+}
+.roomviewselectTable{
+    position: absolute  !important;
+
+}

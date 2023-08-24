@@ -205,7 +205,7 @@ if(!$findBookingPending) $bookingsPending=[];
                             <?php foreach ($roomLists as $room) { ?>
                             <div class="tablewidth" style="<?="top:".$room->rtop."px;left:".$room->rleft."px;"?>">
                                 <?php 
-                                $tableLists = getAllTableLiveViewByRoom($room->id);
+                                $tableLists = getAllTableLiveViewFrontByRoom($room->id);
                                 foreach($tableLists as $t){
                                     $tableBookings= findBookingTable($allBookings,$t->id);
                                     if($tableBookings)
@@ -213,10 +213,10 @@ if(!$findBookingPending) $bookingsPending=[];
                                     ?>
                                 <div  id="<?=$t->id?>:<?=$room->id?>" style="<?="top:".$t->ttop."px;left:".$t->tleft."px;"?>" class="tablet4 <?=findTableClass($t->seats)?> borderright live-<?=$tableBookings?$tableBookings->booking_status:'open'?>">
                                    <?php 
-                                   for($i=1;$i<=$t->seats;$i++){
+                                   //for($i=1;$i<=$t->seats;$i++){
                                     ?>
-                                    <div class="tablebox-top<?=$i?>"><?=$i?></div>
-                                    <?php } ?>
+                                    <div class="tablebox-top1"><?=$room->roomname?></div>
+                                    <?php //} ?>
                                     <div class="t1_text"><?=$t->label?></div>
                                     <?php if($tableBookings){?>
                                        
