@@ -1074,7 +1074,7 @@ elseif ($task == "add_type") {
 		$body .= 'Table: ' . $no_seat . '<br>';
 		$body .= 'Status: Completed<br>';
 	}
-	send_message(date('F j, Y, H:i', strtotime($schedule)), $phone);
+	//send_message(date('F j, Y, H:i', strtotime($schedule)), $phone);
 	wp_mail(array($email, $adminEmail), $subject, $body, $headers);
 	echo wp_send_json($gateway);
 } else if ($task == "reports_filter") {
