@@ -682,6 +682,8 @@ elseif ($task == "add_type") {
 	
 	$schedule = date("Y-m-d H:i:s", strtotime(filter_var($_POST["schedule"], FILTER_SANITIZE_STRING)));
 	
+	$filterschedule =  $schedule;
+	
 	$seats = filter_var($_POST["seats"], FILTER_SANITIZE_STRING);
     
 	$dayname = strtolower(date("l",strtotime($schedule)));
@@ -775,7 +777,7 @@ elseif ($task == "add_type") {
 
 		for ($i = 0; $i <= $bookingtime; $i += 5) {
 			$datesche = date(get_option('date_format') . " H:i", strtotime("-" . $i . " minutes", strtotime($schedule)));
-			$getOrdersSql = $wpdb->prepare("SELECT * from {$ordersTb} where  schedule=%s",  $datesche);
+			$getOrdersSql = $wpdb->prepare("SELECT * from {$ordersTb} where  schedule=%s",  $filterschedule);
 			$orders = $wpdb->get_results($getOrdersSql);
 			if ($orders) {
 				foreach ($orders as $order) {
@@ -787,7 +789,7 @@ elseif ($task == "add_type") {
 			}
 		}
 	} else {
-		$getOrdersSql = $wpdb->prepare("SELECT * from {$ordersTb} where schedule=%s",  $schedule);
+		$getOrdersSql = $wpdb->prepare("SELECT * from {$ordersTb} where schedule=%s",  $filterschedule);
 		$orders = $wpdb->get_results($getOrdersSql);
 		if ($orders) {
 			foreach ($orders as $order) {
@@ -927,7 +929,7 @@ elseif ($task == "add_type") {
 
 	$booking_update  = $_POST["booking_update"];
 
-    print_r($booking_update);
+    
 	$booking = (array) orderGet($booking_id);
 
 	orderUpdate($booking_id, $booking_update);
@@ -1064,7 +1066,7 @@ elseif ($task == "add_type") {
 		include_once  'class-wc-gateway-ipp.php';
 		$wcGatewayIpp = new WC_Gateway_IPP($_POST['url']);
 		$gateway = $wcGatewayIpp->process_payment($lastid);
-		$body .= 'Seats: ' . $no_seat . '<br>';
+		$body .= 'Table: ' . $no_seat . '<br>';
 		$body .= 'Total: ' . $total . '<br>';
 	} else {
 		$gateway = array(
@@ -1074,7 +1076,7 @@ elseif ($task == "add_type") {
 		$body .= 'Table: ' . $no_seat . '<br>';
 		$body .= 'Status: Completed<br>';
 	}
-	//send_message(date('F j, Y, H:i', strtotime($schedule)), $phone);
+	send_message(date('F j, Y, H:i', strtotime($schedule)), $phone);
 	wp_mail(array($email, $adminEmail), $subject, $body, $headers);
 	echo wp_send_json($gateway);
 } else if ($task == "reports_filter") {

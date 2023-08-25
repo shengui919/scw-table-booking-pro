@@ -78,7 +78,7 @@ function getAllTableLiveViewFrontByRoom($roomid)
 	global $wpdb;
 	//LEFT JOIN ".ordersTB." AS o ON  o.seats = t.id
 	//o.phone,o.name as customer_name,o.schedule,o.seats as tableID o.booking_status,
-	$rooomQuery = $wpdb->prepare("SELECT ty.tbrecwidth as tw,ty.tbrecheight as th,r.width as rw,r.height as rh,p.price,t.id,t.label,t.seats,t.ttop,t.tleft from ".tablesTB." AS t
+	$rooomQuery = $wpdb->prepare("SELECT ty.tbshape,ty.tbcirwidth,ty.tbbg,ty.seatbg,ty.tbrecwidth as tw,ty.tbrecheight as th,r.width as rw,r.height as rh,p.price,t.id,t.label,t.seats,t.ttop,t.tleft from ".tablesTB." AS t
 	INNER JOIN ".roomsTB." AS r ON t.roomid = r.id
 	LEFT JOIN ".pricesTB." AS p ON p.typeid = t.type
 	LEFT JOIN ".typesTB." AS ty ON t.type = ty.id

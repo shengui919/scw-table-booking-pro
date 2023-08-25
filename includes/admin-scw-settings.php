@@ -190,6 +190,25 @@ $times = $wpdb->get_results($getTimesSql);
                                                 </div>
                                                 <div class="general-setting-scw">
                                                     <div class="general-setting-left">
+                                                        <p><?php echo __(
+                                                            "Restaurant Address",
+                                                            "scwatbwsr-translate"
+                                                        ); ?></p>
+                                                    </div>
+                                                    <div class="general-setting-right">
+                                                        <input type="text" value="<?= @$options[
+                                                            "restaurant_address"
+                                                        ] ?>"
+                                                            name="scwatbwsr_settings_rest[restaurant_address]"
+                                                            class="require-deposit-scw">
+                                                        <p><?php echo __(
+                                                            "Restaurant Address",
+                                                            "scwatbwsr-translate"
+                                                        ); ?></p>
+                                                    </div>
+                                                </div>
+                                                <div class="general-setting-scw">
+                                                    <div class="general-setting-left">
                                                         <p><?= $settings_fields[
                                                             "enabled"
                                                         ]["title"] ?></p>
@@ -348,7 +367,7 @@ $times = $wpdb->get_results($getTimesSql);
                                                             name="scwatbwsr_settings_rest[restaurant_size_height]"
                                                             class="require-deposit-scw">
                                                         <p><?php echo esc_html__(
-                                                            "Booking Time (in minutes - the time customers will stay)",
+                                                            "Restaurant booking area width and height",
                                                             "scwatbwsr-translate"
                                                         ); ?>
                                                         </p>
@@ -472,31 +491,40 @@ $times = $wpdb->get_results($getTimesSql);
                                     <?php
                                     $roomLists = getAllroomsLiveView();
                                     foreach ($roomLists as $room) { ?>
-                                    <div class="leaderboard tablesize-drag" data-id="<?= $room->id ?>"
+                                    <div class=" tablesize-drag" data-id="<?= $room->id ?>"
                                         style="<?= "top:" .
                                             $room->rtop .
                                             "px;left:" .
                                             $room->rleft .
-                                            "px;" ?>">
-                                        <header>
-                                            <h1 class="leaderboard__title"><span
-                                                    class="leaderboard__title--top"><?= $room->roomname ?></span><span
-                                                    class="leaderboard__title--bottom">Totoal Table
-                                                    (<?= $room->count ?>)</span></h1>
-                                        </header>
-                                        <main class="leaderboard__profiles">
+                                            "px;"."width:" .
+                                            $room->rw .
+                                            ";height:" .
+                                            $room->rh .
+                                            ";" ?>">
+                                        
+                                        <main style="<?= "height:" . $room->rh .
+                                            ";"?>" >
                                             <?php
-                                            $tableLists = getAllTableLiveViewByRoom(
+                                            $tableLists = getAllTableLiveViewFrontByRoom(
                                                 $room->id
                                             );
                                             foreach ($tableLists as $t) { ?>
-                                            <span class="leaderboard__name"><?= $t->label ?> <span
-                                                    class="leaderboard__value"><?= $t->seats ?></span></span>
+                                            <div style="position:absolute;<?= "top:" .
+                                            $t->ttop .
+                                            "px;left:" .
+                                            $t->tleft .
+                                            "px;"."width:" .
+                                            $t->tw .
+                                            "px;height:" .
+                                            $t->th .
+                                            "px;" ?>" data-id="<?=$t->id?> class="leaderboard__name"><?= $t->label ?> 
+                                            </div>
 
 
-                                    </div>
+                                    
                                     <?php }
                                             ?>
+                                    </div>
                                     </main>
                                     <?php }
                                     ?>

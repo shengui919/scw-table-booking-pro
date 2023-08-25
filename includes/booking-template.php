@@ -145,7 +145,7 @@
                                             fill="#2D333F"></path>
                                     </g>
                                 </svg>
-                                <span id="span_people">2</span> People (Standard seating)</div>
+                                <span id="span_people">2</span></div>
                                 <div class="cafetextsub">
                                     <svg style="width:26px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"
                                     focusable="false">
@@ -189,7 +189,7 @@ look forward to serving you.. </p>
                     </div>
                     <div class="closeback">Back</div>
                 </div>
-                <div class="seat-text">Select a seating type</div>
+                <div class="seat-text">Select your table</div>
                 <div class="seat-textsub">The following option are available for a reservation on <span id="booking_time_span"></span>.
                 </div>
             <div class="roomsviewform">
@@ -205,9 +205,9 @@ look forward to serving you.. </p>
                     foreach($tableLists as $t){
                         $price=getTablePrices($t->id);
                 ?>
-                    <div style="width:<?=$t->tw?>px;height:<?=$t->th?>px;top:<?=$t->ttop;?>px;left:<?=$t->tleft?>px" class="roomviewselectTable">
+                    <div  data-name="<?=$t->label?>" style="width:<?=$t->tw?>px;height:<?=$t->th?>px;top:<?=$t->ttop;?>px;left:<?=$t->tleft?>px" class="roomviewselectTable roomviewselectTable-<?=$t->id?>">
                     
-                    <button style="width:<?=$t->tw?>px;height:<?=$t->th?>px;" id="price-find-<?=$t->id?>" data-price="<?=$price?$price->price:"0.00"?>" class="stand-btn" onclick="mysecondtab(<?=$t->id?>,<?=$room->id?>)"> <?=$room->roomname?> <br /><?=$t->label?>  
+                    <button style="background-color:<?=$t->tbbg?> !important;width:<?=$t->tw?>px;height:<?=$t->th?>px;" id="price-find-<?=$t->id?>" data-price="<?=$price?$price->price:"0.00"?>" class="stand-btn table-selected-<?=$t->id?>" onclick="mysecondtab(<?=$t->id?>,<?=$room->id?>)"> <?=$t->label?>  
                     <!-- <span class="pricetrue"><?=$price?"$".$price->price:"Free"?></span> -->
                     </button>
                     </div>

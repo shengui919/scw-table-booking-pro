@@ -695,10 +695,46 @@ function booking_update(booking_id,booking_update)
 			jQuery(this).parent().toggle(jQuery(this).text().toLowerCase().indexOf(value) > -1)
 		});
 	  });
+	//room table drag
+	
+	jQuery(".leaderboard__name").each(function () {
+		var thistbmap = jQuery(this);
+		thistbmap.draggable({
+			containment: "parent",
+			scroll: true,
+			drag: function () {
+				
+			},
+			start: function () {
+				
+			},
+			stop: function ($event) {
+				
+			   var room_id=jQuery($event.target).data("id");
+			   var sleft = jQuery($event.target).position().left;
+			   var stop = jQuery($event.target).position().top;
+			   jQuery.ajax({
+				url: "../wp-content/plugins/scw-table-booking-pro/helper.php",
+				data: {
+					roomId: room_id,
+					rleft: sleft,
+					rtop: stop,
+					task: "update_room_position"
+				},
+				type: 'POST',
+				
+				
+			   });
+			}
+		});
+
+		
+	});
 	// room drag start
 	jQuery(".tablesize-drag").each(function () {
 		var thistbmap = jQuery(this);
 		thistbmap.draggable({
+			containment: "parent",
 			scroll: true,
 			drag: function () {
 				

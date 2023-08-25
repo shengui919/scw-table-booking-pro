@@ -279,7 +279,7 @@ function myFunction(setDate) {
 	jQuery("#booking_time_span").html(dateL+" "+setTime);
 	jQuery("#span_booking_date").html(dateL)
 	jQuery("#span_booking_time").html(setTime)
-	jQuery("#span_people").html(jQuery("#no_people_hidden").val())
+	jQuery("#span_people").html(jQuery("#no_people_hidden").val()+" ")
 	
 	
 	
@@ -316,6 +316,7 @@ function mysecondtab(id=0,rid=0){
 	document.getElementById("topsectionid").style.display = "block";
 	jQuery(".scwatbwsr_form_room_input").val(rid)
 	jQuery(".scwatbwsr_form_tabel_input").val(id)
+	jQuery("#span_people").html(jQuery(".roomviewselectTable-"+id).data("name")+" Table booked at room "+jQuery(".roomava-"+rid).data("room"))
 }
 
 function mymainfirsttab() {

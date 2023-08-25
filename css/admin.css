@@ -1167,9 +1167,12 @@
 .tablesize {
    
     position: relative;
+    width:600px;
+    height:600px;
+    overflow: hidden;
 }
 .leaderboard {
-    max-width: 290px;
+   
     width: 100%;
     border-radius: 12px;
   }

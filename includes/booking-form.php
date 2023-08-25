@@ -28,9 +28,34 @@ function scwatbwsr_content($content){
 	  where t.roomid!=%d", 0);
 	$rooms = $wpdb->get_results($getRoomSql);
 	
-	
+	$alertType="success";
+	$action=0;
 	$ippay_return= file_get_contents('php://input');
     parse_str($ippay_return,$obj);
+   
+    if($obj && array_key_exists("payment_status",$obj))
+	{
+		$ipp_message = $obj["payment_status"];
+		if($obj["payment_status"]!="completed")
+		{
+			$alertType="error";
+		}
+	   $custom=json_decode($obj["custom"]);
+	   $order_id=$custom->order_id;
+	   $ordersData=orderGet($order_id);
+	   if($ordersData && is_null($ordersData->tran_id))
+	   {
+	   orderUpdate($order_id,[
+		"tran_id"=>$obj["tran_id"],
+		"_ipp_status" => ucfirst($obj["payment_status"])
+	   ]);
+	   $action=1;
+	   }
+	   else 
+	   {
+		$action =0;
+	   }
+	}
     ob_start();
 		
 	wp_register_style('font-awesome', SCWATBWSR_URL .'css/font-awesome.css');
@@ -42,25 +67,24 @@ function scwatbwsr_content($content){
 	wp_register_script('scwjquery', 'https://code.jquery.com/jquery-1.11.2.min.js');
 	wp_enqueue_script('scwjquery');
 	
+	wp_register_script('jqueryvalidation','https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js');
+	wp_enqueue_script('jqueryvalidation');
 		
-		wp_register_script('jqueryvalidation','https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.0/jquery.validate.min.js');
-		wp_enqueue_script('jqueryvalidation');
-		
-		wp_register_script('sweetalert','https://cdn.jsdelivr.net/npm/sweetalert2@11');
-		wp_enqueue_script('sweetalert');
-		wp_register_script('scwatbwsr-script-frontend', SCWATBWSR_URL .'js/front.js',array(),time(),true);
-		wp_enqueue_script('scwatbwsr-script-frontend');
+	wp_register_script('sweetalert','https://cdn.jsdelivr.net/npm/sweetalert2@11');
+	wp_enqueue_script('sweetalert');
+	wp_register_script('scwatbwsr-script-frontend', SCWATBWSR_URL .'js/front.js',array(),time(),true);
+	wp_enqueue_script('scwatbwsr-script-frontend');
 		
 		
-		if($ipp_message!='')
+		if($ipp_message!='' && $action=="1")
 		{
-		add_action('wp_print_footer_scripts', function() use ($ipp_message){
-			scw_this_script_footer($ipp_message);
+		add_action('wp_print_footer_scripts', function() use ($ipp_message,$alertType){
+			scw_this_script_footer($ipp_message,$alertType);
 		});
 		do_action('scw_this_script_footer');
 		}
 		if(!function_exists('scw_this_script_footer')) { 
-			function scw_this_script_footer($ipp_message){ 
+			function scw_this_script_footer($ipp_message,$alertType){ 
 				
 			?>
 			 <script type='text/javascript'>
@@ -68,7 +92,7 @@ function scwatbwsr_content($content){
 				Swal.fire(
 				'Booking Status',
 				'<?=$ipp_message?>',
-				'success'
+				'<?=$alertType?>'
 				);
 				
 			</script>
