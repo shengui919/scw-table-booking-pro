@@ -360,6 +360,7 @@ $bookedTB = $wpdb->prefix . 'scwatbwsr_bookedseats';
 			<form id="rtb-bookings-table" method="POST" action="">
 				<input type="hidden" name="post_type" value="<?php echo SCW_BOOKING_POST_TYPE; ?>" />
 				<input type="hidden" name="page" value="rtb-bookings">
+				<input type="hidden" name="type" value="list">
 
 				<div class="rtb-primary-controls clearfix">
 					<div class="rtb-views">

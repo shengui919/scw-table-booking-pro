@@ -173,7 +173,7 @@ if (!class_exists('scwBookingsTable')) {
 			// Retrieve bookings data for the table
 			$this->bookings_data();
 
-			$this->base_url = admin_url('admin.php?page=scwatbwsr-table-bookings');
+			$this->base_url = admin_url('admin.php?page=scwatbwsr-table-bookings&type=list');
 
 			// Add default items to the details column if they've been hidden
 			add_filter('rtb_bookings_table_column_details', array($this, 'add_details_column_items'), 10, 2);
@@ -330,7 +330,8 @@ if (!class_exists('scwBookingsTable')) {
 			if ($this->filter_end_time !== null) {
 				$this->query_string = add_query_arg(array('end_time' => $this->filter_end_time), $this->query_string);
 			}
-
+            $this->query_string = add_query_arg(array('end_time' => $this->filter_end_time), $this->query_string);
+			$this->query_string = add_query_arg(array('type' => "list"), $this->query_string);
 			$this->filter_location = !isset($_GET['location']) ? 0 : intval($_GET['location']);
 			$this->filter_location = !isset($_POST['location']) ? $this->filter_location : intval($_POST['location']);
 			$this->query_string = remove_query_arg('location', $this->query_string);
@@ -451,6 +452,7 @@ if (!class_exists('scwBookingsTable')) {
 				</ul>
 
 				<div class="date-filters">
+					<input type="hidden" name="type" value="list" />
 					<div class="rtb-admin-bookings-filters-start">
 						<label for="start-date" class="screen-reader-text"><?php _e('Start Date:', 'scwatbwsr-translate'); ?></label>
 						<input type="text" id="start-date" name="start_date" class="datepicker" value="<?php echo esc_attr($this->filter_start_date); ?>" placeholder="<?php _e('Start Date', 'scwatbwsr-translate'); ?>" />
@@ -460,8 +462,7 @@ if (!class_exists('scwBookingsTable')) {
 						<input type="text" id="end-date" name="end_date" class="datepicker" value="<?php echo esc_attr($this->filter_end_date); ?>" placeholder="<?php _e('End Date', 'scwatbwsr-translate'); ?>" />
 					</div>
 
-					<input type="submit" class="button button-secondary" value="<?php _e('Apply', 'scwatbwsr-translate'); ?>" />
-
+					
 					<?php if (!empty($this->filter_start_date) || !empty($this->filter_end_date) || !empty($this->filter_start_time) || !empty($this->filter_end_time)) : ?>
 						<a href="<?php echo esc_url(add_query_arg(array('action' => 'clear_date_filters'))); ?>" class="button button-secondary"><?php _e('Clear Filter', 'scwatbwsr-translate'); ?></a>
 					<?php endif; ?>
@@ -469,6 +470,8 @@ if (!class_exists('scwBookingsTable')) {
 					<?php if (!empty($_GET['status'])) : ?>
 						<input type="hidden" name="status" value="<?php echo esc_attr(sanitize_text_field($_GET['status'])); ?>" />
 					<?php endif; ?>
+					<input type="submit" class="button button-secondary" value="<?php _e('Apply', 'scwatbwsr-translate'); ?>" />
+
 
 				</div>
 			</div>
@@ -1091,7 +1094,7 @@ if (!class_exists('scwBookingsTable')) {
 
 			global $wpdb;
 
-			$where = "WHERE p.productId > 0";
+			$where = "WHERE p.id > 0";
 
 			if ($this->filter_start_date !== null || $this->filter_end_date !== null) {
 
@@ -1176,7 +1179,7 @@ if (!class_exists('scwBookingsTable')) {
 			if (!empty($this->filter_name)) {
 				$args['filter_name'] = $this->filter_name;
 			}
-
+            $args['type'] = "list";
 			$query = new scwQuery($args, 'bookings-table');
 			$query->parse_request_args();
 			$query->prepare_args();
@@ -1200,7 +1203,7 @@ if (!class_exists('scwBookingsTable')) {
 
 			$table = $this->table_name;
 
-			$where = "WHERE p.productId > 0";
+			$where = "WHERE p.id > 0";
 
 			if ($this->filter_start_date !== null || $this->filter_end_date !== null) {
 
@@ -1268,7 +1271,7 @@ if (!class_exists('scwBookingsTable')) {
 
 			$this->_column_headers = array($columns, $hidden, $sortable);
 			$this->table_data = $this->get_table_data();
-
+            
 			$this->items = $this->table_data;
 
 			$total_items   = empty($_GET['status']) ? $this->booking_counts['all'] : $this->booking_counts[$_GET['status']];

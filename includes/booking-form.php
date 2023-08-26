@@ -45,6 +45,9 @@ function scwatbwsr_content($content){
 	   $ordersData=orderGet($order_id);
 	   if($ordersData && is_null($ordersData->tran_id))
 	   {
+		$booking= (array) $ordersData;
+		$booking['textarea_email'] ="We will update booking confirmation quickly";
+		bookingEmail($booking, "Booking is progress");
 	   orderUpdate($order_id,[
 		"tran_id"=>$obj["tran_id"],
 		"_ipp_status" => ucfirst($obj["payment_status"])

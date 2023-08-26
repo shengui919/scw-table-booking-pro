@@ -774,7 +774,7 @@ function bookingEmail($booking,$subject='')
 	'<tr><td>Notes</td><td>'.$booking['note'].'</td>';
 	if($booking['total']>0)
 	{
-		if($booking['tran_id']!='' || $booking['trand_id']=='offline')
+		if($booking['tran_id']!='' || $booking['tran_id']=='offline')
 		{
 			$htmlContent .= '<tr><td>Payment</td><td>Offline</td>';
 		}
@@ -797,7 +797,7 @@ function bookingEmail($booking,$subject='')
     if($subject=='')
 	$subject = 'Remainder Booking Information';
 
-	$body .= '<h2>Booking Date<h2> '.date("l M d, Y",strtotime($booking['schedule']));
+	$body = '<h2>Booking Date<h2> '.date("l M d, Y",strtotime($booking['schedule']));
 
 	$body .="<p>Restaurant Message : ".$booking['textarea_email']." </p>";
 
